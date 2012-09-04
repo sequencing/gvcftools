@@ -1,0 +1,40 @@
+CMDLINE ../../bin/twins --ref /illumina/scratch/iGenomes/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/genome.fa --twin1 data/twin1.vcf.gz --twin2 data/twin2.vcf.gz --no-variable-metadata
+
+sites: 171115067
+known_sites: 167395066
+
+sites_mapped_twin1: 39
+sites_mapped_twin2: 39
+sites_mapped_in_no_samples: 167395027
+sites_mapped_in_some_samples: 0
+sites_mapped_in_all_samples: 39
+
+sites_called_twin1: 39
+sites_called_twin2: 39
+sites_called_in_no_samples: 167395027
+sites_called_in_some_samples: 0
+sites_called_in_all_samples: 39
+sites_called_in_all_samples_conflict: 0
+fraction_of_known_sites_called_in_all_samples: 2.32982e-07
+fraction_of_sites_called_in_all_samples_in_conflict: 0
+
+sites_with_snps_called_total_het_hom_het/hom_P(het)_twin1: 1 1 0 0 1
+sites_with_snps_called_total_het_hom_het/hom_P(het)_twin2: 1 1 0 0 1
+sites_called_in_all_samples_with_snps_called_any_sample: 1
+fraction_of_snp_sites_in_conflict: 0
+
+snp_non_conflict_total_het_hom_het/hom_P(het)_twin1: 1 1 0 0 1
+snp_non_conflict_total_het_hom_het/hom_P(het)_twin2: 1 1 0 0 1
+
+snp_conflict_type_samehom: 0
+snp_conflict_type_diffhom: 0
+snp_conflict_type_samehet: 0
+snp_conflict_type_diffhet: 0
+snp_conflict_type_homhet: 0
+
+snp_non_conflict_type_samehom: 0
+snp_non_conflict_type_diffhom: 0
+snp_non_conflict_type_samehet: 0
+snp_non_conflict_type_diffhet: 1
+snp_non_conflict_type_homhet: 0
+

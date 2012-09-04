@@ -1,0 +1,1 @@
+test error causing GT="1/0" to be treated as unequal to GT="0/1"

@@ -1,0 +1,10 @@
+v0.5
+added gatk gVCF block compress tool
+v0.4
+twins: fix twins to handle flipped genotype order
+v0.3
+trio/twins: fix issue with overlapping site call handling in murdock mode, affecting mapped site counts
+v0.2
+trio/twins: fix issue with counts of sites mapped or partially called
+v0.1
+First preview release of trio/twins tools

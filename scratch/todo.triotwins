@@ -1,0 +1,3 @@
+loop through union of chromosome names in all samples
+simple indel conflict information
+accept non-indexed vcfs if no region arg is given
