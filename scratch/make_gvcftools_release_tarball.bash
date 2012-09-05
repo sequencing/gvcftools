@@ -49,7 +49,7 @@ for f in *; do
 done
 
 # make version number substitutions:
-for f in README.txt src/gvcftools.hh; do
+for f in README.txt; do
     cat $f |\
     sed "s/\${VERSION}/$gitversion/" >|\
     $pname/$f
