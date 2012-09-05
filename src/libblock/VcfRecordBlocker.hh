@@ -213,9 +213,12 @@ private:
         const std::string& gt = record.GetGT();
         if ((!gt.empty()) && (gt != "./.") && (gt != ".") && (gt != "0/0") && (gt != "0")) return false;
 
+        // AD from GATK uses unfiltered counts, for this reason we use
+        // info DP (unfiltered) instead of sample DP (filtered)
+        const MaybeInt info_dp(record.GetInfoVal("DP"));
         const MaybeInt ad(record.GetSampleVal("AD"));
-        if(ad.IsInt && record.GetDP().IsInt) {
-            const double reffrac(static_cast<double>(ad.IntVal)/static_cast<double>(record.GetDP().IntVal));
+        if(ad.IsInt && info_dp.IsInt) {
+            const double reffrac(static_cast<double>(ad.IntVal)/static_cast<double>(info_dp.IntVal));
             if((reffrac+_opt.min_nonref_blockable.numval) <= 1.0) return false;
         }
 

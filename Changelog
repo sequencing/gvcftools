@@ -1,10 +1,14 @@
+v0.6
+- gatk_to_gvcf: Tweak non-reference allele fraction filter to use unfiltered depth.
+- Update version number using git-describe when source is compiled directly from
+git repo.
 v0.5
-added gatk gVCF block compress tool
+- Added gatk gVCF block compress tool
 v0.4
-twins: fix twins to handle flipped genotype order
+- twins: fix twins to handle flipped genotype order
 v0.3
-trio/twins: fix issue with overlapping site call handling in murdock mode, affecting mapped site counts
+- trio/twins: fix issue with overlapping site call handling in murdock mode, affecting mapped site counts
 v0.2
-trio/twins: fix issue with counts of sites mapped or partially called
+- trio/twins: fix issue with counts of sites mapped or partially called
 v0.1
-First preview release of trio/twins tools
+- First preview release of trio/twins tools
