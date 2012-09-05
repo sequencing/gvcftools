@@ -50,9 +50,11 @@ done
 
 # make version number substitutions:
 for f in README.txt; do
-    cat $f |\
-    sed "s/\${VERSION}/$gitversion/" >|\
-    $pname/$f
+    sed "s/\${VERSION}/$gitversion/" < $f >| $pname/$f
+done
+
+for f in src/Makefile; do
+    sed "s/\$\$(git describe)/$gitversion/" < $f >| $pname/$f
 done
 
 cd $outdir
