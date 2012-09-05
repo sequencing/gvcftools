@@ -49,12 +49,16 @@ for f in *; do
 done
 
 # make version number substitutions:
-for f in README.txt; do
+gh=src/gvcftools.hh
+for f in README.txt $gh.in; do
     sed "s/\${VERSION}/$gitversion/" < $f >| $pname/$f
 done
+mv $pname/$gh.in $pname/$gh
 
+# fix makefile
+rm -f $pname/src/devel.mk
 for f in src/Makefile; do
-    sed "s/\$\$(git describe)/$gitversion/" < $f >| $pname/$f
+    awk '! /^include/' < $f >| $pname/$f
 done
 
 cd $outdir
