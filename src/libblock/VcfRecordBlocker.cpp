@@ -106,8 +106,8 @@ GroomInputRecord(GatkVcfRecord& record) {
         if (mqVal.IsInt) {
             static const unsigned buff_size(32);
             char buff[buff_size];
-            const unsigned known_size(snprintf(buff,buff_size,"%i",mqVal.IntVal));
-            assert(known_size <= buff_size);
+            const int write_size(snprintf(buff,buff_size,"%i",mqVal.IntVal));
+            assert((write_size>=0) && (write_size < buff_size));
 
             record.SetSampleVal("MQ", buff);
         } else {

@@ -1,3 +1,4 @@
+- Improve win32 compatability
 v0.6
 - gatk_to_gvcf: Tweak non-reference allele fraction filter to use unfiltered depth.
 - Update version number using git-describe when source is compiled directly from

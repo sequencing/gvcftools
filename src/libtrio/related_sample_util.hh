@@ -32,6 +32,7 @@
 #ifndef __RELATED_SAMPLE_UTIL_HH
 #define __RELATED_SAMPLE_UTIL_HH
 
+#include "compat_util.hh"
 #include "parse_util.hh"
 #include "pos_type.hh"
 #include "reference_contig_segment.hh"

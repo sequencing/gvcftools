@@ -144,8 +144,8 @@ struct BlockVcfRecord {
             char buff[buff_size];
 
             const int end(_baseCvcfr->GetPos() + _count - 1);
-            const unsigned write_size(snprintf(buff,buff_size,"END=%i",end));
-            assert(write_size <= buff_size);
+            const int write_size(snprintf(buff,buff_size,"END=%i",end));
+            assert((write_size>=0) && (write_size < static_cast<int>(buff_size)));
             _baseCvcfr->AppendInfo(buff);
         }
 
@@ -183,9 +183,9 @@ private:
             printptr = unknown;
         } else {
             if (block.size() > 1) isAvg = true;
-            const int min(static_cast<int>(round(block.min())));
-            const unsigned write_size(snprintf(buff,buff_size,"%i",min));
-            assert(write_size <= buff_size);
+            const int min(static_cast<int>(compat_round(block.min())));
+            const int write_size(snprintf(buff,buff_size,"%i",min));
+            assert((write_size>=0) && (write_size < static_cast<int>(buff_size)));
             printptr=buff;
         }
         _baseCvcfr->SetSampleVal(label,printptr);
@@ -234,7 +234,7 @@ private:
                         const double fracTol,
                         const int absTol) {
 
-        const int min(static_cast<int>(round(ss.min())));
+        const int min(static_cast<int>(compat_round(ss.min())));
         if (CheckBlockSingleTolerance(ss, min, absTol)) return true;
         const int ftol(static_cast<int>(std::floor(min * fracTol)));
         if (ftol <= absTol) return false;

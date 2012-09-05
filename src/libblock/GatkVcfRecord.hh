@@ -31,6 +31,7 @@
 #ifndef __GATK_VCF_RECORD_HH
 #define __GATK_VCF_RECORD_HH
 
+#include "compat_util.hh"
 #include "parse_util.hh"
 #include "VcfRecord.hh"
 
@@ -59,7 +60,7 @@ struct MaybeInt {
         if (! IsInt) return;
         if(NULL != s) StrVal = std::string(s);
         DoubleVal = parse_double(s);
-        IntVal = static_cast<int>(round(DoubleVal));
+        IntVal = static_cast<int>(compat_round(DoubleVal));
     }
 
     MaybeInt(const int i)

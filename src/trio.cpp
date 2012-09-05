@@ -428,7 +428,7 @@ void
 try_main(int argc,char* argv[]){
 
     const time_t start_time(time(0));
-    const char* progname(basename(argv[0]));
+    const char* progname(compat_basename(argv[0]));
     
     for(int i(0);i<argc;++i){
         if(i) cmdline += ' ';

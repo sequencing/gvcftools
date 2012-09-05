@@ -79,8 +79,8 @@ private:
         if (record.GetGQX().IsInt) {
             static const unsigned buff_size(32);
             char buff[buff_size];
-            const unsigned known_size(snprintf(buff,buff_size,"%i",record.GetGQX().IntVal));
-            assert(known_size <= buff_size);
+            const int write_size(snprintf(buff,buff_size,"%i",record.GetGQX().IntVal));
+            assert((write_size>=0) && (write_size < static_cast<int>(buff_size)));
             record.SetSampleVal("GQX",buff);
         }
 
