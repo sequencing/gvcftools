@@ -38,10 +38,14 @@ LIBBLOCK_PATH = $(LIBBLOCK_DIR)/$(LIBBLOCK)
 export LIBUTIL := libutil.a
 LIBUTIL_PATH = $(LIBUTIL_DIR)/$(LIBUTIL)
 
+VERSION := gvcftools.hh
+
 
 all: build
 
 build: $(PROGS)
+
+$(OBJS): $(VERSION)
 
 $(TRIOPROGS): %: %.o $(LIBTRIO_PATH) $(LIBUTIL_PATH)
 $(TRIOPROGS): CXXFLAGS += -I$(LIBTRIO_DIR) 
@@ -58,6 +62,9 @@ $(LIBBLOCK_PATH):
 $(LIBUTIL_PATH):
 	$(MAKE) -C $(LIBUTIL_DIR) $(LIBUTIL)
 
+$(VERSION): $(VERSION).in
+	gitversion=$$(git describe); echo $$gitversion; sed "s/\$${VERSION}/$$gitversion/" < $@.in > $@
+
 install: build
 	cp $(PROGS) *.pl $(BIN_DIR)
 
@@ -65,4 +72,4 @@ clean:
 	$(MAKE) -C $(LIBTRIO_DIR) $@
 	$(MAKE) -C $(LIBBLOCK_DIR) $@
 	$(MAKE) -C $(LIBUTIL_DIR) $@
-	rm -f $(PROGS) $(OBJS)
+	rm -f $(PROGS) $(OBJS) $(VERSION)
