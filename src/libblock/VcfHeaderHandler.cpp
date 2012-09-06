@@ -114,9 +114,9 @@ process_line(const istream_line_splitter& vparse) {
             _outfp << "##FORMAT=<ID=GQX,Number=1,Type=Integer,Description=\"Minimum of {Genotype quality assuming variant position,Genotype quality assuming non-variant position}\">\n";
 
             // overlap tags:
-            _outfp << "#FILTER=<ID=" << _opt.indel_conflict_label
+            _outfp << "##FILTER=<ID=" << _opt.indel_conflict_label
                    << ",Description=\"Locus is in region with conflicting indel calls.\">\n";
-            _outfp << "#FILTER=<ID=" << _opt.site_conflict_label
+            _outfp << "##FILTER=<ID=" << _opt.site_conflict_label
                    << ",Description=\"Site genotype conflicts with proximal indel call. This is typically a heterozygous SNV call made inside of a heterozygous deletion.\">\n";
             
             // special chrom-depth filter tag:
