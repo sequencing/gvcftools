@@ -198,7 +198,7 @@ try_main(int argc,char* argv[]){
     if ((vm.count("help")) || po_parse_fail) {
         log_os << "\n" << progname << " creates block-compressed gVCF from modified GATK all sites output\n\n"; 
         log_os << "version: " << gvcftools_version() << "\n\n";
-        log_os << "usage: " << progname << " [options] < all_sites > trio_report\n\n"; 
+        log_os << "usage: " << progname << " [options] < all_sites > gVCF\n\n"; 
         log_os << visible << "\n";
         exit(EXIT_FAILURE);
     }
