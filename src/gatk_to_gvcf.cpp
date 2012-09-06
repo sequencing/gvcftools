@@ -164,7 +164,7 @@ try_main(int argc,char* argv[]){
 
     po::options_description filters("filters");
     filters.add_options()
-        ("chrom-depth-file",po::value<std::string>(&chrom_depth_file),"Read mean depth for each chromosome from file, and use these values for maximum site depth filteration. File should contain one line per chromosome, where each line begins with: \"chrom_name<TAB>depth (default: no chrom depth filtration)\"")
+        ("chrom-depth-file",po::value<std::string>(&chrom_depth_file),"Read mean depth for each chromosome from file, and use these values for maximum site depth filteration. File should contain one line per chromosome, where each line begins with: \"chrom_name<TAB>depth\" (default: no chrom depth filtration)")
         ("max-depth-factor",po::value<std::string>(&opt.max_chrom_depth_filter_factor.strval)->default_value(opt.max_chrom_depth_filter_factor.strval),"If a chrom depth file is supplied then loci with depth exceeding the mean chrom depth times this value are filtered")
         ("min-gqx",po::value<std::string>(&opt.min_gqx)->default_value(opt.min_gqx),"Minimum locus GQX");
 
