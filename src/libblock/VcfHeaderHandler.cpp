@@ -46,7 +46,7 @@ print_filter_header(const FilterInfo& filter,
     static const char* gl[] = { "less" , "greater" };
 
     os << "##FILTER=<ID=" << filter.label
-       << ", Description=\"" << type << " " << filter.tag <<" is " << gl[filter.is_max_thresh]
+       << ",Description=\"" << type << " " << filter.tag <<" is " << gl[filter.is_max_thresh]
            << " than " << filter.thresh.strval;
     if(filter.is_filter_if_missing) {
         os << " or not present";
