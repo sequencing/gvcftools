@@ -143,18 +143,3 @@ process_line(const istream_line_splitter& vparse) {
     write_split_line(vparse);
     return true;
 }
-
-
-
-void
-VcfHeaderHandler::
-write_split_line(const istream_line_splitter& vparse) {
-    if(_opt.is_skip_header) return;
-    
-    const unsigned nw(vparse.n_word());
-    for(unsigned i(0);i<nw;++i) {
-        if(i) _outfp << '\t';
-        _outfp << vparse.word[i];
-    }
-    _outfp << '\n';
-}

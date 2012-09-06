@@ -65,8 +65,10 @@ struct VcfHeaderHandler {
 private:
 
     void
-    write_split_line(const istream_line_splitter& vparse);
-
+    write_split_line(const istream_line_splitter& vparse) {
+        if(_opt.is_skip_header) return;
+        vparse.write_line(_outfp);
+    }
 
     const BlockerOptions& _opt;
     const char* _version;

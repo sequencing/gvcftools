@@ -61,12 +61,17 @@ struct istream_line_splitter {
     unsigned
     n_word() const { return _n_word; }
 
-    void
-    dump(std::ostream& os) const;
-
     /// returns false for regular end of input:
     bool
     parse_line();
+
+    // recreates the line before parsing
+    void
+    write_line(std::ostream& os) const;
+
+    // debug output, which provides line number and other info before calling write_line
+    void
+    dump(std::ostream& os) const;
 
 
     enum { MAX_WORD_COUNT = 50 };

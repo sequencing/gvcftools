@@ -45,14 +45,22 @@
 
 void
 istream_line_splitter::
-dump(std::ostream& os) const {
-    os << "\tline_no: " << _line_no << "\n";
-    os << "\tline: '";
+write_line(std::ostream& os) const {
     for(unsigned i(0);i<_n_word;++i) {
         if(i) os << _sep;
         os << word[i];
     }
     os << "'\n";
+}
+
+
+
+void
+istream_line_splitter::
+dump(std::ostream& os) const {
+    os << "\tline_no: " << _line_no << "\n";
+    os << "\tline: '";
+    write_line(os);
 }
 
 
