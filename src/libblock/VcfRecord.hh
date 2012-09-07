@@ -138,7 +138,7 @@ struct VcfRecord {
             const size_t index(_info[i].find('='));
             if(index == std::string::npos) continue;
             if(0 == _info[i].compare(0,index,key)) {
-                _info[i].replace(index,std::string::npos,val);
+                _info[i].replace(index+1,std::string::npos,val);
                 return;
             }
         }
