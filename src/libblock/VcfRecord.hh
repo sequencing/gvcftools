@@ -52,6 +52,8 @@ struct VcfRecord {
 
     int GetPos() const { return _pos; }
 
+    void SetPos(const int& pos) { _pos = pos; }
+
     const std::string& GetId() const { return _id; }
 
     const std::string& GetRef() const { return _ref; }

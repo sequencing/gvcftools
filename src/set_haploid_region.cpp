@@ -92,7 +92,7 @@ parse_bedfile_regions(const std::string& region_file,
     bool is_parse_fail(false);
 
     std::string bed_chrom;
-    unsigned bed_start(0),bed_end(0);
+    unsigned bed_begin(0),bed_end(0);
 
     while(! region_is.eof()){
         ++line_no;
@@ -105,16 +105,16 @@ parse_bedfile_regions(const std::string& region_file,
 
         if(bed_chrom != "track" && bed_chrom != "browser") {
         
-            region_is >> bed_start >> bed_end;
-            if(region_is.fail() || (bed_end<bed_start)) {
+            region_is >> bed_begin >> bed_end;
+            if(region_is.fail() || (bed_end<bed_begin)) {
                 is_parse_fail=true;
                 break;
             }
-
+            
             if(regions.find(bed_chrom) == regions.end()) {
                 regions[bed_chrom] = SetHapOptions::interval_group_t();
             }
-            regions[bed_chrom].push_back(std::make_pair(bed_start,bed_end));
+            regions[bed_chrom].push_back(std::make_pair(bed_begin,bed_end));
         }
 
         region_is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -237,31 +237,31 @@ struct SetHapVcfRecordHandler {
             exit(EXIT_FAILURE);
         }
 
-        if(! is_in_region(vparse)) {
+        // 1. check if record region is in a target region at all, return iterator which provides begin,end ranges on successive calls for the record region.
+        //
+        if(! is_record_in_region(vparse)) {
             vparse.write_line(_opt.outfp);
             return;
         }
 
-        // write modified record:
-        VcfRecord vcfr(vparse);    
-        const char* gt(vcfr.GetSampleVal("GT"));
-        if(NULL != gt) {
-            parse_gt(gt,_gti);
-            
-            if(_gti.size() == 2) {
-                if(_gti[0] == _gti[1]) {
-                    vcfr.SetSampleVal("GT",_stringer.itos_32(_gti[0]));
-                } else {
-                    vcfr.AppendFilter(_opt.haploid_conflict_label.c_str());
-                }
-            }
-        }
+        VcfRecord vcfr(vparse);
+
+        bool is_haploid;
+        unsigned end;
+        while(get_next_record_region_interval(is_haploid,end)){
+            VcfRecord vcfr2(vcfr);
+            vcfr2.SetInfoVal("END",_stringer.itos_32(end));
+            if(is_haploid) make_record_haploid(vcfr2);
+            vcfr2.WriteUnaltered(_opt.outfp);
+            vcfr.SetPos(end+1);
+        } 
+        if(is_haploid) make_record_haploid(vcfr);
         vcfr.WriteUnaltered(_opt.outfp);
    }
 
 private:
     bool
-    is_in_region(const istream_line_splitter& vparse) {
+    is_record_in_region(const istream_line_splitter& vparse) {
         // determine if chromosome is new:
         if(_last_chrom.empty() || (0 != strcmp(_last_chrom.c_str(),vparse.word[0]))) {
             _last_chrom=vparse.word[0];
@@ -276,13 +276,26 @@ private:
         }
 
         if(! _is_skip_chrom) {
+            // get start pos:
             const char* posstr(vparse.word[1]);
-            const unsigned pos(parse_unsigned(posstr));
+            _begin_pos=(parse_unsigned(posstr));
+
+            // get end pos:
+            static const char* endkey = "END=";
+            static const unsigned endsize = strlen(endkey);
+            const char* endstr(strstr(vparse.word[VCFID::INFO],"END="));
+            if(NULL==endstr) {
+                _end_pos = _begin_pos;
+            } else {
+                endstr+=endsize;
+                _end_pos=parse_unsigned(endstr);
+            }
+
             while(_rhead != _rend) {
-                if(pos>_rhead->second) {
+                if(_begin_pos>_rhead->second) {
                     _rhead++;
                 } else {
-                    return (pos>_rhead->first);
+                    return(_end_pos>_rhead->first);
                 }
             }
             _is_skip_chrom=true;
@@ -290,10 +303,58 @@ private:
         return false;
     }
 
+    // if is_record_in_region is true, call this function to get intercepting intervals
+    // returns false when no more intervals exist
+    bool
+    get_next_record_region_interval(bool& is_haploid,
+                                    unsigned& end) {
+
+        assert(_begin_pos <= _end_pos);
+
+        if(_begin_pos > _rhead->second) _rhead++;
+        if(_rhead == _rend) { // no haploid regions left
+            is_haploid = false;
+            end = _end_pos;
+            return false;
+        }
+
+        // our next interval:
+        if(_begin_pos <= _rhead->first) {
+            end = std::min( _end_pos,_rhead->first);
+        } else {
+            end = std::min( _end_pos, _rhead->second);
+        }
+
+        // test for intercept:
+        is_haploid = ((_begin_pos <= _rhead->second) && (end > _rhead->first));
+        
+        _begin_pos = end+1;
+        return (_begin_pos<=_end_pos);
+    }
+
+    void
+    make_record_haploid(VcfRecord& vcfr) {
+        const char* gt(vcfr.GetSampleVal("GT"));
+        if(NULL != gt) {
+            parse_gt(gt,_gti);
+            
+            if(_gti.size() == 2) {
+                if(_gti[0] == _gti[1]) {
+                    vcfr.SetSampleVal("GT",_stringer.itos_32(_gti[0]));
+                } else {
+                    vcfr.AppendFilter(_opt.haploid_conflict_label.c_str());
+                }
+            }
+        }
+    }
+
+
     const SetHapOptions& _opt;
     std::string _last_chrom;
     bool _is_skip_chrom; // true when pos is past all regions in current chrom
     SetHapOptions::interval_group_t::const_iterator _rhead,_rend;
+
+    unsigned _begin_pos,_end_pos; // used to provide the region intercept iterator
 
     std::vector<int> _gti; // cache gt parse
     stringer _stringer; // fast int->str util
