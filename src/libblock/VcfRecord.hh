@@ -126,6 +126,23 @@ struct VcfRecord {
         return NULL;
     }
 
+    void
+    SetInfoVal(const char* key,
+               const char* val) {
+        assert(NULL != key);
+        assert(NULL != val);
+        const unsigned ic(_info.size());
+        for(unsigned i(0);i<ic;++i){
+            const size_t index(_info[i].find('='));
+            if(index == std::string::npos) continue;
+            if(0 == _info[i].compare(0,index,key)) {
+                _info[i].replace(index,std::string::npos,val);
+                return;
+            }
+        }
+        _info.push_back(std::string(key)+"="+val);
+    }
+
     void DeleteInfoKeyVal(const char* key) {
         const unsigned ic(_info.size());
         for(unsigned i(0);i<ic;++i){

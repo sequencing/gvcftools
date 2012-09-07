@@ -57,6 +57,21 @@ checked_double_parse(const char* s,
 void
 VcfRecordBlocker::
 GroomInputRecord(GatkVcfRecord& record) {
+
+    // Transfer MQ over to a sample value for block averaging. To
+    // keep non-variant blocks consistent with variants we need to
+    // round both INFO and SAMPLE MQ to an int.
+    MaybeInt mqVal(record.GetInfoVal("MQ"));
+    if (! mqVal.StrVal.empty()) {
+        if (mqVal.IsInt) {
+            const char* mqintstr( _stringer.itos_32(mqVal.IntVal));
+            record.SetInfoVal("MQ", mqintstr);
+            record.SetSampleVal("MQ", mqintstr);
+        } else {
+            record.SetSampleVal("MQ", mqVal.StrVal.c_str());
+        }
+    }
+
     // handle special filters:
 
     // GQX needs to be handled separately because it is derived,
@@ -99,16 +114,6 @@ GroomInputRecord(GatkVcfRecord& record) {
     record.DeleteInfoKeyVal("AC");
     record.DeleteInfoKeyVal("AF");
     record.DeleteInfoKeyVal("AN");
-
-    // transfer MQ over to a sample value for block averaging
-    MaybeInt mqVal(record.GetInfoVal("MQ"));
-    if (! mqVal.StrVal.empty()) {
-        if (mqVal.IsInt) {
-            record.SetSampleVal("MQ", _stringer.itos_32(mqVal.IntVal));
-        } else {
-            record.SetSampleVal("MQ", mqVal.StrVal.c_str());
-        }
-    }
 }
 
 
