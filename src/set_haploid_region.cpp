@@ -237,7 +237,9 @@ struct SetHapVcfRecordHandler {
             exit(EXIT_FAILURE);
         }
 
-        // 1. check if record region is in a target region at all, return iterator which provides begin,end ranges on successive calls for the record region.
+        // 1. check if record region is in a target region at all,
+        // if true an iterator provides begin,end ranges on
+        // successive calls for the record region.
         //
         if(! is_record_in_region(vparse)) {
             vparse.write_line(_opt.outfp);
@@ -250,7 +252,11 @@ struct SetHapVcfRecordHandler {
         unsigned end;
         while(get_next_record_region_interval(is_haploid,end)){
             VcfRecord vcfr2(vcfr);
-            vcfr2.SetInfoVal("END",_stringer.itos_32(end));
+            if(end>vcfr2.GetPos()) {
+                vcfr2.SetInfoVal("END",_stringer.itos_32(end));
+            } else {
+                vcfr2.DeleteInfoKeyVal("END");
+            }
             if(is_haploid) make_record_haploid(vcfr2);
             vcfr2.WriteUnaltered(_opt.outfp);
             vcfr.SetPos(end+1);
@@ -340,7 +346,12 @@ private:
             
             if(_gti.size() == 2) {
                 if(_gti[0] == _gti[1]) {
-                    vcfr.SetSampleVal("GT",_stringer.itos_32(_gti[0]));
+                    static const char* unknown(".");
+                    const char* val(unknown);
+                    if(_gti[0]>=0) {
+                        val=_stringer.itos_32(_gti[0]);
+                    }
+                    vcfr.SetSampleVal("GT",val);
                 } else {
                     vcfr.AppendFilter(_opt.haploid_conflict_label.c_str());
                 }
