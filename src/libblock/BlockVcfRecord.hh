@@ -35,6 +35,7 @@
 #include "BlockerOptions.hh"
 #include "GatkVcfRecord.hh"
 #include "stream_stat.hh"
+#include "stringer.hh"
 
 #include <cassert>
 #include <cstdio>
@@ -175,18 +176,12 @@ private:
                 bool& isAvg) {
 
         static const char* unknown = ".";
-        static const unsigned buff_size(32);
-        char buff[buff_size];
-        const char* printptr;
+        const char* printptr(unknown);
 
-        if (block.empty()) {
-            printptr = unknown;
-        } else {
+        if (! block.empty()) {
             if (block.size() > 1) isAvg = true;
             const int min(static_cast<int>(compat_round(block.min())));
-            const int write_size(snprintf(buff,buff_size,"%i",min));
-            assert((write_size>=0) && (write_size < static_cast<int>(buff_size)));
-            printptr=buff;
+            printptr=_stringer.itos_32(min);
         }
         _baseCvcfr->SetSampleVal(label,printptr);
     }
@@ -249,6 +244,9 @@ private:
     stream_stat _blockGQX;
     stream_stat _blockDP;
     stream_stat _blockMQ;
+
+    // fast int->str util:
+    stringer _stringer;
 };
 
 

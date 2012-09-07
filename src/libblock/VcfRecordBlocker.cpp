@@ -104,12 +104,7 @@ GroomInputRecord(GatkVcfRecord& record) {
     MaybeInt mqVal(record.GetInfoVal("MQ"));
     if (! mqVal.StrVal.empty()) {
         if (mqVal.IsInt) {
-            static const unsigned buff_size(32);
-            char buff[buff_size];
-            const int write_size(snprintf(buff,buff_size,"%i",mqVal.IntVal));
-            assert((write_size>=0) && (write_size < static_cast<int>(buff_size)));
-
-            record.SetSampleVal("MQ", buff);
+            record.SetSampleVal("MQ", _stringer.itos_32(mqVal.IntVal));
         } else {
             record.SetSampleVal("MQ", mqVal.StrVal.c_str());
         }
