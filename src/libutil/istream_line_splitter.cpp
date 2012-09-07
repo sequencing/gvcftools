@@ -50,7 +50,7 @@ write_line(std::ostream& os) const {
         if(i) os << _sep;
         os << word[i];
     }
-    os << "'\n";
+    os << "\n";
 }
 
 
@@ -59,7 +59,7 @@ void
 istream_line_splitter::
 dump(std::ostream& os) const {
     os << "\tline_no: " << _line_no << "\n";
-    os << "\tline: '";
+    os << "\tline: ";
     write_line(os);
 }
 
