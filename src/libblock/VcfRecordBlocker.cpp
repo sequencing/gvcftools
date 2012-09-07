@@ -107,7 +107,7 @@ GroomInputRecord(GatkVcfRecord& record) {
             static const unsigned buff_size(32);
             char buff[buff_size];
             const int write_size(snprintf(buff,buff_size,"%i",mqVal.IntVal));
-            assert((write_size>=0) && (write_size < buff_size));
+            assert((write_size>=0) && (write_size < static_cast<int>(buff_size)));
 
             record.SetSampleVal("MQ", buff);
         } else {
@@ -210,10 +210,10 @@ static
 void
 adjust_overlap_record(const BlockerOptions& opt,
                       const region_info& rinfo,
-                      const unsigned offset,
+                      const unsigned,
                       GatkVcfRecord& record,
-                      bool& is_edit,
-                      std::vector<refedit>& edits) {
+                      bool&,
+                      std::vector<refedit>&) {
 
     // apply filters:
     const unsigned n_filt(rinfo.filters.size());
@@ -242,31 +242,29 @@ adjust_overlap_record(const BlockerOptions& opt,
     assert(rinfo.copyn<2);
 
     if(rinfo.copyn==1) {
-        int gta,gtb;
-        const int known_count(sscanf(record.GetGT().c_str(),"%i/%i",&gta,&gtb));
-        if(known_count == 2) {
-            if       ((gta==0) && (gtb==0)) {
-                record.SetSampleVal("GT","0");
-            } else if((gta==1) && (gtb==1)) {
-                record.SetSampleVal("GT","1");
-                edits.push_back(std::make_pair(offset,record.GetAlt()[0][0]));
+        std::vector<int> gti;
+        if(! record.GetGT().empty()) {
+            parse_gt(record.GetGT().c_str(),gti);
+        }
+
+        if(gti.size() == 2) {
+            if(gti[0]==gti[1]) {
+                if       (gti[0]>=0) {
+                    std::ostringstream oss;
+                    oss << gti[0];
+                    record.SetSampleVal("GT",oss.str().c_str());
+                    record.DeleteSampleKeyVal("PL");
+                } else {
+                    set_record_to_unknown_gt(record);
+                }
             } else {
                 set_record_to_unknown_gt(record);
-                if(gta!=gtb) {
-                    record.AppendFilter(opt.site_conflict_label.c_str());
-                    edits.push_back(std::make_pair(offset,'N'));
-                } else {
-                    //debug key:
-                    is_edit=false;
-                    //                    if(! (gta==1 && gtb==1)) std::cerr << "VDEBUG_HANDLE2";
-                }
+                record.AppendFilter(opt.site_conflict_label.c_str());
             }
-        } else {
-            is_edit=false;
+        } else if(gti.size() != 1) {            
             set_record_to_unknown_gt(record);
         }
     } else {
-        is_edit=false;
         set_record_to_unknown_gt(record);
     }
 }
@@ -311,14 +309,12 @@ GroomRecordBuffer() {
         rinfo.gq.str=record.GetSampleVal("GQ");
         rinfo.gq.is_valid=checked_double_parse(rinfo.gq.str,rinfo.gq.val);
 
-        int gta,gtb;
-        const int known_count(sscanf(record.GetGT().c_str(),"%i/%i",&gta,&gtb));
-        if(known_count == 2) {
-            if(((gta==0) && (gtb==1)) || ((gta==1) && (gtb==0))) { rinfo.copyn=1; }
-            else {
-                //debug key:
-                //                if(! (gta==1 && gtb==1)) std::cerr << "VDEBUG_HANDLE1";
-            }
+        _gti.clear();
+        if(! record.GetGT().empty()) {
+            parse_gt(record.GetGT().c_str(),_gti);
+        }
+        if(_gti.size() == 2) {
+            if((_gti[0]==0 && _gti[1]>0) || (_gti[1]==0 && _gti[0]>0)){ rinfo.copyn=1; }
         }
     }
 

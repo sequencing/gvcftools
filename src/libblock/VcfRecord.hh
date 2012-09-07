@@ -33,29 +33,13 @@
 
 #include "istream_line_splitter.hh"
 #include "string_util.hh"
+#include "vcf_util.hh"
 
 #include <cassert>
 #include <cstring>
 
 #include <iosfwd>
 
-
-namespace SIDX {
-    enum index_t
-    {
-        CHROM,
-        POS,
-        ID,
-        REF,
-        ALT,
-        QUAL,
-        FILT,
-        INFO,
-        FORMAT,
-        SAMPLE,
-        SIZE
-    };
-}
 
 
 struct VcfRecord {

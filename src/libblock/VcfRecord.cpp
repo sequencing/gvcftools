@@ -42,40 +42,40 @@ VcfRecord::
 VcfRecord(const istream_line_splitter& vparse)
 {
     const unsigned ws(vparse.n_word());
-    if (static_cast<int>(ws) <= SIDX::INFO) {
+    if (static_cast<int>(ws) <= VCFID::INFO) {
         std::ostringstream oss;
         oss << "Too few fields (" << ws << ") in vcf record input:\n";
         vparse.dump(oss);
         throw blt_exception(oss.str().c_str());
     }
     
-    _chrom = vparse.word[SIDX::CHROM];
+    _chrom = vparse.word[VCFID::CHROM];
     
-    _pos = parse_int_str(vparse.word[SIDX::POS]);
+    _pos = parse_int_str(vparse.word[VCFID::POS]);
 
-    _id = vparse.word[SIDX::ID];
+    _id = vparse.word[VCFID::ID];
 
-    _ref = vparse.word[SIDX::REF];
+    _ref = vparse.word[VCFID::REF];
     assert(_ref.size() > 0);
 
-    Splitter(vparse.word[SIDX::ALT],',',_alt);
+    Splitter(vparse.word[VCFID::ALT],',',_alt);
 
     for(unsigned i(0);i<_alt.size();++i) {
         assert(_alt[i].size() > 0);
     }
 
-    _qual = vparse.word[SIDX::QUAL];
+    _qual = vparse.word[VCFID::QUAL];
 
-    Splitter(vparse.word[SIDX::FILT],';',_filt);
+    Splitter(vparse.word[VCFID::FILT],';',_filt);
 
-    Splitter(vparse.word[SIDX::INFO],';',_info);
+    Splitter(vparse.word[VCFID::INFO],';',_info);
     
-    if(ws > SIDX::FORMAT) {
-        Splitter(vparse.word[SIDX::FORMAT],':',_format);
+    if(ws > VCFID::FORMAT) {
+        Splitter(vparse.word[VCFID::FORMAT],':',_format);
     }
     
-    if(ws > SIDX::SAMPLE) {
-        Splitter(vparse.word[SIDX::SAMPLE],':',_sample);
+    if(ws > VCFID::SAMPLE) {
+        Splitter(vparse.word[VCFID::SAMPLE],':',_sample);
     }
     
     if(_format.size() != _sample.size()) {

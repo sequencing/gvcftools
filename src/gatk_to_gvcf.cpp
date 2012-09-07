@@ -68,7 +68,7 @@ process_vcf_input(const BlockerOptions& opt,
     while(vparse.parse_line()) {
         if(header.process_line(vparse)) continue;
 
-        if(vparse.n_word() > SIDX::SIZE) {
+        if(vparse.n_word() > VCFID::SIZE) {
             std::ostringstream oss;
             oss << "Unexpected format in vcf record:\n";
             vparse.dump(oss);

@@ -236,6 +236,9 @@ private:
     int _bufferStartPos,_bufferEndPos; // buffer all records on [Start,End]
     std::vector<GatkVcfRecord> _recordBuffer; // buffer positions crossed by deletions or other indel events
     std::vector<unsigned> _indelIndex; // record index of records in buffer which are indels
+
+    //tmp catch for gt parsing:
+    std::vector<int> _gti;
 };
 
 
