@@ -106,7 +106,7 @@ parse_bedfile_regions(const std::string& region_file,
         if(bed_chrom != "track" && bed_chrom != "browser") {
         
             region_is >> bed_start >> bed_end;
-            if(region_is.fail()) {
+            if(region_is.fail() || (bed_end<bed_start)) {
                 is_parse_fail=true;
                 break;
             }

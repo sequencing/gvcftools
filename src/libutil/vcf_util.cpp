@@ -34,6 +34,7 @@
 
 #include <cctype>
 
+#include <iostream>
 #include <sstream>
 
 
@@ -48,7 +49,6 @@ struct gt_parse_helper {
         if(isdigit(*gt)) return digit(gt,gti);
         
         switch(*gt) {
-        case '\0' : return false;
         case '.' :  return unknown(gt,gti);
         default: return false;
         }
@@ -65,7 +65,7 @@ private:
         switch(*gt) {
         case '\0' : return true;
         case '|' :
-        case '\\' : return sep(gt,gti);
+        case '/' : return sep(gt,gti);
         default : return false;
         }
     }
@@ -96,7 +96,7 @@ private:
         switch(*gt) {
         case '\0' : return true;
         case '|' :
-        case '\\' : return sep(gt,gti);
+        case '/' : return sep(gt,gti);
         default : return false;
         }
     }
