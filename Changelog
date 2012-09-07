@@ -1,3 +1,4 @@
+- add new set_haploid_region tool
 v0.7
 - gatk_to_gvcf: Fix invalid vcf header
 - Improve visual studio c++ compatability
