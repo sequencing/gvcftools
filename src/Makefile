@@ -26,9 +26,9 @@ CXXFLAGS = $(XFLAGS) -I$(LIBUTIL_DIR) -I$(BOOST_INCLUDE_DIR) -I$(TABIX_INCLUDE_D
 LDFLAGS = -L$(BOOST_LIB_DIR) -L$(TABIX_LIB_DIR)
 LDLIBS = -lboost_program_options -ltabix_and_faidx -lz -lm
 
-PROGS = $(TRIOPROGS) $(BLOCKPROG) 
+PROGS = $(TRIOPROGS) $(BLOCKPROGS) 
 TRIOPROGS := trio twins
-BLOCKPROG := gatk_to_gvcf
+BLOCKPROGS := gatk_to_gvcf set_haploid_region
 OBJS = $(PROGS:%=%.o)
 
 export LIBTRIO := libtrio.a
@@ -48,8 +48,8 @@ build: $(PROGS)
 $(TRIOPROGS): %: %.o $(LIBTRIO_PATH) $(LIBUTIL_PATH)
 $(TRIOPROGS): CXXFLAGS += -I$(LIBTRIO_DIR) 
 
-$(BLOCKPROG): %: %.o $(LIBBLOCK_PATH) $(LIBUTIL_PATH)
-$(BLOCKPROG): CXXFLAGS += -I$(LIBBLOCK_DIR) 
+$(BLOCKPROGS): %: %.o $(LIBBLOCK_PATH) $(LIBUTIL_PATH)
+$(BLOCKPROGS): CXXFLAGS += -I$(LIBBLOCK_DIR) 
 
 $(LIBTRIO_PATH):
 	$(MAKE) -C $(LIBTRIO_DIR) $(LIBTRIO)

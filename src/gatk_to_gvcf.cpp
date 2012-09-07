@@ -30,11 +30,11 @@
 ///
 
 #include "BlockerOptions.hh"
+#include "BlockerVcfHeaderHandler.hh"
 #include "blt_exception.hh"
 #include "gvcftools.hh"
 #include "istream_line_splitter.hh"
 #include "parse_util.hh"
-#include "VcfHeaderHandler.hh"
 #include "VcfRecordBlocker.hh"
 
 #include "boost/program_options.hpp"
@@ -61,7 +61,7 @@ process_vcf_input(const BlockerOptions& opt,
                   std::istream& infp) {
 
     VcfRecordBlocker blocker(opt);
-    VcfHeaderHandler header(opt,gvcftools_version(),cmdline.c_str());
+    BlockerVcfHeaderHandler header(opt,gvcftools_version(),cmdline.c_str());
 
     istream_line_splitter vparse(infp);
 

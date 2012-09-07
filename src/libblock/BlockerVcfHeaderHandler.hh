@@ -29,49 +29,49 @@
 /// \author Chris Saunders
 ///
 
-#ifndef __VCF_HEADER_HANLDER
-#define __VCF_HEADER_HANLDER
+#ifndef __BLOCKER_VCF_HEADER_HANLDER
+#define __BLOCKER_VCF_HEADER_HANLDER
 
 
-#include "istream_line_splitter.hh"
+#include "BlockerOptions.hh"
+#include "VcfHeaderHandler.hh"
 
-#include <iosfwd>
+#include <string>
+#include <vector>
 
 
-struct VcfHeaderHandler {
-    VcfHeaderHandler(std::ostream& os,
-                     const char* version,
-                     const char* cmdline,
-                     const bool is_skip_header = false)
-        : _os(os)
-        ,_version(version)
-        , _cmdline(cmdline)
-        , _is_skip_header(is_skip_header)
-        , _is_valid(true)
-    {}
+struct BlockerVcfHeaderHandler : public VcfHeaderHandler {
 
-    bool
-    process_line(const istream_line_splitter& vparse);
+    BlockerVcfHeaderHandler(const BlockerOptions& opt,
+                            const char* version = NULL,
+                            const char* cmdline = NULL)
+        : VcfHeaderHandler(opt.outfp,version,cmdline,_opt.is_skip_header)
+        , _opt(opt)
+    {
+        static const char* rmHeaderTags[] = { "AC", "AF", "AN" };
+        static const unsigned n_tags(sizeof(rmHeaderTags)/sizeof(char*));
 
-protected:
-    virtual
-    bool
-    is_skip_header_line(const istream_line_splitter& /*vparse*/) {
-        return false;
+        for(unsigned i(0);i<n_tags;++i) {
+            _rmKeys.push_back(std::string("INFO=<ID=")+rmHeaderTags[i]);
+        }
     }
 
-    virtual
-    void
-    process_final_header_line() {}
-
-
-    std::ostream& _os;
 
 private:
-    const char* _version;
-    const char* _cmdline;
-    bool _is_skip_header;
-    bool _is_valid;
+    bool
+    is_skip_header_line(const istream_line_splitter& vparse);
+
+    void
+    process_final_header_line();
+
+    void
+    write_split_line(const istream_line_splitter& vparse) {
+        if(_opt.is_skip_header) return;
+        vparse.write_line(_os);
+    }
+
+    const BlockerOptions& _opt;
+    std::vector<std::string> _rmKeys;
 };
 
 #endif
