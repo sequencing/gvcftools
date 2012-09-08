@@ -440,9 +440,9 @@ try_main(int argc,char* argv[]){
     }
     
     if ((argc<=1) || (vm.count("help")) || po_parse_fail) {
-        log_os << "\n" << progname << " convert regions of a gVCF or VCF from diploid to haploid\n\n"; 
+        log_os << "\n" << progname << " converts regions of a gVCF or VCF from diploid to haploid\n\n"; 
         log_os << "version: " << gvcftools_version() << "\n\n";
-        log_os << "usage: " << progname << " [options] < all_sites > trio_report\n\n"; 
+        log_os << "usage: " << progname << " [options] < (g)VCF > haploid_region_(g)VCF\n\n"; 
         log_os << visible << "\n";
         exit(EXIT_FAILURE);
     }
