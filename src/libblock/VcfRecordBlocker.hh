@@ -48,6 +48,7 @@ struct VcfRecordBlocker {
         , _is_highDepth(false)
         , _bufferStartPos(0)
         , _bufferEndPos(0)
+        , _lastNonindelPos(0)
     {}
 
     /// Process and print any remaining blocks
@@ -97,6 +98,12 @@ private:
         // an indel is evaluated but the reference allele is choosen, it would be nice to incorporate these
         // into the final gVCF but until there's a policy it's cleaner to filter such cases:
         if(record.IsNonvariantBlock()) return true;
+
+        // besides the non-variant blocks, GATK will infrequently output the same reference site twice, so filter
+        // thest cases out if found:
+        if((! record.IsIndel()) && (record.GetPos() <= _lastNonindelPos)) {
+            return true;
+        }
 
         return false;
     }
@@ -232,6 +239,8 @@ private:
     int _bufferStartPos,_bufferEndPos; // buffer all records on [Start,End]
     std::vector<GatkVcfRecord> _recordBuffer; // buffer positions crossed by deletions or other indel events
     std::vector<unsigned> _indelIndex; // record index of records in buffer which are indels
+
+    unsigned _lastNonindelPos;
 
     //tmp catch for gt parsing:
     std::vector<int> _gti;
