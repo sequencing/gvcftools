@@ -51,7 +51,8 @@ VcfRecord(const istream_line_splitter& vparse)
     
     _chrom = vparse.word[VCFID::CHROM];
     
-    _pos = parse_int_str(vparse.word[VCFID::POS]);
+    const char* pos_ptr(vparse.word[VCFID::POS]);
+    _pos = parse_unsigned(pos_ptr);
 
     _id = vparse.word[VCFID::ID];
 

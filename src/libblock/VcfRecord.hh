@@ -50,9 +50,9 @@ struct VcfRecord {
 
     const std::string& GetChrom() const { return _chrom; }
 
-    int GetPos() const { return _pos; }
+    unsigned GetPos() const { return _pos; }
 
-    void SetPos(const int& pos) { _pos = pos; }
+    void SetPos(const unsigned& pos) { _pos = pos; }
 
     const std::string& GetId() const { return _id; }
 
@@ -315,7 +315,7 @@ private:
 
 private:
     std::string _chrom;
-    int _pos;
+    unsigned _pos;
     std::string _id;
     std::string _ref;
     std::vector<std::string> _alt;

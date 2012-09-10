@@ -332,7 +332,7 @@ process_record_line(char* line) {
         if((pos+_locus_size-1)<_opt.region_begin) return false;
     }
 
-    const bool last_is_call(is_call);
+    //const bool last_is_call(is_call);
     is_call = _opt.sti().get_is_call(_word,pos,is_indel,_skip_call_begin_pos,_skip_call_end_pos);
 
     n_total = _opt.sti().total(_word);

@@ -74,7 +74,6 @@ test_bn(const char* x) {
     std::cerr << "test_bn input: '" << x << "' output: '" << compat_basename(x) <<"'\n";
 }
 
-static
 void
 test_compat() {
   test_round(3.5);
