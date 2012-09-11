@@ -44,7 +44,7 @@ struct VcfHeaderHandler {
                      const char* cmdline,
                      const bool is_skip_header = false)
         : _os(os)
-        ,_version(version)
+        , _version(version)
         , _cmdline(cmdline)
         , _is_skip_header(is_skip_header)
         , _is_valid(true)

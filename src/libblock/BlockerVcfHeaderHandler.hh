@@ -45,7 +45,7 @@ struct BlockerVcfHeaderHandler : public VcfHeaderHandler {
     BlockerVcfHeaderHandler(const BlockerOptions& opt,
                             const char* version = NULL,
                             const char* cmdline = NULL)
-        : VcfHeaderHandler(opt.outfp,version,cmdline,_opt.is_skip_header)
+        : VcfHeaderHandler(opt.outfp,version,cmdline,opt.is_skip_header)
         , _opt(opt)
     {
         static const char* rmHeaderTags[] = { "AC", "AF", "AN" };
