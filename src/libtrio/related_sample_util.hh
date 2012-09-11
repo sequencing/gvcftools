@@ -56,7 +56,7 @@ ratio(const unsigned n, const unsigned d){
 }
 
 
-
+template <int SAMPLE_SIZE>
 struct site_stats_core {
 
     site_stats_core()
@@ -68,7 +68,16 @@ struct site_stats_core {
         , all_called(0)
         , incorrect(0)
         , snp_correct(0)
-    {}
+    {
+        for(unsigned st(0);st<SAMPLE_SIZE;++st) {
+            sample_mapped[st] = 0;
+            sample_called[st] = 0;
+            sample_snp[st] = 0;
+            sample_snp_het[st] = 0;
+            sample_snp_correct_het[st] = 0;
+            sample_snp_correct_hom[st] = 0;
+        }
+    }
 
     unsigned ref_size;
     unsigned known_size;
@@ -78,6 +87,13 @@ struct site_stats_core {
     unsigned all_called;
     unsigned incorrect;
     unsigned snp_correct;
+
+    unsigned sample_mapped[SAMPLE_SIZE];
+    unsigned sample_called[SAMPLE_SIZE];
+    unsigned sample_snp[SAMPLE_SIZE];
+    unsigned sample_snp_het[SAMPLE_SIZE];
+    unsigned sample_snp_correct_het[SAMPLE_SIZE];
+    unsigned sample_snp_correct_hom[SAMPLE_SIZE];
 };
 
 

@@ -89,29 +89,15 @@ get_st_cat(const bool ist1hom,
 
 
 
-struct site_stats : public site_stats_core{
+struct site_stats : public site_stats_core<SAMPLE_SIZE> {
 
     site_stats() {
-        for(unsigned st(0);st<SAMPLE_SIZE;++st) {
-            sample_mapped[st] = 0;
-            sample_called[st] = 0;
-            sample_snp[st] = 0;
-            sample_snp_het[st] = 0;
-            sample_snp_correct_het[st] = 0;
-            sample_snp_correct_hom[st] = 0;
-        }
         for(unsigned i(0);i<STATE_SIZE;++i) {
             snp_correct_type[i]=0;
             incorrect_type[i]=0;
         }
     }
 
-    unsigned sample_mapped[SAMPLE_SIZE];
-    unsigned sample_called[SAMPLE_SIZE];
-    unsigned sample_snp[SAMPLE_SIZE];
-    unsigned sample_snp_het[SAMPLE_SIZE];
-    unsigned sample_snp_correct_het[SAMPLE_SIZE];
-    unsigned sample_snp_correct_hom[SAMPLE_SIZE];
     unsigned snp_correct_type[STATE_SIZE];
     unsigned incorrect_type[STATE_SIZE];
 };
