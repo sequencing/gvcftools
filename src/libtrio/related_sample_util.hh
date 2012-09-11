@@ -38,8 +38,6 @@
 #include "reference_contig_segment.hh"
 #include "vcf_util.hh"
 
-#include "boost/lexical_cast.hpp"
-
 #include <cassert>
 #include <cstdio>
 #include <cstring>
@@ -166,7 +164,8 @@ struct snp_type_info {
 
     pos_t
     pos(const char* const * word) const {
-        return boost::lexical_cast<pos_t>(word[_poscol]);
+        const char* s(word[_poscol]);
+        return parse_type<pos_t>(s);
     }
 
 

@@ -181,7 +181,7 @@ private:
         if (! block.empty()) {
             if (block.size() > 1) isAvg = true;
             const int min(static_cast<int>(compat_round(block.min())));
-            printptr=_stringer.itos_32(min);
+            printptr=_intstr.get32(min);
         }
         _baseCvcfr->SetSampleVal(label,printptr);
     }
@@ -246,7 +246,7 @@ private:
     stream_stat _blockMQ;
 
     // fast int->str util:
-    stringer _stringer;
+    stringer<int> _intstr;
 };
 
 

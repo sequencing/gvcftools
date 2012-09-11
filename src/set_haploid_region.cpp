@@ -259,7 +259,7 @@ struct SetHapVcfRecordHandler {
         while(get_next_record_region_interval(is_haploid,end)){
             VcfRecord vcfr2(vcfr);
             if(end>vcfr2.GetPos()) {
-                vcfr2.SetInfoVal("END",_stringer.itos_32(end));
+                vcfr2.SetInfoVal("END",_intstr.get32(end));
             } else {
                 vcfr2.DeleteInfoKeyVal("END");
             }
@@ -356,7 +356,7 @@ private:
                 static const char* unknown(".");
                 const char* val(unknown);
                 if(_gti[0]>=0) {
-                    val=_stringer.itos_32(_gti[0]);
+                    val=_intstr.get32(_gti[0]);
                 }
                 vcfr.SetSampleVal("GT",val);
 
@@ -381,7 +381,7 @@ private:
     unsigned _begin_pos,_end_pos; // used to provide the region intercept iterator
 
     std::vector<int> _gti; // cache gt parse
-    stringer _stringer; // fast int->str util
+    stringer<int> _intstr; // fast int->str util
 };
 
 

@@ -1,6 +1,13 @@
 #
+# IDS must be defined:
+#
+IDS := BOOST_INCLUDE_DIR XFLAGS LIBUTIL
 
-CXXFLAGS = $(XFLAGS)
+assert-defined-indirect = $(if $($1),,$(error Variable '$1' must be defined))
+$(foreach I,$(IDS), $(call assert-defined-indirect,$I))
+
+
+CXXFLAGS = $(XFLAGS) -I$(BOOST_INCLUDE_DIR)
 
 SRCS = $(wildcard *.cpp)
 OBJS = $(SRCS:%.cpp=%.o)

@@ -33,8 +33,28 @@
 #define __STRINGER_HH
 
 #include "compat_util.hh"
+#include "scan_string.hh"
 
 #include <cstdio>
+
+#include <typeinfo>
+
+
+
+struct stringer_base {
+
+    stringer_base()
+        : _scanstr(NULL)
+    {}
+
+protected:
+    static
+    void type_error(const char* tiname);
+    void get32_error(const int write_size) const;
+
+    mutable char _buff32[32];
+    const char* _scanstr;
+};
 
 
 /// String conversion utility which is harder-to-use but faster than stringstream/lexical_cast
@@ -43,22 +63,25 @@
 /// 1) client must create one object for each thread
 /// 2) The string pointer returned will be invalid at the next conversion call to stringer
 ///
-struct stringer {
+template <typename T>
+struct stringer : public stringer_base {
+
+    stringer<T>()
+    {
+        _scanstr=scan_string<T>();
+        if(NULL==_scanstr) { type_error(typeid(T).name()); }
+    }
+
 
     const char*
-    itos_32(const int i) {
+    get32(const T val) const {
         static const unsigned buff_size(32);
-        const int write_size(snprintf(_buff32,buff_size,"%i",i));
+        const int write_size(snprintf(_buff32,buff_size,_scanstr,val));
         if((write_size<0) || (write_size >= static_cast<int>(buff_size))) {
-            itos_32_error(i,write_size);
+            get32_error(write_size);
         }
         return _buff32;
     }
-
-private:
-    void itos_32_error(const int i, const int write_size);
-
-    char _buff32[32];
 };
 
 

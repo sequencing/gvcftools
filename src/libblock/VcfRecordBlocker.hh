@@ -78,7 +78,7 @@ private:
     // write a single non-blockable record:
     void WriteThisCvcfr(GatkVcfRecord& record) {
         if (record.GetGQX().IsInt) {
-            record.SetSampleVal("GQX",_stringer.itos_32(record.GetGQX().IntVal));
+            record.SetSampleVal("GQX",_intstr.get32(record.GetGQX().IntVal));
         }
 
         record.WriteUnaltered(_opt.outfp);
@@ -248,7 +248,7 @@ private:
     //tmp catch for gt parsing:
     std::vector<int> _gti;
     //obj for fast int->str
-    stringer _stringer;
+    stringer<int> _intstr;
 };
 
 

@@ -37,9 +37,20 @@
 
 
 void
-stringer::
-itos_32_error(const int i, const int write_size) {
+stringer_base::
+type_error(const char* tiname) {
     std::ostringstream oss;
-    oss << "ERROR: itos_32 failed to convert integer '" << i << "' ws: '" << write_size << "'\n";
+    oss << "ERROR: Can't initialize stringer object for type: "  << tiname << "\n";
+    throw blt_exception(oss.str().c_str());
+}
+
+
+
+void
+stringer_base::
+get32_error(const int write_size) const {
+    _buff32[31]='\0';
+    std::ostringstream oss;
+    oss << "ERROR: stringer.get32 failed to convert type to string. write_size: '" << write_size << " buffer: " << _buff32 << "'\n";
     throw blt_exception(oss.str().c_str());
 }
