@@ -53,6 +53,12 @@ struct VcfHeaderHandler {
     bool
     process_line(const istream_line_splitter& vparse);
 
+    void
+    write_format(const char* tag,
+                 const char* number,
+                 const char* type,
+                 const char* description) const;
+
 protected:
     virtual
     bool

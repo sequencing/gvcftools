@@ -69,3 +69,18 @@ process_line(const istream_line_splitter& vparse){
     vparse.write_line(_os);
     return true;
 }
+
+
+
+void
+VcfHeaderHandler::
+write_format(const char* tag,
+             const char* number,
+             const char* type,
+             const char* description) const {
+
+    _os << "##FORMAT=<ID=" << tag
+        << ",Number=" << number
+        << ",Type=" << type
+        << ",Description=\"" << description << "\">\n";
+}

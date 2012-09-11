@@ -60,11 +60,12 @@ struct SetHapOptions {
 
     SetHapOptions()
         : haploid_conflict_label("HAPLOID_CONFLICT")
+        , orig_pl_tag("OPL")
         , outfp(std::cout)
     {}
 
-
     const std::string haploid_conflict_label;
+    const std::string orig_pl_tag;
     std::ostream& outfp;
 
     typedef std::pair<unsigned,unsigned> interval_t;
@@ -212,6 +213,7 @@ private:
             _os << _haploid_filter_prefix
                 << ",Description=\"Locus has heterozygous genotype in a haploid region.\">\n";
         }
+        write_format(opt.orig_pl_tag.c_str(),".","Integer","Original PL value before ploidy correction");
     }
     
 
@@ -221,6 +223,8 @@ private:
 
 
 
+// process each vcf record for haploid setting:
+//
 struct SetHapVcfRecordHandler {
 
     SetHapVcfRecordHandler(const SetHapOptions& opt)
@@ -341,20 +345,27 @@ private:
     void
     make_record_haploid(VcfRecord& vcfr) {
         const char* gt(vcfr.GetSampleVal("GT"));
-        if(NULL != gt) {
-            parse_gt(gt,_gti);
+        if(NULL == gt)  return;
+        parse_gt(gt,_gti);
             
-            if(_gti.size() == 2) {
-                if(_gti[0] == _gti[1]) {
-                    static const char* unknown(".");
-                    const char* val(unknown);
-                    if(_gti[0]>=0) {
-                        val=_stringer.itos_32(_gti[0]);
-                    }
-                    vcfr.SetSampleVal("GT",val);
-                } else {
-                    vcfr.AppendFilter(_opt.haploid_conflict_label.c_str());
+        if(_gti.size() == 2) { // record is diploid
+            if(_gti[0] == _gti[1]) {
+                // change GT:
+                static const char* unknown(".");
+                const char* val(unknown);
+                if(_gti[0]>=0) {
+                    val=_stringer.itos_32(_gti[0]);
                 }
+                vcfr.SetSampleVal("GT",val);
+
+                // move PL field to 'backup' OPL field:
+                const char* pl(vcfr.GetSampleVal("PL"));
+                if(NULL != pl) {
+                    vcfr.SetSampleVal(opt.orig_pl_tag.c_str(),pl);
+                    vcfr.DeleteSampleKeyVal("PL");
+                }
+            } else {
+                vcfr.AppendFilter(_opt.haploid_conflict_label.c_str());
             }
         }
     }
