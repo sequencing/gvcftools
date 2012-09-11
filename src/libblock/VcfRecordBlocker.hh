@@ -101,9 +101,12 @@ private:
 
         // besides the non-variant blocks, GATK will infrequently output the same reference site twice, so filter
         // thest cases out if found:
-        if((! record.IsIndel()) && (record.GetPos() <= _lastNonindelPos)) {
-            return true;
+        if(! record.IsIndel()) {
+            const unsigned pos(record.GetPos());
+            if(pos <= _lastNonindelPos) return true;
+            _lastNonindelPos = pos;
         }
+
 
         return false;
     }
