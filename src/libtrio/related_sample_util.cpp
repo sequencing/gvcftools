@@ -205,8 +205,8 @@ get_format_float(const char* const * word,
 
 
 
-site_crawler::
-site_crawler(const sample_info& si,
+locus_crawler::
+locus_crawler(const sample_info& si,
              const unsigned sample_id,
              const shared_crawler_options& opt,
              const char* chr_region,
@@ -234,8 +234,8 @@ site_crawler(const sample_info& si,
 
 
 
-site_crawler::
-~site_crawler() {
+locus_crawler::
+~locus_crawler() {
     if(NULL != _tabs) delete _tabs;
 }
 
@@ -244,10 +244,10 @@ site_crawler::
 
 
 void
-site_crawler::
+locus_crawler::
 dump_state(std::ostream& os) const {
     const std::string& afile(_si.file);
-    os << "SITE_CRAWLER STATE:\n";
+    os << "LOCUS_CRAWLER STATE:\n";
     os << "\tchrom: " << chrom();
     os << "\tposition: " << pos << " offset: " << _locus_offset << "\n";
     os << "\tfile: '" << afile << "'\n";
@@ -263,7 +263,7 @@ static const char sep('\t');
 
 // return true if current position in record is valid and usable
 bool
-site_crawler::
+locus_crawler::
 process_record_line(char* line) {
     static const unsigned MAX_WORD(50);
     
@@ -391,7 +391,7 @@ process_record_line(char* line) {
 
 
 void
-site_crawler::
+locus_crawler::
 update(){
     if(_is_sample_end_state) return;
 
@@ -484,7 +484,7 @@ update(){
 
 
 void
-site_crawler::
+locus_crawler::
 dump_line(std::ostream& os) const {
     if(_is_sample_end_state) return;
     for(unsigned i(0);i<_n_word;++i){
@@ -527,7 +527,7 @@ pos_reporter::
 
 void
 pos_reporter::
-print_pos(const site_crawler* sa) {
+print_pos(const locus_crawler* sa) {
     if(! is_pos_report) return;
     *pos_fs_ptr << "EVENT\t" << sa[0].chrom() << "\t" << sa[0].pos << "\n";
     for(unsigned i(0);i<sample_size;++i){

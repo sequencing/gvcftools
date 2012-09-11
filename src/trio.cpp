@@ -117,10 +117,26 @@ struct site_stats : public site_stats_core<SAMPLE_SIZE> {
 };
 
 
+struct indel_stats {
+
+    unsigned incorrect;
+    unsigned indel_correct;
+
+    unsigned insert_called[SAMPLE_SIZE];
+    unsigned delete_called[SAMPLE_SIZE];
+};
+
+
+struct indel_processor {
+
+
+    accumulate();
+};
+
 
 static
 void
-processSite(const site_crawler* sa,
+processSite(const locus_crawler* sa,
             const pos_t low_pos,
             const reference_contig_segment& ref_seg,
             pos_reporter& pr,
@@ -380,9 +396,9 @@ accumulate_region_statistics(const sample_info* const si,
     ss.known_size += segment_known_size;
 
     // setup allele crawlers:
-    site_crawler sa[SAMPLE_SIZE] = { site_crawler(si[MOTHER],MOTHER,opt,region,ref_seg),
-                                     site_crawler(si[FATHER],FATHER,opt,region,ref_seg),
-                                     site_crawler(si[CHILD],CHILD,opt,region,ref_seg) };
+    locus_crawler sa[SAMPLE_SIZE] = { locus_crawler(si[MOTHER],MOTHER,opt,region,ref_seg),
+                                      locus_crawler(si[FATHER],FATHER,opt,region,ref_seg),
+                                      locus_crawler(si[CHILD],CHILD,opt,region,ref_seg) };
 
     while(true) {
         // get lowest position:

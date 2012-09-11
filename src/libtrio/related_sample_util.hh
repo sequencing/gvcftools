@@ -401,15 +401,15 @@ struct shared_crawler_options {
 struct tabix_streamer;
 
 
-struct site_crawler {
+struct locus_crawler {
     
-    site_crawler(const sample_info& si,
+    locus_crawler(const sample_info& si,
                  const unsigned sample_id,
                  const shared_crawler_options& opt,
                  const char* chr_region,
                  const reference_contig_segment& ref_seg);
 
-    ~site_crawler();
+    ~locus_crawler();
 
     void
     update();
@@ -478,7 +478,7 @@ struct pos_reporter {
     ~pos_reporter();
 
     void
-    print_pos(const site_crawler* sa);
+    print_pos(const locus_crawler* sa);
 
 private:
 
