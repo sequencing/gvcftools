@@ -193,6 +193,7 @@ struct SetHapVcfHeaderHandler : public VcfHeaderHandler {
                            const char* version = NULL,
                            const char* cmdline = NULL)
         : VcfHeaderHandler(opt.outfp,version,cmdline)
+        , _opt(opt)
         , _is_add_filter_tag(true)
     {
         _haploid_filter_prefix="##FILTER=<ID="+opt.haploid_conflict_label;
@@ -213,10 +214,11 @@ private:
             _os << _haploid_filter_prefix
                 << ",Description=\"Locus has heterozygous genotype in a haploid region.\">\n";
         }
-        write_format(opt.orig_pl_tag.c_str(),".","Integer","Original PL value before ploidy correction");
+        write_format(_opt.orig_pl_tag.c_str(),".","Integer","Original PL value before ploidy correction");
     }
     
 
+    const SetHapOptions& _opt;
     bool _is_add_filter_tag;
     std::string _haploid_filter_prefix;
 };
@@ -361,7 +363,7 @@ private:
                 // move PL field to 'backup' OPL field:
                 const char* pl(vcfr.GetSampleVal("PL"));
                 if(NULL != pl) {
-                    vcfr.SetSampleVal(opt.orig_pl_tag.c_str(),pl);
+                    vcfr.SetSampleVal(_opt.orig_pl_tag.c_str(),pl);
                     vcfr.DeleteSampleKeyVal("PL");
                 }
             } else {
