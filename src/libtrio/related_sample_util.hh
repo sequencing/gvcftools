@@ -36,6 +36,7 @@
 #include "parse_util.hh"
 #include "pos_type.hh"
 #include "reference_contig_segment.hh"
+#include "vcf_util.hh"
 
 #include "boost/lexical_cast.hpp"
 
@@ -207,7 +208,7 @@ struct snp_type_info_vcf : public snp_type_info {
 		pos_t& skip_call_end_pos) const {
 
         update_skip_call_range(word,pos,is_indel,skip_call_begin_pos,skip_call_end_pos);
-        bool is_bad_call(is_indel || (0!=strcmp(word[FILT_COL],"PASS")));
+        bool is_bad_call(is_indel || (0!=strcmp(word[VCFID::FILT],"PASS")));
         if(is_bad_call) return false;
         if(_sp.min_gqx > 0) {
             float gqx(0);
@@ -231,13 +232,13 @@ struct snp_type_info_vcf : public snp_type_info {
 #endif
         if(_sp.is_min_qd) {
             float qd(0);
-            if(get_info_float(word[INFO_COL],"QD",qd)) {
+            if(get_info_float(word[VCFID::INFO],"QD",qd)) {
                 if(qd<_sp.min_qd) return false;
             }
         }
         if(_sp.is_min_pos_rank_sum) {
             float pos_rank_sum(0);
-            if(get_info_float(word[INFO_COL],"BaseQRankSum",pos_rank_sum)) {
+            if(get_info_float(word[VCFID::INFO],"BaseQRankSum",pos_rank_sum)) {
                 if(pos_rank_sum<_sp.min_pos_rank_sum) return false;
             }
         }
@@ -278,9 +279,9 @@ struct snp_type_info_vcf : public snp_type_info {
         result=0;
         if(is_indel) return true;
         
-        const unsigned reflen(strlen(word[REF_COL]));
+        const unsigned reflen(strlen(word[VCFID::REF]));
         unsigned iend;
-        if(! get_info_unsigned(word[INFO_COL],"END",iend)) {
+        if(! get_info_unsigned(word[VCFID::INFO],"END",iend)) {
             result=reflen;
         } else {
             if( ! (iend>=pos && (reflen <= ((iend+1)-pos))) ) return false; 
@@ -292,13 +293,13 @@ struct snp_type_info_vcf : public snp_type_info {
     // this detects both indels and unequal or equal length 'block-substutitons'
     bool
     get_is_indel(const char * const * word) const {
-        const char* alt(word[ALT_COL]);
+        const char* alt(word[VCFID::ALT]);
         const char* tmp_ptr;
         // no alternate:
         if(0==strcmp(alt,".")) return false;
         // breakend:
         if(NULL != (tmp_ptr=strchr(alt,'.'))) return true;
-        const unsigned reflen(strlen(word[REF_COL]));
+        const unsigned reflen(strlen(word[VCFID::REF]));
         // if alt is not '.' and reflen > 1, then this must be some sort of indel/subst:
         // pathological case is alt=".,." ... don't worry about that one.
         if(reflen>1) return true;
@@ -345,7 +346,7 @@ private:
     // be 1 until vcf support was added.
     unsigned
     get_ref_length(const char * const * word) const { 
-        return strlen(word[REF_COL]);
+        return strlen(word[VCFID::REF]);
     }
 
     
@@ -368,17 +369,6 @@ private:
         }
         skip_call_end_pos=std::max(skip_call_end_pos,indel_end_pos);
     }
-
-    enum {
-        POS_COL = 1,
-        REF_COL = 3,
-        ALT_COL = 4,
-        QVAR_COL = 5,
-        FILT_COL = 6,
-        INFO_COL = 7,
-        FORMAT_COL = 8,
-        SAMPLE_COL = 9,
-    };
 };
 
 

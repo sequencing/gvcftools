@@ -81,11 +81,11 @@ get_allele(std::pair<char,char>& allele,
         return true;
     }
 
-    const char ref(word[REF_COL][offset]);
+    const char ref(word[VCFID::REF][offset]);
     char altbase[2] = {ref,ref};
     for(unsigned i(0);i<2;++i) {
         if(gtcode[i]==0) continue;
-        const char* alt(word[ALT_COL]);
+        const char* alt(word[VCFID::ALT]);
         for(unsigned ai(0);(ai+1)<gtcode[i];alt++) {
             if(! *alt) return false;
             if((*alt)==',') ai++;
@@ -104,9 +104,9 @@ get_format_string(const char* const * word,
                   const char* key) {
 
     unsigned keynum(0);
-    if(! get_format_key_index(word[FORMAT_COL],key,keynum)) return NULL;
+    if(! get_format_key_index(word[VCFID::FORMAT],key,keynum)) return NULL;
 
-    const char* sample(word[SAMPLE_COL]);
+    const char* sample(word[VCFID::SAMPLE]);
     for(;keynum;sample++) {
         if(! *sample) return NULL;
         if((*sample)==':') keynum--;
@@ -192,9 +192,9 @@ get_format_float(const char* const * word,
                  float& val) {
 
     unsigned keynum(0);
-    if(! get_format_key_index(word[FORMAT_COL],key,keynum)) return false;
+    if(! get_format_key_index(word[VCFID::FORMAT],key,keynum)) return false;
 
-    const char* sample(word[SAMPLE_COL]);
+    const char* sample(word[VCFID::SAMPLE]);
     for(;keynum;sample++) {
         if(! *sample) return false;
         if((*sample)==':') keynum--;
