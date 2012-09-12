@@ -30,58 +30,17 @@
 ///
 
 #include "tabix_streamer.hh"
+#include "tabix_util.hh"
 
 #include <cassert>
 #include <cstdlib>
-#include <sys/stat.h>
 
 #include <iostream>
 #include <set>
-#include <sstream>
 #include <string>
 
 namespace {
 std::ostream& log_os(std::cerr);
-}
-
-
-
-static
-bool
-is_prefix(const char* a,
-          const char* b) {
-    return (strstr(a,b)==a);
-}
-
-
-
-// this is lifted from tabix main.c:
-static
-bool
-is_tabix_index(const char* f) {
-
-    // punt on remote case:
-    if(is_prefix(f,"ftp://") || is_prefix(f,"http://")) return true;
-
-    std::string idx(f);
-    idx += ".tbi";
-
-    struct stat stat_f,stat_idx;
-    stat(f, &stat_f);
-    stat(idx.c_str(), &stat_idx);
-    return ( stat_f.st_mtime <= stat_idx.st_mtime );
-}
-
-
-
-static
-void
-enforce_tabix_index(const char* f) {
-    if(is_tabix_index(f)) return;
-
-    std::ostringstream oss;
-    oss << "ERROR: Missing or outdated index for vcf file: " << f << "\n";
-    throw blt_exception(oss.str().c_str());
 }
 
 

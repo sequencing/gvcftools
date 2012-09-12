@@ -36,6 +36,14 @@ extern "C" {
 #include "tabix.h"
 }
 
+// check for acceptable tabix index:
+bool
+is_tabix_index(const char* f);
+
+// throw if no acceptable tabix index
+void
+enforce_tabix_index(const char* f);
+
 
 bool
 parse_tabix_region(const char* filename,

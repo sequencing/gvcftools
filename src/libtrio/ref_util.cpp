@@ -32,10 +32,6 @@
 #include "ref_util.hh"
 #include "seq_util.hh"
 
-extern "C" {
-#include "faidx.h"
-}
-
 #include <cstdlib>
 
 #include <iostream>
@@ -77,4 +73,33 @@ get_samtools_std_ref_segment(const char* ref_file,
     known_size=0;
     const std::string::size_type ref_size(ref_seq.size());
     for(std::string::size_type i(0);i<ref_size;++i){ if(ref_seq[i]!='N') known_size++; }
+}
+
+
+
+fasta_chrom_list::
+fasta_chrom_list(const char* filename)
+    : _index(0)
+{
+    _fai=fai_load(filename);
+    _nchrom=faidx_fetch_nseq(_fai);
+}
+
+
+
+fasta_chrom_list::
+~fasta_chrom_list() {
+    fai_destroy(_fai);
+}
+
+
+
+const char*
+fasta_chrom_list::
+next() {
+    if(_index < _nchrom) {
+        return faidx_fetch_seqname(_fai,_index++);
+    } else {
+        return NULL;
+    }
 }

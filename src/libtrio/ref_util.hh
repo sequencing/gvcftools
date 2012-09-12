@@ -33,6 +33,10 @@
 
 #include "reference_contig_segment.hh"
 
+extern "C" {
+#include "faidx.h"
+}
+
 #include <string>
 
 
@@ -46,5 +50,23 @@ get_samtools_std_ref_segment(const char* ref_file,
                              const char* region,
                              reference_contig_segment& ref_seg,
                              unsigned& known_size);
+
+
+struct fasta_chrom_list {
+
+    explicit
+    fasta_chrom_list(const char* filename);
+
+    ~fasta_chrom_list();
+
+    // returns null when names are exhuasted:
+    const char* next();
+
+private:
+    int _index;
+    int _nchrom;
+    faidx_t* _fai;
+};
+
 
 #endif
