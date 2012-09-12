@@ -46,7 +46,6 @@ extern "C" {
 
 struct tabix_streamer {
 
-    // optionally provide a BAM header to validatr vcf chromosome names against
     //
     explicit
     tabix_streamer(const char* filename,
