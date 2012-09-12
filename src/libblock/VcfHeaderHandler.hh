@@ -50,6 +50,9 @@ struct VcfHeaderHandler {
         , _is_valid(true)
     {}
 
+    virtual
+    ~VcfHeaderHandler() {}
+
     bool
     process_line(const istream_line_splitter& vparse);
 
