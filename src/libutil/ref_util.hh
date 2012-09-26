@@ -40,6 +40,24 @@ extern "C" {
 #include <string>
 
 
+// specialized ref reader -- picks out many calls to individual positions:
+struct samtools_char_picker {
+    
+    samtools_char_picker(const char* ref_file)
+        : _fai(fai_load(ref_file))
+    {}
+
+    ~samtools_char_picker() { fai_destroy(_fai); }
+
+    char
+    get_char(const char* chrom,
+             const int pos);
+
+private:
+    faidx_t* _fai;
+};
+
+
 void
 get_samtools_ref_seq(const char* ref_file,
                      const char* region,

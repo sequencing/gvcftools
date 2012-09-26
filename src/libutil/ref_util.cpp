@@ -43,6 +43,24 @@ std::ostream& log_os(std::cerr);
 
 
 
+char
+samtools_char_picker::
+get_char(const char* chrom,
+         const int pos) {
+
+    int len; // throwaway...
+    char* ref_tmp(faidx_fetch_seq(_fai,(char*)chrom,pos-1,pos-1, &len));
+    if (NULL == ref_tmp) {
+        log_os << "ERROR: Can't find sequence region '" << chrom << ':' << pos << '-' << pos << "' in reference file\n";
+        exit(EXIT_FAILURE);
+    }
+    const char retval(*ref_tmp);
+    free(ref_tmp);
+    return retval;
+}
+
+
+
 void
 get_samtools_ref_seq(const char* ref_file,
                      const char* region,

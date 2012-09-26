@@ -58,6 +58,8 @@ struct VcfRecord {
 
     const std::string& GetRef() const { return _ref; }
 
+    void SetRef(const char r) { _ref=r; }
+
     std::vector<std::string>& GetAlt() { return _alt; }
     const std::vector<std::string>& GetAlt() const { return _alt; }
 
