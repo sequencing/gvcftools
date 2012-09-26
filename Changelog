@@ -1,3 +1,4 @@
+- set_haploid_region: fix reference correction for divided blocks
 - added new break_blocks tool
 v0.8
 - gatk_to_gvcf: additional fixes to output based on vcf-validator feedback

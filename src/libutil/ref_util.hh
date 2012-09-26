@@ -51,7 +51,7 @@ struct samtools_char_picker {
 
     char
     get_char(const char* chrom,
-             const int pos);
+             const int pos) const ;
 
 private:
     faidx_t* _fai;

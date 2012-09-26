@@ -34,7 +34,7 @@
 #include "gvcftools.hh"
 #include "parse_util.hh"
 #include "ref_util.hh"
-#include "region_util.hh"
+#include "RegionVcfRecordHandler.hh"
 #include "stringer.hh"
 #include "VcfHeaderHandler.hh"
 #include "VcfRecord.hh"
@@ -55,139 +55,23 @@ std::ostream& log_os(std::cerr);
 std::string cmdline;
 
 
-struct BreakOptions {
-
-    BreakOptions()
-        : outfp(std::cout)
-    {}
-
-    std::ostream& outfp;
-    std::string ref_seq_file;
-    region_util::region_t regions;
-};
-
-
 
 // process each vcf record for haploid setting:
 //
-struct BreakVcfRecordHandler {
+struct BreakVcfRecordHandler : public RegionVcfRecordHandler {
 
-    BreakVcfRecordHandler(const BreakOptions& opt)
-        : _opt(opt)
-        , _scp(opt.ref_seq_file.c_str())
+    BreakVcfRecordHandler(const RegionVcfOptions& opt)
+        : RegionVcfRecordHandler(opt)
     {}
 
-    void
-    process_line(const istream_line_splitter& vparse) {
-        const unsigned nw(vparse.n_word());
-
-        if(nw != (VCFID::SAMPLE+1)) {
-            log_os << "ERROR: unexpected number of fields in vcf record:\n";
-            vparse.dump(log_os);
-            exit(EXIT_FAILURE);
-        }
-
-        // 1. check if record region is in a target region at all,
-        // if true an iterator provides begin,end ranges on
-        // successive calls for the record region.
-        //
-        if(! is_record_in_region(vparse)) {
-            vparse.write_line(_opt.outfp);
-            return;
-        }
-
-        VcfRecord vcfr(vparse);
-
-        bool is_deblock;
-        unsigned end;
-        while(get_next_record_region_interval(is_deblock,end)){
-            VcfRecord vcfr2(vcfr);
-            process_block(vcfr2,is_deblock,end);
-            vcfr.SetPos(end+1);
-            vcfr.SetRef(_scp.get_char(vcfr.GetChrom().c_str(),static_cast<int>(end+1)));
-        }
-        process_block(vcfr,is_deblock,end);
-   }
-
 private:
-    bool
-    is_record_in_region(const istream_line_splitter& vparse) {
-        // determine if chromosome is new:
-        if(_last_chrom.empty() || (0 != strcmp(_last_chrom.c_str(),vparse.word[0]))) {
-            _last_chrom=vparse.word[0];
-            const region_util::region_t::const_iterator i(_opt.regions.find(_last_chrom));
-            _is_skip_chrom=((i==_opt.regions.end()) || (i->second.empty()));
-
-            // setup region iterators:
-            if(! _is_skip_chrom) {
-                _rhead=i->second.begin();
-                _rend=i->second.end();
-            }
-        }
-
-        if(! _is_skip_chrom) {
-            // get start pos:
-            const char* posstr(vparse.word[1]);
-            _begin_pos=(parse_unsigned(posstr));
-
-            // get end pos:
-            static const char* endkey = "END=";
-            static const unsigned endsize = strlen(endkey);
-            const char* endstr(strstr(vparse.word[VCFID::INFO],"END="));
-            if(NULL==endstr) {
-                _end_pos = _begin_pos;
-            } else {
-                endstr+=endsize;
-                _end_pos=parse_unsigned(endstr);
-            }
-
-            while(_rhead != _rend) {
-                if(_begin_pos>_rhead->second) {
-                    _rhead++;
-                } else {
-                    return(_end_pos>_rhead->first);
-                }
-            }
-            _is_skip_chrom=true;
-        }
-        return false;
-    }
-
-    // if is_record_in_region is true, call this function to get intercepting intervals
-    // returns false when no more intervals exist
-    bool
-    get_next_record_region_interval(bool& is_in_region,
-                                    unsigned& end) {
-
-        assert(_begin_pos <= _end_pos);
-
-        if(_begin_pos > _rhead->second) _rhead++;
-        if(_rhead == _rend) { // no haploid regions left
-            is_in_region = false;
-            end = _end_pos;
-            return false;
-        }
-
-        // our next interval:
-        if(_begin_pos <= _rhead->first) {
-            end = std::min( _end_pos,_rhead->first);
-        } else {
-            end = std::min( _end_pos, _rhead->second);
-        }
-
-        // test for intercept:
-        is_in_region = ((_begin_pos <= _rhead->second) && (end > _rhead->first));
-        
-        _begin_pos = end+1;
-        return (_begin_pos<=_end_pos);
-    }
 
     void
-    process_block(VcfRecord& vcfr,
-                  const bool is_deblock,
-                  const unsigned end) {
+    process_block(const bool is_in_region,
+                  const unsigned end,
+                  VcfRecord& vcfr) const {
 
-        if(! is_deblock) {
+        if(! is_in_region) {
             if(end>vcfr.GetPos()) {
                 vcfr.SetInfoVal("END",_intstr.get32(end));
             } else {
@@ -206,23 +90,14 @@ private:
         }
     }
 
-    const BreakOptions& _opt;
-    std::string _last_chrom;
-    bool _is_skip_chrom; // true when pos is past all regions in current chrom
-    region_util::interval_group_t::const_iterator _rhead,_rend;
-
-    unsigned _begin_pos,_end_pos; // used to provide the region intercept iterator
-
-    std::vector<int> _gti; // cache gt parse
     stringer<int> _intstr; // fast int->str util
-
-    samtools_char_picker _scp;
 };
+
 
 
 static
 void
-process_vcf_input(const BreakOptions& opt,
+process_vcf_input(const RegionVcfOptions& opt,
                   std::istream& infp) {
 
     VcfHeaderHandler header(opt.outfp,gvcftools_version(),cmdline.c_str());
@@ -254,7 +129,7 @@ try_main(int argc,char* argv[]){
     }
 
     std::istream& infp(std::cin);
-    BreakOptions opt;
+    RegionVcfOptions opt;
     std::string region_file;
 
     namespace po = boost::program_options;
@@ -294,7 +169,7 @@ try_main(int argc,char* argv[]){
     }
 
     if(opt.ref_seq_file.empty()) {
-        log_os << "ERROR: no region file specified\n";
+        log_os << "ERROR: no reference file specified\n";
         exit(EXIT_FAILURE);
     }
 

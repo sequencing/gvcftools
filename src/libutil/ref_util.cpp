@@ -46,7 +46,7 @@ std::ostream& log_os(std::cerr);
 char
 samtools_char_picker::
 get_char(const char* chrom,
-         const int pos) {
+         const int pos) const {
 
     int len; // throwaway...
     char* ref_tmp(faidx_fetch_seq(_fai,(char*)chrom,pos-1,pos-1, &len));
