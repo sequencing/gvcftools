@@ -1,3 +1,6 @@
+- added new break_blocks tool
+v0.8
+- gatk_to_gvcf: additional fixes to output based on vcf-validator feedback
 - add new set_haploid_region tool
 v0.7
 - gatk_to_gvcf: Fix invalid vcf header

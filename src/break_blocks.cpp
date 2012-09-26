@@ -81,7 +81,7 @@ struct BreakVcfRecordHandler {
     process_line(const istream_line_splitter& vparse) {
         const unsigned nw(vparse.n_word());
 
-        if(nw+1 != VCFID::SAMPLE) {
+        if(nw != (VCFID::SAMPLE+1)) {
             log_os << "ERROR: unexpected number of fields in vcf record:\n";
             vparse.dump(log_os);
             exit(EXIT_FAILURE);
