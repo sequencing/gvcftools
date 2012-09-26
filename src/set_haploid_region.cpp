@@ -165,6 +165,7 @@ private:
 };
 
 
+
 static
 void
 process_vcf_input(const SetHapOptions& opt,
@@ -177,20 +178,9 @@ process_vcf_input(const SetHapOptions& opt,
 
     while(vparse.parse_line()) {
         if(header.process_line(vparse)) continue;
-
-        if(vparse.n_word() > VCFID::SIZE) {
-            std::ostringstream oss;
-            oss << "Unexpected format in vcf record:\n";
-            vparse.dump(oss);
-            throw new blt_exception(oss.str().c_str());
-        }
-
         rec.process_line(vparse);
     }
 }
-
-
-
 
 
 
