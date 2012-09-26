@@ -40,7 +40,7 @@ boost: $(BOOST_ID)
 	cd $(CURDIR) && ln -sf $(BOOST_ID) boost
 
 tabix: $(TABIX_ID)
-	$(MAKE) -C $(TABIX_ID)
+	$(MAKE) -C $(TABIX_ID) && \
 	ln -sf $(TABIX_ID) tabix
 
 clean:
