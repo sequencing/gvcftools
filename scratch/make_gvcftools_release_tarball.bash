@@ -31,7 +31,8 @@ thisdir=$(dirname $0)
 outdir=$(pwd)
 
 cd $thisdir
-gitversion=$(git describe)
+gitversion=$(git describe | sed s/^v//)
+
 
 if [ "$pname_root" == "" ]; then
     pname_root=gvcftools-$gitversion
