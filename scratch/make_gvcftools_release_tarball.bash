@@ -34,7 +34,7 @@ cd $thisdir
 gitversion=$(git describe)
 
 if [ "$pname_root" == "" ]; then
-    pname_root=gvcftools_$gitversion
+    pname_root=gvcftools-$gitversion
 fi
 
 pname=$outdir/$pname_root
@@ -42,11 +42,10 @@ pname=$outdir/$pname_root
 mkdir -p $pname
 
 cd ..
-make clean
-for f in *; do
-    if [ $f == "scratch" ]; then continue; fi
-    cp -r $f $pname
-done
+git archive --prefix=$pname_root/ HEAD | tar -x -C $outdir 
+
+# don't include scratch
+rm -rf $pname/scratch
 
 # make version number substitutions:
 gh=src/gvcftools.hh
@@ -62,6 +61,6 @@ for f in src/Makefile; do
 done
 
 cd $outdir
-tar -cz $pname_root -f $pname.tgz
+tar -cz $pname_root -f $pname.tar.gz
 rm -rf $pname 
 
