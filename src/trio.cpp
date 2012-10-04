@@ -148,9 +148,9 @@ processSite(const site_crawler* sa,
 
         if(sa[st].is_pos_valid() && (sa[st].pos==low_pos) && sa[st].is_call){
             ss.sample_called[st]++;
-            if(! ((ref_base==sa[st].allele.first) && (ref_base==sa[st].allele.second))){
+            if(! ((ref_base==sa[st].allele[0]) && (ref_base==sa[st].allele[1]))){
                 ss.sample_snp[st]++;
-                if(sa[st].allele.first != sa[st].allele.second){
+                if(sa[st].allele[0] != sa[st].allele[1]){
                     ss.sample_snp_het[st]++;
                 }
             }
@@ -173,12 +173,12 @@ processSite(const site_crawler* sa,
         ss.all_called++;
     }
 
-    const char c1(sa[CHILD].allele.first);
-    const char c2(sa[CHILD].allele.second);
-    const char f1(sa[FATHER].allele.first);
-    const char f2(sa[FATHER].allele.second);
-    const char m1(sa[MOTHER].allele.first);
-    const char m2(sa[MOTHER].allele.second);
+    const char c1(sa[CHILD].allele[0]);
+    const char c2(sa[CHILD].allele[1]);
+    const char f1(sa[FATHER].allele[0]);
+    const char f2(sa[FATHER].allele[1]);
+    const char m1(sa[MOTHER].allele[0]);
+    const char m2(sa[MOTHER].allele[1]);
 
     const bool isc1f((c1==f1) || (c1==f2));
     const bool isc1m((c1==m1) || (c1==m2));
@@ -499,7 +499,7 @@ try_main(int argc,char* argv[]){
     sp.is_min_pos_rank_sum=(vm.count("min-pos-rank-sum"));
 
     // setup snp_mode (artifact of former ability to choose style:
-    snp_type_info_vcf stiv(sp);
+    snp_type_info stiv(sp);
     opt.stip=&stiv;
 
 #if 0

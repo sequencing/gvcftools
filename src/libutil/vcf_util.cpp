@@ -44,12 +44,13 @@ struct gt_parse_helper {
     static
     bool
     start(const char* gt,
-          std::vector<int>& gti) {
+          std::vector<int>& gti,
+          const bool is_badend) {
         gti.clear();
-        if(isdigit(*gt)) return digit(gt,gti);
+        if(isdigit(*gt)) return digit(gt,gti,is_badend);
         
         switch(*gt) {
-        case '.' :  return unknown(gt,gti);
+        case '.' :  return unknown(gt,gti,is_badend);
         default: return false;
         }
     }
@@ -59,25 +60,27 @@ private:
     static
     bool
     unknown(const char* gt,
-            std::vector<int>& gti) {
+            std::vector<int>& gti,
+            const bool is_badend) {
         gt++;
         gti.push_back(-1);
         switch(*gt) {
         case '\0' : return true;
         case '|' :
-        case '/' : return sep(gt,gti);
-        default : return false;
+        case '/' : return sep(gt,gti,is_badend);
+        default : return is_badend;
         }
     }
 
     static
     bool
     sep(const char* gt,
-        std::vector<int>& gti) {
+        std::vector<int>& gti,
+        const bool is_badend) {
         gt++;
-        if(isdigit(*gt)) return digit(gt,gti);
+        if(isdigit(*gt)) return digit(gt,gti,is_badend);
         switch(*gt) {
-        case '.' : return unknown(gt,gti);
+        case '.' : return unknown(gt,gti,is_badend);
         default : return false;
         }
     }
@@ -85,7 +88,8 @@ private:
     static
     bool
     digit(const char* gt,
-          std::vector<int>& gti) {
+          std::vector<int>& gti,
+          const bool is_badend) {
         int val(0);
         while(isdigit(*gt)) {
             val = val*10 + static_cast<int>(*gt-'0');
@@ -96,8 +100,8 @@ private:
         switch(*gt) {
         case '\0' : return true;
         case '|' :
-        case '/' : return sep(gt,gti);
-        default : return false;
+        case '/' : return sep(gt,gti,is_badend);
+        default : return is_badend;
         }
     }
 };
@@ -107,9 +111,10 @@ private:
 
 void
 parse_gt(const char* gt,
-         std::vector<int>& gti) {
+         std::vector<int>& gti,
+         const bool is_allow_bad_end_char) {
 
-    if(! gt_parse_helper::start(gt,gti)) {
+    if(! gt_parse_helper::start(gt,gti,is_allow_bad_end_char)) {
         std::ostringstream oss;
         oss << "ERROR: can't parse genotype string: '" << gt << "'\n";
         throw blt_exception(oss.str().c_str());

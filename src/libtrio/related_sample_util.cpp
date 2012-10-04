@@ -32,6 +32,7 @@
 
 #include "related_sample_util.hh"
 #include "tabix_streamer.hh"
+#include "vcf_util.hh"
 
 #include <cctype>
 #include <cerrno>
@@ -64,44 +65,11 @@ get_format_key_index(const char* format,
 }
 
 
-bool
-snp_type_info_vcf::
-get_allele(std::pair<char,char>& allele,
-           const char * const * word,
-           const unsigned offset,
-           const char ref_base) const {
 
-    // get the genotype code numbers:
-    unsigned gtcode[2];
-    if(! get_digt_code(word,gtcode)) { return false; }
-
-    // in this case, pull result form reference sequence:
-    if((gtcode[0] == 0) && (gtcode[1] == 0)) {
-        allele = std::make_pair(ref_base,ref_base);
-        return true;
-    }
-
-    const char ref(word[VCFID::REF][offset]);
-    char altbase[2] = {ref,ref};
-    for(unsigned i(0);i<2;++i) {
-        if(gtcode[i]==0) continue;
-        const char* alt(word[VCFID::ALT]);
-        for(unsigned ai(0);(ai+1)<gtcode[i];alt++) {
-            if(! *alt) return false;
-            if((*alt)==',') ai++;
-        }
-        altbase[i]=alt[offset];
-    }
-    allele = std::make_pair(altbase[0],altbase[1]);
-    return true;
-}
-
-
-
-char*
-snp_type_info_vcf::
-get_format_string(const char* const * word,
-                  const char* key) {
+static
+const char*
+get_format_string_nocopy(const char* const * word,
+                         const char* key) {
 
     unsigned keynum(0);
     if(! get_format_key_index(word[VCFID::FORMAT],key,keynum)) return NULL;
@@ -111,41 +79,68 @@ get_format_string(const char* const * word,
         if(! *sample) return NULL;
         if((*sample)==':') keynum--;
     }
+    return sample;
+}
+
+
+
+static
+const char*
+get_format_string(const char* const * word,
+                  const char* key) {
+
+    const char* str(get_format_string_nocopy(word,key));
+    if(NULL==str) return NULL;
     unsigned len(0);
-    while(sample[len]!='\0' && (sample[len]!=':')) {
+    while(str[len]!='\0' && (str[len]!=':')) {
         len++;
     }
-    return strndup(sample,len);
+    return strndup(str,len);
+}
+
+
+
+static
+bool
+get_digt_code(const char * const * word,
+              std::vector<int>& digt_code) {
+
+    parse_gt(get_format_string_nocopy(word,"GT"),digt_code,true);
+    return (digt_code.size()==2 && digt_code[0]>=0 && digt_code[1]>=0);
 }
 
 
 
 bool
-snp_type_info_vcf::
-get_digt_code(const char * const * word,
-              unsigned digt_code[2]) {
+snp_type_info::
+get_allele(char allele[2],
+           const char * const * word,
+           const unsigned offset,
+           const char ref_base) const {
 
     // get the genotype code numbers:
+    if(! get_digt_code(word,_gtcode)) { return false; }
+
     for(unsigned i(0);i<2;++i) {
-        digt_code[i] = 0;
+        if(_gtcode[i]==0) {
+            allele[i] = ref_base;
+            continue;
+        }
+        const char* alt(word[VCFID::ALT]);
+        for(int ai(0);(ai+1)<_gtcode[i];alt++) {
+            if(! *alt) return false;
+            if((*alt)==',') ai++;
+        }
+        allele[i]=alt[offset];
     }
-
-    char* gtword=get_format_string(word,"GT");
-    if(NULL==gtword) return false;
-
-    int ret = sscanf(gtword,"%i/%i",&digt_code[0],&digt_code[1]);
-    if(2!=ret) {
-        ret = sscanf(gtword,"%i|%i",&digt_code[0],&digt_code[1]);
-    }
-    free(gtword);
-    return (2==ret);
+    return true;
 }
 
 
 
 // extract unsigned value for key from the vcf info field
 bool
-snp_type_info_vcf::
+snp_type_info::
 get_info_unsigned(const char* info,
                   const char* key,
                   unsigned& val) {
@@ -166,7 +161,7 @@ get_info_unsigned(const char* info,
 
 // extract float value for key from the vcf info field
 bool
-snp_type_info_vcf::
+snp_type_info::
 get_info_float(const char* info,
                const char* key,
                float& val) {
@@ -186,20 +181,27 @@ get_info_float(const char* info,
 
 
 bool
-snp_type_info_vcf::
+snp_type_info::
 get_format_float(const char* const * word,
                  const char* key,
                  float& val) {
 
-    unsigned keynum(0);
-    if(! get_format_key_index(word[VCFID::FORMAT],key,keynum)) return false;
+    const char* str(get_format_string_nocopy(word,key));
+    if(NULL==str) return false;
+    val=parse_double(str);
+    return true; 
+}
 
-    const char* sample(word[VCFID::SAMPLE]);
-    for(;keynum;sample++) {
-        if(! *sample) return false;
-        if((*sample)==':') keynum--;
-    }
-    val=parse_double(sample);
+
+bool
+snp_type_info::
+get_format_unsigned(const char* const * word,
+                    const char* key,
+                    unsigned& val) {
+
+    const char* str(get_format_string_nocopy(word,key));
+    if(NULL==str) return false;
+    val=parse_unsigned(str);
     return true; 
 }
 
@@ -350,8 +352,6 @@ process_record_line(char* line) {
             //log_os << "ERROR: Failed to read site genotype from record:\n";
             //dump_state(log_os);
             //exit(EXIT_FAILURE);
-        } else {
-            strcpy(score,_opt.sti().score(_word));
         }
     }
 

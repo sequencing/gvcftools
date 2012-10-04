@@ -1,3 +1,4 @@
+- trio/twins: cut runtime by ~70% for baseline case
 - set_haploid_region: fix reference correction for divided blocks
 - added new break_blocks tool
 v0.8

@@ -56,7 +56,8 @@ namespace VCFID {
 // returns -1 for '.' alleles
 void
 parse_gt(const char* gt,
-         std::vector<int>& gti);
+         std::vector<int>& gti,
+         const bool is_allow_bad_end_char=false);
 
 
 #endif

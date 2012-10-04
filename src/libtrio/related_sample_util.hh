@@ -119,92 +119,18 @@ struct snp_param {
 
 struct snp_type_info {
 
-    snp_type_info(const snp_param& sp,
-                  const unsigned ccol,
-                  const unsigned pcol) 
+    snp_type_info(const snp_param& sp)
         : _sp(sp)
-        , _chromcol(ccol)
-        , _poscol(pcol)
+        , _chromcol(0)
+        , _poscol(1)
     {}
 
-    virtual
-    ~snp_type_info() {}
-
-    virtual
     bool
     get_is_call(char** word,
                 const pos_t pos,
                 const bool is_indel,
                 pos_t& skip_call_begin_pos,
-                pos_t& skip_call_end_pos) const = 0;
-
-    virtual
-    bool
-    get_allele(std::pair<char,char>& allele,
-               const char * const * word,
-               const unsigned offset,
-               const char ref_base) const = 0;
-
-    virtual
-    const char*
-    score(const char * const * word) const = 0;
-
-    virtual
-    unsigned
-    total(const char * const * word) const = 0;
-
-    virtual
-    unsigned
-    col_count() const = 0; // total number of columns expected in a data line
-
-    const char*
-    chrom(const char* const * word) const {
-        return word[_chromcol];
-    }
-
-    pos_t
-    pos(const char* const * word) const {
-        const char* s(word[_poscol]);
-        return parse_type<pos_t>(s);
-    }
-
-
-    // Size of the site or multisite locus in reference bases. This has been 
-    // assumed to be 1 until vcf support was added. On indel records this
-    // returns 0.
-    virtual
-    bool
-    get_nonindel_ref_length(const pos_t /*pos**/, const bool /*is_indel*/, const char * const * /*word*/,unsigned& result) const {
-        result=1;
-        return true;
-    }
-   
-    virtual
-    bool
-    get_is_indel(const char * const * word) const = 0; 
-
-protected:
-    const snp_param& _sp;
-
-private:
-    const unsigned _chromcol;
-    const unsigned _poscol;
-};
-
-
-
-struct snp_type_info_vcf : public snp_type_info {
-
-    snp_type_info_vcf(const snp_param& sp) 
-        : snp_type_info(sp,0,1)
-    {}
-
-    bool
-    get_is_call(char** word,
-                const pos_t pos,
-                const bool is_indel,
-		pos_t& skip_call_begin_pos,
-		pos_t& skip_call_end_pos) const {
+                pos_t& skip_call_end_pos) const { 
 
         update_skip_call_range(word,pos,is_indel,skip_call_begin_pos,skip_call_end_pos);
         bool is_bad_call(is_indel || (0!=strcmp(word[VCFID::FILT],"PASS")));
@@ -245,34 +171,38 @@ struct snp_type_info_vcf : public snp_type_info {
     }
   
 
+
+
     bool
-    get_allele(std::pair<char,char>& allele,
+    get_allele(char allele[2],
                const char * const * word,
                const unsigned offset,
                const char ref_base) const;
 
-    const char*
-    score(const char * const * /*word*/) const {
-        return "0";
-    }
-
     unsigned
     total(const char * const * word) const {
-        float dp;
-        if(! get_format_float(word,"DP",dp)) return 0;
-        return static_cast<unsigned>(dp);
+        unsigned dp;
+        if(! get_format_unsigned(word,"DP",dp)) return 0;
+        return dp;
     }
 
     unsigned
-    col_count() const { // total number of columns expected in a data line
-        return 10;
+    col_count() const { return 10; }
+
+    const char*
+    chrom(const char* const * word) const {
+        return word[_chromcol];
     }
 
-    // Size of the site or multisite locus in reference bases. This has been 
-    // assumed to be 1 until vcf support was added. On indel records this
-    // returns 0.
+    pos_t
+    pos(const char* const * word) const {
+        const char* s(word[_poscol]);
+        return parse_type<pos_t>(s);
+    }
 
-    // returns false on error
+
+    // Size of the site or multisite locus in reference bases.
+    // returns false on error 
     bool
     get_nonindel_ref_length(const pos_t pos, const bool is_indel, const char * const * word, unsigned& result) const { 
         result=0;
@@ -311,18 +241,8 @@ struct snp_type_info_vcf : public snp_type_info {
         return (strlen(alt)!=reflen);
     }
 
+
 private:
-    static
-    char*
-    get_format_string(const char* const * word, 
-                      const char* key);
-
-    static
-    bool
-    get_digt_code(const char * const * word,
-                  unsigned digt_code[2]);
-
-
     static
     bool
     get_info_float(const char* info,
@@ -341,6 +261,12 @@ private:
                      const char* key,
                      float& val);
 
+    static
+    bool
+    get_format_unsigned(const char* const * word, 
+                        const char* key,
+                        unsigned& val);
+
     // Size of the locus in reference bases. This has been assumed to
     // be 1 until vcf support was added.
     unsigned
@@ -348,7 +274,6 @@ private:
         return strlen(word[VCFID::REF]);
     }
 
-    
     // if the current locus is an indel, mark out its range as no-call:
     //
     void
@@ -368,8 +293,18 @@ private:
         }
         skip_call_end_pos=std::max(skip_call_end_pos,indel_end_pos);
     }
-};
 
+
+// data:
+    
+    const snp_param& _sp;
+
+    const unsigned _chromcol;
+    const unsigned _poscol;
+
+    // cache this to avoid malloc cost:
+    mutable std::vector<int> _gtcode;
+};
 
 
 
@@ -377,6 +312,7 @@ private:
 struct sample_info {
     std::string file;
 };
+
 
 
 struct shared_crawler_options {
@@ -430,14 +366,9 @@ struct site_crawler {
         return _chrom;
     }
 
-    enum {
-        buff_size = 5000
-    };
-
     pos_t pos;
     bool is_call;
-    std::pair<char,char> allele;
-    char score[buff_size];
+    char allele[2];
     unsigned n_total;
 
 private:

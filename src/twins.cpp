@@ -132,9 +132,9 @@ processSite(const site_crawler* sa,
 
         if(sa[st].is_pos_valid() && (sa[st].pos==low_pos) && sa[st].is_call){
             ss.sample_called[st]++;
-            if(! ((ref_base==sa[st].allele.first) && (ref_base==sa[st].allele.second))){
+            if(! ((ref_base==sa[st].allele[0]) && (ref_base==sa[st].allele[1]))){
                 ss.sample_snp[st]++;
-                if(sa[st].allele.first != sa[st].allele.second){
+                if(sa[st].allele[0] != sa[st].allele[1]){
                     ss.sample_snp_het[st]++;
                 }
             }
@@ -157,10 +157,10 @@ processSite(const site_crawler* sa,
         ss.all_called++;
     }
 
-    const char t1_1(sa[TWIN1].allele.first);
-    const char t1_2(sa[TWIN1].allele.second);
-    const char t2_1(sa[TWIN2].allele.first);
-    const char t2_2(sa[TWIN2].allele.second);
+    const char t1_1(sa[TWIN1].allele[0]);
+    const char t1_2(sa[TWIN1].allele[1]);
+    const char t2_1(sa[TWIN2].allele[0]);
+    const char t2_2(sa[TWIN2].allele[1]);
 
     const bool is_correct(((t1_1==t2_1) && (t1_2==t2_2)) ||
                           ((t1_2==t2_1) && (t1_1==t2_2)));
@@ -393,7 +393,7 @@ try_main(int argc,char* argv[]){
     sp.is_min_pos_rank_sum=(vm.count("min-pos-rank-sum"));
 
     // setup snp_mode (artifact of former ability to choose style:
-    snp_type_info_vcf stiv(sp);
+    snp_type_info stiv(sp);
     opt.stip=&stiv;
 
 #if 0
