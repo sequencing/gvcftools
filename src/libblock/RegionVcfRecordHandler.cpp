@@ -92,7 +92,7 @@ RegionVcfRecordHandler::
 is_record_in_region(const istream_line_splitter& vparse) {
     // determine if chromosome is new:
     if(_last_chrom.empty() || (0 != strcmp(_last_chrom.c_str(),vparse.word[0]))) {
-        _last_chrom=vparse.word[0];
+        _last_chrom=vparse.word[VCFID::CHROM];
         const region_util::region_t::const_iterator i(_opt.regions.find(_last_chrom));
         _is_skip_chrom=((i==_opt.regions.end()) || (i->second.empty()));
         
@@ -105,7 +105,7 @@ is_record_in_region(const istream_line_splitter& vparse) {
     
     if(! _is_skip_chrom) {
         // get start pos:
-        const char* posstr(vparse.word[1]);
+        const char* posstr(vparse.word[VCFID::POS]);
         _begin_pos=(parse_unsigned(posstr));
         
         // get end pos:

@@ -51,40 +51,6 @@ std::ostream& log_os(std::cerr);
 
 
 static
-bool
-get_format_key_index(const char* format,
-                     const char* key,
-                     unsigned& index) {
-    index=0;
-    do {
-        if(index) format++;
-        if(0==strncmp(format,key,strlen(key))) return true;
-        index++;
-    } while(NULL != (format=strchr(format,':')));
-    return false;
-}
-
-
-
-static
-const char*
-get_format_string_nocopy(const char* const * word,
-                         const char* key) {
-
-    unsigned keynum(0);
-    if(! get_format_key_index(word[VCFID::FORMAT],key,keynum)) return NULL;
-
-    const char* sample(word[VCFID::SAMPLE]);
-    for(;keynum;sample++) {
-        if(! *sample) return NULL;
-        if((*sample)==':') keynum--;
-    }
-    return sample;
-}
-
-
-
-static
 const char*
 get_format_string(const char* const * word,
                   const char* key) {

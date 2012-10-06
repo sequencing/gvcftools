@@ -39,9 +39,12 @@
 
 
 struct VcfHeaderHandler {
+    /// version - version number to add add the end of the header (set to NULL to disable)
+    /// cmdline - cmdline to add add the end of the header (set to NULL to disable)
+    /// is_skip_header - if true, don't write out any header lines
     VcfHeaderHandler(std::ostream& os,
-                     const char* version,
-                     const char* cmdline,
+                     const char* version = NULL,
+                     const char* cmdline = NULL,
                      const bool is_skip_header = false)
         : _os(os)
         , _version(version)
