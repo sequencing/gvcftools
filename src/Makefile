@@ -28,7 +28,7 @@ LDLIBS = -lboost_program_options -ltabix_and_faidx -lz -lm
 
 PROGS = $(TRIOPROGS) $(BLOCKPROGS) 
 TRIOPROGS := trio twins
-BLOCKPROGS := break_blocks extract_variants gatk_to_gvcf set_haploid_region break_blocks
+BLOCKPROGS := break_blocks extract_variants gatk_to_gvcf set_haploid_region
 OBJS = $(PROGS:%=%.o)
 
 export LIBTRIO := libtrio.a
