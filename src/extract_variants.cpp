@@ -145,7 +145,7 @@ try_main(int argc,char* argv[]){
         ("help,h","print this message");
 
     po::options_description visible("options");
-    visible.add(help);
+    visible.add(req).add(help);
 
     bool po_parse_fail(false);
     po::variables_map vm;
@@ -157,7 +157,7 @@ try_main(int argc,char* argv[]){
         po_parse_fail=true;
     }
     
-    if ((argc<=1) || (vm.count("help")) || po_parse_fail) {
+    if ((vm.count("help")) || po_parse_fail) {
         log_os << "\n" << progname << " extracts variants from a VCF file\n\n"; 
         log_os << "version: " << gvcftools_version() << "\n\n";
         log_os << "usage: " << progname << " [options] < (g)VCF > variants_only_VCF\n\n"; 
