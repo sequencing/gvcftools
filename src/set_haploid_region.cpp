@@ -86,7 +86,7 @@ private:
         if(0 == strncmp(vparse.word[0],_haploid_filter_prefix.c_str(),_haploid_filter_prefix.size())) {
             _is_add_filter_tag=false;
         }
-        return true;
+        return false;
     }
 
     void
