@@ -131,13 +131,11 @@ std::ostream& operator<<(std::ostream& os,const FilterInfo& fi);
 //
 struct NonvariantBlockOptions {
     NonvariantBlockOptions()
-        : MaxNonrefFraction(.05)
-        , BlockFracTol(.3)
+        : BlockFracTol(.3)
         , BlockAbsTol(3)
         , BlockavgLabel("BLOCKAVG_min30p3a")
     {}
 
-    double MaxNonrefFraction;
     double BlockFracTol;
     int BlockAbsTol;
     std::string BlockavgLabel;
