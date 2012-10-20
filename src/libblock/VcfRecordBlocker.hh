@@ -95,7 +95,7 @@ private:
     bool
     IsSkipRecord(GatkVcfRecord& record) {
         // check to make sure this isn't a reference block record from GATK -- I believe these are created when
-        // an indel is evaluated but the reference allele is choosen, it would be nice to incorporate these
+        // an indel is evaluated but the reference allele is chosen, it would be nice to incorporate these
         // into the final gVCF but until there's a policy it's cleaner to filter such cases:
         if(record.IsNonvariantBlock()) return true;
 
