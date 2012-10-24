@@ -1,4 +1,6 @@
+v0.10
 - trio/twins: tolerate missing value '.' in GQX field
+- twins: fix chromosome iteration when no region is provided
 - fix header for shr tool
 - add simple variant extraction tool
 v0.9
