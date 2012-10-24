@@ -425,7 +425,7 @@ try_main(int argc,char* argv[]){
     if(opt.is_region()) {
         accumulate_region_statistics(si,opt,ref_seq_file,opt.region.c_str(),pr,ss);
     } else {
-        fasta_chrom_list fcl(si[TWIN1].file.c_str());
+        fasta_chrom_list fcl(ref_seq_file.c_str());
         while(true) {
             const char* chrom = fcl.next();
             if(NULL == chrom) break;
