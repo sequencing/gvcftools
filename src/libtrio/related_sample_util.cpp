@@ -154,6 +154,11 @@ get_format_float(const char* const * word,
 
     const char* str(get_format_string_nocopy(word,key));
     if(NULL==str) return false;
+    if('\0'==*str) return false;
+    if('.'==*str) {
+        if('\0'==*(str+1)) return false;
+        if(':'==*(str+1)) return false;
+    }
     val=parse_double(str);
     return true; 
 }
