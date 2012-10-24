@@ -1,3 +1,6 @@
+- trio/twins: tolerate missing value '.' in GQX field
+- fix header for shr tool
+- add simple variant extraction tool
 v0.9
 - trio/twins: cut runtime by ~70% for baseline case
 - set_haploid_region: fix reference correction for divided blocks
