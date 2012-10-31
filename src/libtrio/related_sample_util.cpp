@@ -49,7 +49,7 @@ std::ostream& log_os(std::cerr);
 }
 
 
-
+#if 0
 static
 const char*
 get_format_string(const char* const * word,
@@ -63,6 +63,7 @@ get_format_string(const char* const * word,
     }
     return strndup(str,len);
 }
+#endif
 
 
 
