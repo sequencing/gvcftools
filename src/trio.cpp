@@ -33,6 +33,7 @@
 #include "related_sample_util.hh"
 #include "ref_util.hh"
 #include "tabix_util.hh"
+#include "trio_option_util.hh"
 
 #include "boost/program_options.hpp"
 
@@ -432,6 +433,8 @@ try_main(int argc,char* argv[]){
     sample_info si[SAMPLE_SIZE];
     snp_param sp;
 
+    std::vector<info_filter> max_info_filters;
+
     namespace po = boost::program_options;
     po::options_description req("configuration");
     req.add_options()
@@ -456,7 +459,11 @@ try_main(int argc,char* argv[]){
     filter.add_options()
         ("min-gqx", po::value<double>(&sp.min_gqx), "If GQX value for a record is below this value, then don't use the locus. Note that if the filter field already contains a GQX filter, this will not 'rescue' filtered variants when min-gqx is set very low -- this filter can only lower callability on a file. Any records missing the GQX field will not be filtered out. (default: 0)")
         ("min-pos-rank-sum", po::value<double>(&sp.min_pos_rank_sum), "Filter site if the INFO field contains the key BaseQRankSum and the value is less than the minimum. (default: no-filter)")
-        ("min-qd", po::value<double>(&sp.min_qd), "Filter site if the INFO field contains the key QD and the value is less than the minimum. (default: no-filter)");
+        ("min-qd", po::value<double>(&sp.min_qd), "Filter site if the INFO field contains the key QD and the value is less than the minimum. (default: no-filter)")
+        ("min-info-field",po::value<std::vector<info_filter> >(&sp.infof)->multitoken(),
+         "Filter records which contain an INFO key equal to argument1, and a corresponding value less than argument2 ")
+        ("max-info-field",po::value<std::vector<info_filter> >(&max_info_filters)->multitoken(),
+         "Filter records which contain an INFO key equal to argument1, and a corresponding value greater than argument2 ");
 
 //    po::options_description cvcf("vcf mode");
 //   cvcf.add_options()
@@ -490,6 +497,14 @@ try_main(int argc,char* argv[]){
         log_os << visible << "\n";
 	log_os << "Note that calls inside of deletions will not be used\n";
         exit(EXIT_FAILURE);
+    }
+
+    // clean up filters:
+    {
+        for(unsigned i(0);i<max_info_filters.size();++i) {
+            max_info_filters[i].is_min=false;
+            sp.infof.push_back(max_info_filters[i]);
+        }
     }
 
     const bool is_variable_metadata(! vm.count("no-variable-metadata"));

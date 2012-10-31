@@ -36,6 +36,7 @@
 #include "parse_util.hh"
 #include "pos_type.hh"
 #include "reference_contig_segment.hh"
+#include "trio_option_util.hh"
 #include "vcf_util.hh"
 
 #include <cassert>
@@ -113,6 +114,8 @@ struct snp_param {
 
     bool is_min_qd;
     bool is_min_pos_rank_sum;
+
+    std::vector<info_filter> infof;
 };
 
 
@@ -167,6 +170,21 @@ struct snp_type_info {
                 if(pos_rank_sum<_sp.min_pos_rank_sum) return false;
             }
         }
+
+        // handle the custom info filters:
+        if(! _sp.infof.empty()) {
+            for(unsigned i(0);i<_sp.infof.size();++i) {
+                float record_val(0);
+                if(get_info_float(word[VCFID::INFO],_sp.infof[i].key.c_str(),record_val)) {
+                    if(_sp.infof[i].is_min) {
+                        if(record_val<_sp.infof[i].val) return false;
+                    } else {
+                        if(record_val>_sp.infof[i].val) return false;
+                    }
+                }
+            }
+        }
+
         return (pos<skip_call_begin_pos || pos>=skip_call_end_pos);
     }
   
