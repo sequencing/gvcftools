@@ -483,7 +483,8 @@ try_main(int argc,char* argv[]){
     bool po_parse_fail(false);
     po::variables_map vm;
     try {
-        po::store(po::parse_command_line(argc, argv, visible), vm);
+        po::store(po::parse_command_line(argc, argv, visible,
+                  po::command_line_style::unix_style ^ po::command_line_style::allow_short), vm);
         po::notify(vm);    
     } catch(const boost::program_options::error& e) { // todo:: find out what is the more specific exception class thrown by program options
         log_os << "\nERROR: Exception thrown by option parser: " << e.what() << "\n";
