@@ -44,7 +44,7 @@ struct VcfRecordBlocker {
 
     VcfRecordBlocker(const BlockerOptions& opt)
         : _opt(opt)
-        , _blockCvcfr(opt)
+        , _blockCvcfr(opt,_stats)
         , _is_highDepth(false)
         , _bufferStartPos(0)
         , _bufferEndPos(0)
@@ -52,11 +52,7 @@ struct VcfRecordBlocker {
     {}
 
     /// Process and print any remaining blocks
-    ~VcfRecordBlocker() {
-        ProcessRecordBuffer();
-        WriteBlockCvcfr();
-        _opt.outfp.flush();
-    }
+    ~VcfRecordBlocker();
 
     /// Submit next vcf record for printing or blocking
     ///
@@ -249,6 +245,8 @@ private:
     std::vector<int> _gti;
     //obj for fast int->str
     stringer<int> _intstr;
+
+    BlockerStats _stats;
 };
 
 

@@ -37,9 +37,9 @@
 
 //#define VDEBUG
 
-#ifdef VDEBUG 
+//#ifdef VDEBUG 
 #include <iostream>
-#endif
+//#endif
 
 
 
@@ -50,6 +50,16 @@ checked_double_parse(const char* s,
     if((NULL != s) && ('\0' != *s) && (0 != strcmp(s,"."))) return false;
     val=parse_double(s);
     return true;
+}
+
+
+
+VcfRecordBlocker::
+~VcfRecordBlocker() {
+    ProcessRecordBuffer();
+    WriteBlockCvcfr();
+    _opt.outfp.flush();
+    _stats.report(std::cerr);
 }
 
 

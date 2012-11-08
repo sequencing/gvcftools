@@ -33,6 +33,7 @@
 
 
 #include "BlockerOptions.hh"
+#include "BlockerStats.hh"
 #include "GatkVcfRecord.hh"
 #include "stream_stat.hh"
 #include "stringer.hh"
@@ -47,11 +48,13 @@
 ///
 struct BlockVcfRecord {
 
-    BlockVcfRecord(const BlockerOptions& opt)
+    BlockVcfRecord(const BlockerOptions& opt,
+                   BlockerStats& stats)
         : _opt(opt)
         , _fracTol(opt.nvopt.BlockFracTol.numval())
         , _absTol(opt.nvopt.BlockAbsTol)
         , _count(0)
+        , _stats(stats)
     {}
 
     ~BlockVcfRecord();
@@ -164,6 +167,8 @@ struct BlockVcfRecord {
             }
         }
 
+        _stats.addBlock(_count);
+
         _baseCvcfr->WriteUnaltered(os);
     }
 
@@ -241,6 +246,8 @@ private:
     const int _absTol;
     std::auto_ptr<GatkVcfRecord> _baseCvcfr;
     int _count;
+    BlockerStats _stats;
+
     stream_stat _blockGQX;
     stream_stat _blockDP;
     stream_stat _blockMQ;
