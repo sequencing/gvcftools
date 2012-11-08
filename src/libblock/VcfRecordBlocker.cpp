@@ -37,9 +37,8 @@
 
 //#define VDEBUG
 
-//#ifdef VDEBUG 
+#include <fstream>
 #include <iostream>
-//#endif
 
 
 
@@ -59,7 +58,17 @@ VcfRecordBlocker::
     ProcessRecordBuffer();
     WriteBlockCvcfr();
     _opt.outfp.flush();
-    _stats.report(std::cerr);
+
+    if(_opt.is_block_stats()) {
+        // We check that this file can be written to at the 
+        // beginning of the run. If there's an error here at
+        // the very end of the run, just power-through any
+        // errors and don't write the stats out.
+        std::ofstream ofs(_opt.block_stats_file.c_str());
+        if(! ofs) {
+            _stats.report(ofs);
+        }
+    }
 }
 
 

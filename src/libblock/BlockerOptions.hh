@@ -137,6 +137,11 @@ struct BlockerOptions {
         return (! ChromDepth.empty());
     }
 
+    bool
+    is_block_stats() const {
+        return (! block_stats_file.empty());
+    }
+
     enum filter_mode_t {
         FILTER_FULL,
         FILTER_NONE
@@ -157,6 +162,8 @@ struct BlockerOptions {
     std::vector<FilterInfo> filters;
 
     NonvariantBlockOptions nvopt;
+
+    std::string block_stats_file;
 };
 
 

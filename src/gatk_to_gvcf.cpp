@@ -182,7 +182,9 @@ try_main(int argc,char* argv[]){
         ("block-range-factor",po::value<print_double>(&opt.nvopt.BlockFracTol)->default_value(opt.nvopt.BlockFracTol),
          "Non-variant blocks are restricted to range [x,y], y <= max(x+3,x*(1+block-range-factor))")
         ("block-label",po::value<std::string>(&opt.nvopt.BlockavgLabel)->default_value(opt.nvopt.BlockavgLabel),
-         "VCF INFO key used to annotate compressed non-variant blocks");
+         "VCF INFO key used to annotate compressed non-variant blocks")
+        ("block-stats",po::value<std::string>(&opt.block_stats_file),
+         "Write non-variant block stats to the file");
 
     po::options_description help("help");
     help.add_options()
@@ -232,6 +234,13 @@ try_main(int argc,char* argv[]){
         parse_chrom_depth(chrom_depth_file,opt.ChromDepth);
     }
 
+    if(opt.is_block_stats()) {
+        std::ofstream ofs(opt.block_stats_file.c_str());
+        if(! ofs) {
+            log_os << "ERROR: can't write stats file: " << opt.block_stats_file << "\n";
+            exit(2);
+        }
+    }
     opt.finalize_filters();
 
     process_vcf_input(opt,infp);

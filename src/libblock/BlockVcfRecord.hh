@@ -167,7 +167,9 @@ struct BlockVcfRecord {
             }
         }
 
-        _stats.addBlock(_count,_blockGQX.stderror(),_blockDP.stderror(),_blockMQ.stderror());
+        if(_opt.is_block_stats()) {
+            _stats.addBlock(_count,_blockGQX.stderror(),_blockDP.stderror(),_blockMQ.stderror());
+        }
 
         _baseCvcfr->WriteUnaltered(os);
     }
