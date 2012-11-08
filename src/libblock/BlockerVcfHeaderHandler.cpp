@@ -97,7 +97,8 @@ process_final_header_line() {
     _os << "##INFO=<ID=END,Number=1,Type=Integer,Description=\"End position of the region described in this record\">\n";
     _os << "##INFO=<ID=" << _opt.nvopt.BlockavgLabel 
         << ",Number=0,Type=Flag,Description=\"Non-variant site block."
-        << " All sites in a block are constrained to be non-variant, have the same filter value, and have all sample values in range [x,y], y <= max(x+3,(x*1.3))."
+        << " All sites in a block are constrained to be non-variant, have the same filter value,"
+        << " and have all sample values in range [x,y] , y <= max(x+3,(x*" << 1+_opt.nvopt.BlockFracTol << "))."
         << " All printed site block sample values are the minimum observed in the region spanned by the block\">\n";
             
     // new format tags:

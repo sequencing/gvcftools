@@ -177,12 +177,19 @@ try_main(int argc,char* argv[]){
     filters.add_options()
         ("no-default-filters","Clear all default filters. Any individual filter threshold changes above will still be in effect");
 
+    po::options_description blocks("blocks");
+    blocks.add_options()
+        ("block-range-factor",po::value<double>(&opt.nvopt.BlockFracTol)->default_value(opt.nvopt.BlockFracTol),
+         "Non-variant blocks are restricted to range [x,y], y <= max(x+3,x*(1+block-range-factor))")
+        ("block-label",po::value<std::string>(&opt.nvopt.BlockavgLabel)->default_value(opt.nvopt.BlockavgLabel),
+         "VCF INFO key used to annotate compressed non-variant blocks");
+
     po::options_description help("help");
     help.add_options()
         ("help,h","print this message");
 
     po::options_description visible("options");
-    visible.add(filters).add(req).add(help);
+    visible.add(filters).add(req).add(blocks).add(help);
 
     bool po_parse_fail(false);
     po::variables_map vm;
@@ -193,17 +200,22 @@ try_main(int argc,char* argv[]){
         log_os << "\nERROR: Exception thrown by option parser: " << e.what() << "\n";
         po_parse_fail=true;
     }
-    
+
     //    if ((argc<=1) || (vm.count("help")) || po_parse_fail) {
     if ((vm.count("help")) || po_parse_fail) {
         log_os << "\n" << progname << " creates block-compressed gVCF from modified GATK all sites output\n\n"; 
         log_os << "version: " << gvcftools_version() << "\n\n";
         log_os << "usage: " << progname << " [options] < all_sites > gVCF\n\n"; 
         log_os << visible << "\n";
-        exit(EXIT_FAILURE);
+        exit(2);
     }
 
     opt.is_skip_header=vm.count("skip-header");
+
+    if(opt.nvopt.BlockFracTol < 0) {
+        log_os << "\nblock-range-factor must be >= 0\n\n";
+        exit(2);
+    }
 
     if(vm.count("no-default-filters")) {
         if(vm["min-gqx"].defaulted()) opt.min_gqx.clear();

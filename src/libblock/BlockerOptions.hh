@@ -176,7 +176,7 @@ struct BlockerOptions {
     std::auto_ptr<FilterInfo> GQX_filter; // has to be a special case for now...
     std::vector<FilterInfo> filters;
 
-    const NonvariantBlockOptions nvopt;
+    NonvariantBlockOptions nvopt;
 };
 
 
