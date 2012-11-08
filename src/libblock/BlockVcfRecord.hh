@@ -248,7 +248,7 @@ private:
     const int _absTol;
     std::auto_ptr<GatkVcfRecord> _baseCvcfr;
     int _count;
-    BlockerStats _stats;
+    BlockerStats& _stats;
 
     stream_stat _blockGQX;
     stream_stat _blockDP;
