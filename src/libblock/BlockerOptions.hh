@@ -32,33 +32,13 @@
 #define __BLOCKER_OPTIONS_HH
 
 
-#include "parse_util.hh"
+#include "print_double.hh"
 
 #include <iosfwd>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
-
-
-// double values with exact control of pretty print:
-//
-struct PrintDouble {
-    PrintDouble(const char* init)
-        : strval(init)
-        , numval(parse_double(init))
-    {}
-
-    void
-    update() {
-        numval=parse_double_str(strval);
-    }
-
-    std::string strval;
-    double numval;
-};
-
-std::ostream& operator<<(std::ostream& os,const PrintDouble& pd);
 
 
 namespace FILTERTYPE {
@@ -116,7 +96,7 @@ struct FilterInfo {
     FILTERTYPE::index_t filter_type;
     std::string label;
     std::string tag;
-    PrintDouble thresh;
+    print_double thresh;
     bool is_max_thresh; // filter is either a max or min allowed value
     bool is_sample_value; // if not sample value, then find the key in INFO for all samples
     bool is_filter_if_missing; // apply filter even if tag does not exist
@@ -131,12 +111,12 @@ std::ostream& operator<<(std::ostream& os,const FilterInfo& fi);
 //
 struct NonvariantBlockOptions {
     NonvariantBlockOptions()
-        : BlockFracTol(.3)
+        : BlockFracTol("0.3")
         , BlockAbsTol(3)
         , BlockavgLabel("BLOCKAVG_min30p3a")
     {}
 
-    double BlockFracTol;
+    print_double BlockFracTol;
     int BlockAbsTol;
     std::string BlockavgLabel;
 };
@@ -165,8 +145,8 @@ struct BlockerOptions {
     std::ostream& outfp;
     bool is_skip_header;
     std::string max_chrom_depth_filter_tag;
-    PrintDouble max_chrom_depth_filter_factor;
-    PrintDouble min_nonref_blockable;
+    print_double max_chrom_depth_filter_factor;
+    print_double min_nonref_blockable;
     std::string indel_conflict_label;
     std::string site_conflict_label;
     typedef std::map<std::string,double> cdmap_t;

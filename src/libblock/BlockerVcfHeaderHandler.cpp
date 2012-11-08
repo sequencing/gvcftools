@@ -47,7 +47,7 @@ print_filter_header(const FilterInfo& filter,
 
     os << "##FILTER=<ID=" << filter.label
        << ",Description=\"" << type << " " << filter.tag <<" is " << gl[filter.is_max_thresh]
-           << " than " << filter.thresh.strval;
+       << " than " << filter.thresh.strval();
     if(filter.is_filter_if_missing) {
         os << " or not present";
     }
@@ -98,7 +98,7 @@ process_final_header_line() {
     _os << "##INFO=<ID=" << _opt.nvopt.BlockavgLabel 
         << ",Number=0,Type=Flag,Description=\"Non-variant site block."
         << " All sites in a block are constrained to be non-variant, have the same filter value,"
-        << " and have all sample values in range [x,y] , y <= max(x+3,(x*" << 1+_opt.nvopt.BlockFracTol << "))."
+        << " and have all sample values in range [x,y] , y <= max(x+3,(x*(1+" << _opt.nvopt.BlockFracTol << ")))."
         << " All printed site block sample values are the minimum observed in the region spanned by the block\">\n";
             
     // new format tags:
@@ -114,12 +114,12 @@ process_final_header_line() {
     // special chrom-depth filter tag:
     if(_opt.is_chrom_depth()){
         _os << "##FILTER=<ID=" << _opt.max_chrom_depth_filter_tag
-            << ",Description=\"Site depth is greater than " << _opt.max_chrom_depth_filter_factor.strval
+            << ",Description=\"Site depth is greater than " << _opt.max_chrom_depth_filter_factor.strval()
             << "x the mean chromosome depth\">\n";
         BlockerOptions::cdmap_t::const_iterator i(_opt.ChromDepth.begin()), i_end(_opt.ChromDepth.end());
         for(;i!=i_end;++i) {
             const std::string& chrom(i->first);
-            const double chrom_thresh(i->second*_opt.max_chrom_depth_filter_factor.numval);
+            const double chrom_thresh(i->second*_opt.max_chrom_depth_filter_factor.numval());
             _os << "##" <<  _opt.max_chrom_depth_filter_tag << "_" << chrom << "=" <<  chrom_thresh << "\n";
         }
     }

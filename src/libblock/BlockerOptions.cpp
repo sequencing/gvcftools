@@ -36,15 +36,6 @@
 
 
 std::ostream&
-operator<<(std::ostream& os,const PrintDouble& pd){
-
-    os << pd.strval << " (" << pd.numval << ")";
-    return os;
-}
-
-
-
-std::ostream&
 operator<<(std::ostream& os,const FilterInfo& fi){
 
     os << "FilterInfo\n"
@@ -87,14 +78,7 @@ BlockerOptions()
 void
 BlockerOptions::
 finalize_filters() {
-    max_chrom_depth_filter_factor.update();
-    min_nonref_blockable.update();
-
     if(! min_gqx.empty()) GQX_filter.reset(new FilterInfo("min-gqx",FILTERTYPE::BOTH,"LowGQX","GQX",min_gqx.c_str(),false,true,true));
-
-    for(unsigned i(0);i<filters.size();++i) {
-        filters[i].thresh.update();
-    }
 }
 
 

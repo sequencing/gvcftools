@@ -225,7 +225,7 @@ private:
         const MaybeInt ad(record.GetSampleVal("AD"));
         if(ad.IsInt && info_dp.IsInt) {
             const double reffrac(static_cast<double>(ad.IntVal)/static_cast<double>(info_dp.IntVal));
-            if((reffrac+_opt.min_nonref_blockable.numval) <= 1.0) return false;
+            if((reffrac+_opt.min_nonref_blockable.numval()) <= 1.0) return false;
         }
 
         return true;

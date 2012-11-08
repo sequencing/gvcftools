@@ -78,7 +78,7 @@ GroomInputRecord(GatkVcfRecord& record) {
     // rather than actually in, the input vcf record:
     if(NULL != _opt.GQX_filter.get()) {
         const MaybeInt& gqx(record.GetGQX());
-        if ((!gqx.IsInt) || (gqx.DoubleVal < _opt.GQX_filter->thresh.numval)) {
+        if ((!gqx.IsInt) || (gqx.DoubleVal < _opt.GQX_filter->thresh.numval())) {
             record.AppendFilter(_opt.GQX_filter->label.c_str());
         }
     }
@@ -91,7 +91,7 @@ GroomInputRecord(GatkVcfRecord& record) {
             
             _is_highDepth=(0 != _opt.ChromDepth.count(thisChrom));
             if(_is_highDepth) {
-                _highDepth = _opt.ChromDepth.find(thisChrom)->second * _opt.max_chrom_depth_filter_factor.numval;
+                _highDepth = _opt.ChromDepth.find(thisChrom)->second * _opt.max_chrom_depth_filter_factor.numval();
             }
             _lastChrom = thisChrom;
         }
@@ -136,8 +136,8 @@ AddFilter(GatkVcfRecord& record,
             is_filter=true;
         }
     } else {
-        if ((filter.is_max_thresh && (val.DoubleVal > filter.thresh.numval)) ||
-            ((!filter.is_max_thresh) && (val.DoubleVal < filter.thresh.numval)))
+        if ((filter.is_max_thresh && (val.DoubleVal > filter.thresh.numval())) ||
+            ((!filter.is_max_thresh) && (val.DoubleVal < filter.thresh.numval())))
             is_filter=true;
     }
     if(is_filter) record.AppendFilter(filter.label.c_str());

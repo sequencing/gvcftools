@@ -49,7 +49,7 @@ struct BlockVcfRecord {
 
     BlockVcfRecord(const BlockerOptions& opt)
         : _opt(opt)
-        , _fracTol(opt.nvopt.BlockFracTol)
+        , _fracTol(opt.nvopt.BlockFracTol.numval())
         , _absTol(opt.nvopt.BlockAbsTol)
         , _count(0)
     {}
