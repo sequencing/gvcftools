@@ -65,7 +65,7 @@ VcfRecordBlocker::
         // the very end of the run, just power-through any
         // errors and don't write the stats out.
         std::ofstream ofs(_opt.block_stats_file.c_str());
-        if(! ofs) {
+        if(ofs) {
             _stats.report(ofs);
         }
     }
