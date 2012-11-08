@@ -43,15 +43,33 @@ struct BlockerStats {
     BlockerStats() {}
 
     void
-    addBlock(const unsigned size) {
+    addBlock(const unsigned size,
+             const double gqx_cov,
+             const double dp_cov,
+             const double mq_cov) {
+
         _block_size.add(size);
+
+        if(size < min_cov_block()) return;
+        _gqx_cov.add(gqx_cov);
+        _dp_cov.add(dp_cov);
+        _mq_cov.add(mq_cov);
     }
 
     void
     report(std::ostream& os) const;
 
+
+    static
+    unsigned
+    min_cov_block() { return 5; }
+
 private:
     stream_stat _block_size;
+
+    stream_stat _gqx_cov;
+    stream_stat _dp_cov;
+    stream_stat _mq_cov;
 };
 
 
