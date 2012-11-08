@@ -44,16 +44,15 @@ struct BlockerStats {
 
     void
     addBlock(const unsigned size,
-             const double gqx_cov,
-             const double dp_cov,
-             const double mq_cov) {
+             const stream_stat& gqx,
+             const stream_stat& dp,
+             const stream_stat& mq) {
 
         _block_size.add(size);
 
-        if(size < min_cov_block()) return;
-        _gqx_cov.add(gqx_cov);
-        _dp_cov.add(dp_cov);
-        _mq_cov.add(mq_cov);
+        if(gqx.size()>=min_block_count()) _gqx_cov.add(gqx.stderror());
+        if(dp.size()>=min_block_count()) _dp_cov.add(dp.stderror());
+        if(mq.size()>=min_block_count()) _mq_cov.add(mq.stderror());
     }
 
     void
@@ -61,8 +60,8 @@ struct BlockerStats {
 
 
     static
-    unsigned
-    min_cov_block() { return 5; }
+    int
+    min_block_count() { return 5; }
 
 private:
     stream_stat _block_size;

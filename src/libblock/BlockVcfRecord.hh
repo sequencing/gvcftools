@@ -165,10 +165,10 @@ struct BlockVcfRecord {
                 const std::string& label(_opt.nvopt.BlockavgLabel);
                 _baseCvcfr->AppendInfo(label.c_str());
             }
-        }
 
-        if(_opt.is_block_stats()) {
-            _stats.addBlock(_count,_blockGQX.stderror(),_blockDP.stderror(),_blockMQ.stderror());
+            if(_opt.is_block_stats()) {
+                _stats.addBlock(_count,_blockGQX,_blockDP,_blockMQ);
+            }
         }
 
         _baseCvcfr->WriteUnaltered(os);
