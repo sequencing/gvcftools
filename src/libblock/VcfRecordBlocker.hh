@@ -58,6 +58,18 @@ struct VcfRecordBlocker {
     ///
     void Append(GatkVcfRecord& record)
     {
+        // tack-on a handler for chromosome switch:
+        const std::string& thisChrom(record.GetChrom());
+        if ((_lastChrom.empty()) || (_lastChrom != thisChrom)) {
+            ProcessRecordBuffer();
+            WriteBlockCvcfr();
+            _bufferStartPos=0;
+            _bufferEndPos=0;
+            _lastNonindelPos=0;
+
+            _lastChrom=thisChrom;
+        }
+
         if(IsSkipRecord(record)) return;
 
         GroomInputRecord(record);
@@ -232,6 +244,7 @@ private:
     BlockVcfRecord _blockCvcfr;
 
     std::string _lastChrom;
+    std::string _lastDepthChrom;
     bool _is_highDepth;
     double _highDepth;
 

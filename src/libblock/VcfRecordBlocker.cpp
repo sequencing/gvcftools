@@ -106,13 +106,13 @@ GroomInputRecord(GatkVcfRecord& record) {
     if(_opt.is_chrom_depth()) {
         // filter for high depth:
         const std::string& thisChrom(record.GetChrom());
-        if ((_lastChrom.empty()) || (_lastChrom != thisChrom)) {
+        if ((_lastDepthChrom.empty()) || (_lastDepthChrom != thisChrom)) {
             
             _is_highDepth=(0 != _opt.ChromDepth.count(thisChrom));
             if(_is_highDepth) {
                 _highDepth = _opt.ChromDepth.find(thisChrom)->second * _opt.max_chrom_depth_filter_factor.numval();
             }
-            _lastChrom = thisChrom;
+            _lastDepthChrom = thisChrom;
         }
         
         if (_is_highDepth) {
