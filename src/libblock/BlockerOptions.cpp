@@ -60,6 +60,7 @@ BlockerOptions()
     , indel_conflict_label("IndelConflict")
     , site_conflict_label("SiteConflict")
     , min_gqx("20.0")
+    , is_skip_blocks(false)
 {
     // set default filters:
     filters.push_back(FilterInfo("min-mq",FILTERTYPE::SITE,"LowMQ","MQ","20.0",false));

@@ -218,6 +218,7 @@ private:
     /// and annotated sites
     bool
     IsVcfRecordBlockable(GatkVcfRecord& record) {
+        if (_opt.is_skip_blocks) return false;
         if (record.GetId() != ".") return false;
         if (record.IsVariant()) return false;
         if (record.GetRef().size() != 1) return false;

@@ -184,7 +184,8 @@ try_main(int argc,char* argv[]){
         ("block-label",po::value<std::string>(&opt.nvopt.BlockavgLabel)->default_value(opt.nvopt.BlockavgLabel),
          "VCF INFO key used to annotate compressed non-variant blocks")
         ("block-stats",po::value<std::string>(&opt.block_stats_file),
-         "Write non-variant block stats to the file");
+         "Write non-variant block stats to the file")
+        ("no-block-compression","Turn off block compression");
 
     po::options_description help("help");
     help.add_options()
@@ -214,6 +215,7 @@ try_main(int argc,char* argv[]){
 
     opt.is_skip_header=vm.count("skip-header");
 
+
     if(opt.nvopt.BlockFracTol.numval() < 0) {
         log_os << "\nblock-range-factor must be >= 0\n\n";
         exit(2);
@@ -241,6 +243,9 @@ try_main(int argc,char* argv[]){
             exit(2);
         }
     }
+
+    opt.is_skip_blocks=vm.count("no-block-compression");
+ 
     opt.finalize_filters();
 
     process_vcf_input(opt,infp);

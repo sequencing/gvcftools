@@ -164,6 +164,7 @@ struct BlockerOptions {
     NonvariantBlockOptions nvopt;
 
     std::string block_stats_file;
+    bool is_skip_blocks;
 };
 
 
