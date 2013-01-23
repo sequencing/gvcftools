@@ -64,7 +64,7 @@ is_valid_seq(const char* seq){
     assert(NULL != seq);
 
     while(*seq !=  '\0'){
-        if(not is_valid_base(*seq)) return false;
+        if(! is_valid_base(*seq)) return false;
         seq++;
     }
     return true;
@@ -142,8 +142,8 @@ standardize_ref_seq(const char* ref_seq_file,
         const char old_ref(ref_seq[i]);
         char c(old_ref);
         if(islower(c)) c = toupper(c);
-        if(not is_valid_base(c)){
-            if(not is_iupac_base(c)) {
+        if(! is_valid_base(c)){
+            if(! is_iupac_base(c)) {
                 log_os << "ERROR:: Unexpected character in reference sequence.\n";
                 log_os << "\treference-sequence: " << ref_seq_file << "\n";
                 log_os << "\tcharacter: '" << old_ref << "'\n";
