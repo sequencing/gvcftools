@@ -72,7 +72,7 @@ process_vcf_input(const BlockerOptions& opt,
             std::ostringstream oss;
             oss << "Unexpected format in vcf record:\n";
             vparse.dump(oss);
-            throw new blt_exception(oss.str().c_str());
+            throw blt_exception(oss.str().c_str());
         }
 
         try {
