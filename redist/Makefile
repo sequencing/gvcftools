@@ -33,7 +33,7 @@ $(DIRS):
 boost: $(BOOST_ID)
 	cd $(BOOST_ID) && \
 	if ! test -f ./bjam; then \
-	  ./bootstrap.sh --with-libraries=program_options; \
+	  ./bootstrap.sh --with-libraries=program_options,test; \
 	fi && \
 	./bjam -a link=static && \
 	cd stage && rm -f include && ln -s .. include && \
