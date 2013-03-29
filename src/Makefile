@@ -7,15 +7,15 @@ REQS := BIN_DIR BOOST_ROOT TABIX_ROOT
 assert-defined-indirect = $(if $($1),,$(error Variable '$1' must be defined))
 $(foreach I,$(REQS), $(call assert-defined-indirect,$I))
 
-export BOOST_INCLUDE_DIR = $(BOOST_ROOT)/include
+BOOST_INCLUDE_DIR = $(BOOST_ROOT)/include
 BOOST_LIB_DIR = $(BOOST_ROOT)/lib
 
-export TABIX_INCLUDE_DIR = $(TABIX_ROOT)
+TABIX_INCLUDE_DIR = $(TABIX_ROOT)
 TABIX_LIB_DIR = $(TABIX_ROOT)
 
 # debug:
 #export XFLAGS= -g3 -fno-inline -O0 -Wall -Wextra
-export XFLAGS= -O3 -Wall -Wextra
+XFLAGS= -O3 -Wall -Wextra
 
 LIBTRIO_DIR = $(CURDIR)/libtrio
 LIBBLOCK_DIR = $(CURDIR)/libblock
@@ -24,9 +24,9 @@ export LIBUTIL_DIR = $(CURDIR)/libutil
 
 CC := $(CXX) # this gets the linker to include libc++
 
-CXXFLAGS = $(XFLAGS) -I$(LIBUTIL_DIR) -I$(BOOST_INCLUDE_DIR) -I$(TABIX_INCLUDE_DIR)
-LDFLAGS = -L$(BOOST_LIB_DIR) -L$(TABIX_LIB_DIR)
-LDLIBS = -lboost_program_options -ltabix_and_faidx -lz -lm
+export CXXFLAGS = $(XFLAGS) -I$(LIBUTIL_DIR) -I$(BOOST_INCLUDE_DIR) -I$(TABIX_INCLUDE_DIR)
+export LDFLAGS = -L$(BOOST_LIB_DIR) -L$(TABIX_LIB_DIR)
+export LDLIBS = -ltabix_and_faidx -lz -lm
 
 PROGS = $(TRIOPROGS) $(BLOCKPROGS) 
 TRIOPROGS := trio twins
@@ -41,6 +41,8 @@ export LIBUTIL := libutil.a
 LIBUTIL_PATH = $(LIBUTIL_DIR)/$(LIBUTIL)
 
 
+.PHONY: all build clean install test
+
 
 all: build
 
@@ -48,10 +50,12 @@ build: $(PROGS)
 
 
 $(TRIOPROGS): %: %.o $(LIBTRIO_PATH) $(LIBUTIL_PATH)
-$(TRIOPROGS): CXXFLAGS += -I$(LIBTRIO_DIR) 
+$(TRIOPROGS): CXXFLAGS += -I$(LIBUTIL_DIR) -I$(LIBTRIO_DIR) 
+$(TRIOPROGS): LDLIBS += -lboost_program_options
 
 $(BLOCKPROGS): %: %.o $(LIBBLOCK_PATH) $(LIBUTIL_PATH)
-$(BLOCKPROGS): CXXFLAGS += -I$(LIBBLOCK_DIR) 
+$(BLOCKPROGS): CXXFLAGS += -I$(LIBUTIL_DIR) -I$(LIBBLOCK_DIR) 
+$(BLOCKPROGS): LDLIBS += -lboost_program_options
 
 $(LIBTRIO_PATH):
 	$(MAKE) -C $(LIBTRIO_DIR) $(LIBTRIO)
@@ -66,6 +70,11 @@ include devel.mk
 
 install: build
 	cp $(PROGS) *.pl $(BIN_DIR)
+
+test:
+	$(MAKE) -C $(LIBUTIL_DIR) $@
+	#$(MAKE) -C $(LIBBLOCK_DIR) $@
+	#$(MAKE) -C $(LIBUTIL_DIR) $@
 
 clean:
 	$(MAKE) -C $(LIBTRIO_DIR) $@
