@@ -10,10 +10,10 @@ REDIST_DIR := $(CURDIR)/redist
 export TABIX_ROOT := $(REDIST_DIR)/tabix
 export BOOST_ROOT := $(REDIST_DIR)/boost/stage
 
-.PHONY: test
+.PHONY: all build clean install test
 
 
-all: install
+all: install test
 
 build:
 	$(MAKE) -C $(REDIST_DIR) && \
