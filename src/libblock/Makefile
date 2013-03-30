@@ -1,7 +1,7 @@
 #
 # IDS must be defined:
 #
-IDS := CXXFLAGS LIBBLOCK LIBUTIL_DIR
+IDS := CXXFLAGS LIBUTIL_DIR
 
 assert-defined-indirect = $(if $($1),,$(error Variable '$1' must be defined))
 $(foreach I,$(IDS), $(call assert-defined-indirect,$I))
@@ -9,11 +9,16 @@ $(foreach I,$(IDS), $(call assert-defined-indirect,$I))
 SRCS = $(wildcard *.cpp)
 OBJS = $(SRCS:%.cpp=%.o)
 
+LIBLABEL=$(notdir $(CURDIR))
+LIBNAME=$(LIBLABEL).a
+
 $(OBJS) : CXXFLAGS += -I$(LIBUTIL_DIR)
 
-$(LIBBLOCK): $(OBJS)
+$(LIBNAME): $(OBJS)
 	$(AR) -csru $@ $(OBJS)
 
+test:
+
 clean:
-	rm -f $(LIBBLOCK) $(OBJS)
+	rm -f $(LIBNAME) $(OBJS)
 

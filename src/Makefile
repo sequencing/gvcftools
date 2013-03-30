@@ -32,12 +32,9 @@ TRIOPROGS := trio twins
 BLOCKPROGS := break_blocks extract_variants gatk_to_gvcf set_haploid_region
 OBJS = $(PROGS:%=%.o)
 
-export LIBTRIO := libtrio.a
-LIBTRIO_PATH = $(LIBTRIO_DIR)/$(LIBTRIO)
-export LIBBLOCK := libblock.a
-LIBBLOCK_PATH = $(LIBBLOCK_DIR)/$(LIBBLOCK)
-export LIBUTIL := libutil.a
-LIBUTIL_PATH = $(LIBUTIL_DIR)/$(LIBUTIL)
+LIBTRIO_PATH = $(LIBTRIO_DIR)/libtrio.a
+LIBBLOCK_PATH = $(LIBBLOCK_DIR)/libblock.a
+LIBUTIL_PATH = $(LIBUTIL_DIR)/libutil.a
 
 
 .PHONY: all build clean install test
@@ -71,9 +68,9 @@ install: build
 	cp $(PROGS) *.pl $(BIN_DIR)
 
 test:
+	$(MAKE) -C $(LIBTRIO_DIR) $@
+	$(MAKE) -C $(LIBBLOCK_DIR) $@
 	$(MAKE) -C $(LIBUTIL_DIR) $@
-	#$(MAKE) -C $(LIBBLOCK_DIR) $@
-	#$(MAKE) -C $(LIBUTIL_DIR) $@
 
 clean:
 	$(MAKE) -C $(LIBTRIO_DIR) $@

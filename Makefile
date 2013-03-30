@@ -10,14 +10,16 @@ REDIST_DIR := $(CURDIR)/redist
 export TABIX_ROOT := $(REDIST_DIR)/tabix
 export BOOST_ROOT := $(REDIST_DIR)/boost/stage
 
-.PHONY: all build clean install test
+.PHONY: all build clean install redist test
 
 
 all: install test
 
-build:
-	$(MAKE) -C $(REDIST_DIR) && \
+build: redist
 	$(MAKE) -C $(SRC_DIR)
+
+redist:
+	$(MAKE) -C $(REDIST_DIR)
 
 install: build
 	mkdir -p $(BIN_DIR) && $(MAKE) -C $(SRC_DIR) $@ 
@@ -28,7 +30,7 @@ clean: srcclean
 
 ###### developer targets
 
-test:
+test: build
 	$(MAKE) -C $(SRC_DIR) $@
 
 # Cleans only src but leaves redist in place:
