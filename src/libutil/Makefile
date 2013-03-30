@@ -25,12 +25,9 @@ TEST_PROGRAM := $(LIBUTIL)_unittest
 test_execute: $(TEST_PROGRAM)
 	@echo Unit testing $(LIBUTIL)
 	@$(TEST_PROGRAM) --log_level=test_suite
-	#@$(TEST_PROGRAM) --log_level=all
 
-#$(TEST_PROGRAM): LDLIBS += -lboost_unit_test_framework
-
+$(TEST_PROGRAM): LDLIBS += -lboost_unit_test_framework
 $(TEST_PROGRAM): $(LIBUTIL) $(TEST_OBJS)
-	$(CXX) $(TEST_OBJS) $(LIBUTIL) -o $(TEST_PROGRAM) $(LDFLAGS) $(LDLIBS) -lboost_unit_test_framework
 
 $(TEST_OBJS): CXXFLAGS += -I$(CURDIR)
 
