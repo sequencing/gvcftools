@@ -41,24 +41,14 @@ if(! defined($samtoolsBin)) {
 }
 
 if(scalar(@ARGV)!=1) {
-  print STDERR <<ENDE;
-
-Create a simple estimate of mean depth for each chromosome given a WGS BAM file as input.
-
-Usage: $0 bamfile > depth.txt
-
-The file created by this script is designed to be used as input to the 'gatk_to_gvcf' tool.
-The script requires samtools to either be in your path, or defined in the environment variable
-'SAMTOOLS'. Note this method will not work on BAM files from exome or other targeted
-sequencing data.
-
-ENDE
-  exit 2;
+  die("usage: $0 bamfile");
 }
 
 my $bamfile=$ARGV[0];
 
 checkFile($bamfile,"bam");
+checkFile($bamfile.".bai","bam index");
+
 
 
 my $cmd1="$samtoolsBin idxstats $bamfile";
@@ -76,24 +66,37 @@ while(<$FP1>) {
 
 close($FP1);
 
+#my $cmd2="$samtoolsBin view -F 4 -s 0.1 $bamfile";
 
-my $example_chrom = $chroms[0];
-my $cmd2="$samtoolsBin view -F 4 -s 0.1 $bamfile $example_chrom";
-open(my $FP2,"$cmd2 |");
-
+# pass 0 is a subsampled approximation of read length,
+# if that fails, then pass 1 runs the exact computation
+#
 my $length = 0;
 my $count = 0;
-while(<$FP2>) {
-    my @F = split(/\t/,$_,7);
-    next unless($F[5] =~ /[0-9]+M/);
-    $length += $1 while($F[5] =~ /([0-9]+)M/g);
-    $count++;
-    last if($count >= 200000);
-}
-close($FP2);
+for my $pass ((0,1)) {
+    my $cmd2;
+    if($pass == 0) {
+        $cmd2="$samtoolsBin view -F 4 -s 0.1 $bamfile";
+    } else {
+        $cmd2="$samtoolsBin view -F 4 $bamfile";
+    }
 
-if($count <= 100000) {
-    die("Unexpected read length approximation results");
+    my $sid=open(my $FP2,"$cmd2 |");
+
+    $length = 0;
+    $count = 0;
+    while(<$FP2>) {
+        my @F = split(/\t/,$_,7);
+        next unless($F[5] =~ /[0-9]+M/);
+        $length += $1 while($F[5] =~ /([0-9]+)M/g);
+        $count++;
+        last if($count >= 200000);
+    }
+    kill('INT',$sid);
+    close($FP2);
+
+    last if($count > 100000);
+    logX("Poor read length approximation results. Count: '$count' Rerunning exact estimate"); # rerun pass 1 for exact read length
 }
 
 
