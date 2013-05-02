@@ -77,6 +77,10 @@ struct istream_line_splitter {
     enum { MAX_WORD_COUNT = 50 };
     char* word[MAX_WORD_COUNT];
 private:
+
+    void
+    increase_buffer_size();
+
     std::istream& _is;
     unsigned _line_no;
     unsigned _n_word;
