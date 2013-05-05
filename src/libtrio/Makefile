@@ -20,5 +20,5 @@ $(LIBNAME): $(OBJS)
 test:
 
 clean:
-	rm -f $(LIBTNAME) $(OBJS)
+	rm -f $(LIBNAME) $(OBJS)
 
