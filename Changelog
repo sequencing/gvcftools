@@ -1,3 +1,4 @@
+v0.13
 - change all tools to handle longer vcf input lines by modifying istream_splitter
 v0.12
 - gatk_to_gvcf: add option to turn off non-variant block compression
