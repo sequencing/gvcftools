@@ -29,8 +29,7 @@
 /// \author Chris Saunders
 ///
 
-#ifndef __RELATED_SAMPLE_UTIL_HH
-#define __RELATED_SAMPLE_UTIL_HH
+#pragma once
 
 #include "compat_util.hh"
 #include "parse_util.hh"
@@ -302,7 +301,7 @@ private:
 			   pos_t& skip_call_end_pos) const {
         const unsigned locus_size=get_ref_length(word);
         if(locus_size<=1) return;
-	if(! is_indel) return;
+        if(! is_indel) return;
         // follow CASAVA begin-end convention: 0-indexed and end goes 1 past range
         const pos_t indel_begin_pos(pos+1);
         const pos_t indel_end_pos(pos+locus_size);
@@ -396,7 +395,7 @@ private:
 
     const char* _chrom;
     const sample_info& _si;
-    const unsigned _sample_id; // only useed for debuging...
+    const unsigned _sample_id; // only used for debugging...
     const shared_crawler_options& _opt;
     const char* _chr_region;
 
@@ -437,4 +436,3 @@ private:
     const std::vector<std::string>& _sample_label;
 };
 
-#endif
