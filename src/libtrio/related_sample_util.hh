@@ -410,13 +410,15 @@ struct site_crawler {
 
     unsigned
     get_allele_size() const {
-        return allele.size();
+        if(! _is_allele_current) update_allele();
+        return _allele.size();
     }
 
     char
     get_allele(const unsigned index) const {
+        if(! _is_allele_current) update_allele();
         if(index>get_allele_size()) return 'N';
-        return allele[index];
+        return _allele[index];
     }
 
 
@@ -425,6 +427,9 @@ struct site_crawler {
     unsigned n_total;
 
 private:
+
+    bool
+    update_allele() const;
 
     bool
     process_record_line(char* line);
@@ -455,7 +460,8 @@ private:
     mutable pos_t _skip_call_begin_pos;
     mutable pos_t _skip_call_end_pos;
 
-    std::vector<char> allele;
+    mutable bool _is_allele_current;
+    mutable std::vector<char> _allele;
 };
 
 
