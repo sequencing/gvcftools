@@ -117,21 +117,35 @@ print_pos(const std::vector<boost::shared_ptr<site_crawler> >& sa,
 
     assert(genotypes.size() == n_samples);
 
-    std::ostringstream alt;
-    const unsigned n_alleles(alleles.size());
-    for(unsigned i(1);i<n_alleles;++i) {
-        if(i>1) alt << ",";
-        alt << alleles.get_key(i);
+
+
+    typedef id_set<std::string> fkey_t;
+    std::vector<std::string> words;
+
+    //
+    // merge all filters
+    //
+    static const char filter_delim(';');
+    fkey_t merged_filters;
+    for(unsigned st(0);st<n_samples;++st) {
+        const site_crawler& sample(*(sa[st]));
+        const char* filter(sample.word(VCFID::FILT));
+        if((0 != strcmp(filter,".")) && (0 != strcmp(filter,"PASS"))) {
+            split_string(filter,filter_delim,words);
+            BOOST_FOREACH(const std::string& w, words)
+            {
+                merged_filters.insert_key(w);
+            }
+        }
     }
 
     //
     // merge all format fields
     //
     static const char format_delim(':');
-    typedef id_set<std::string> fkey_t;
+
     fkey_t merged_keys;
     std::vector<fkey_t> sample_keys(n_samples);
-    std::vector<std::string> words;
 
     for(unsigned st(0);st<n_samples;++st) {
         const site_crawler& sample(*(sa[st]));
@@ -146,23 +160,50 @@ print_pos(const std::vector<boost::shared_ptr<site_crawler> >& sa,
         }
     }
 
-    // create merged format tag:
-    std::ostringstream format;
-    const unsigned n_keys(merged_keys.size());
-    for(unsigned i(0);i<n_keys;++i) {
-        if(i) format << format_delim;
-        format << merged_keys.get_key(i);
+    _os << sa[0]->chrom()     // CHROM
+        << '\t' << sa[0]->pos // POS
+        << '\t' << '.'        // ID
+        << '\t' << ref_base;  // REF
+
+    // ALT:
+    _os << '\t';
+    const unsigned n_alleles(alleles.size());
+    if(n_alleles>1) {
+        for(unsigned i(1);i<n_alleles;++i) {
+            if(i>1) _os << ",";
+            _os << alleles.get_key(i);
+        }
+    } else {
+        _os << '.';
     }
 
-    _os << sa[0]->chrom()
-        << '\t' << sa[0]->pos
-        << '\t' << '.' // ID
-        << '\t' << ref_base
-        << '\t' << alt.str()
-        << '\t' << '.' // QUAL
-        << '\t' << '.' // FILT
-        << '\t' << '.' // INFO
-        << '\t' << format.str(); // FORMAT
+    _os << '\t' << '.'; // QUAL
+
+    // FILT:
+    _os << '\t';
+    const unsigned n_filters(merged_filters.size());
+    if(n_filters) {
+        for(unsigned filter_index(0);filter_index<n_filters;++filter_index) {
+            if(filter_index) _os << filter_delim;
+            _os << merged_filters.get_key(filter_index);
+        }
+    } else {
+        _os << '.';
+    }
+
+    _os << '\t' << '.'; // INFO
+
+    // FORMAT:
+    _os << '\t';
+    const unsigned n_keys(merged_keys.size());
+    if(n_keys) {
+        for(unsigned i(0);i<n_keys;++i) {
+            if(i) _os << format_delim;
+            _os << merged_keys.get_key(i);
+        }
+    } else {
+        _os << '.';
+    }
 
     for(unsigned st(0);st<n_samples;++st) {
         const site_crawler& sample(*(sa[st]));
@@ -177,18 +218,22 @@ print_pos(const std::vector<boost::shared_ptr<site_crawler> >& sa,
 
         // print out values in merged order:
         _os << '\t';
-        for(unsigned key_index(0);key_index<n_keys;++key_index) {
-            if(key_index) _os << format_delim;
-            const std::string& key(merged_keys.get_key(key_index));
-            if(sample_key.test_key(key)) {
-                if(key == "GT") {
-                    _os << genotypes[st];
+        if(n_keys) {
+            for(unsigned key_index(0);key_index<n_keys;++key_index) {
+                if(key_index) _os << format_delim;
+                const std::string& key(merged_keys.get_key(key_index));
+                if(sample_key.test_key(key)) {
+                    if(key == "GT") {
+                        _os << genotypes[st];
+                    } else {
+                        _os << words[sample_key.get_id(key)];
+                    }
                 } else {
-                    _os << words[sample_key.get_id(key)];
+                    _os << '.';
                 }
-            } else {
-                _os << '.';
             }
+        } else {
+            _os << '.';
         }
     }
 
