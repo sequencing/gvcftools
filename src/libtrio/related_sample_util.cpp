@@ -192,7 +192,7 @@ site_crawler(const sample_info& si,
     : pos(0)
     , is_call(false)
     , _chrom(NULL)
-    , _sip(&si)
+    , _si(si)
     , _sample_id(sample_id)
     , _opt(opt)
     , _chr_region(chr_region)
@@ -224,7 +224,7 @@ site_crawler::
 void
 site_crawler::
 dump_state(std::ostream& os) const {
-    const std::string& afile(_sip->file);
+    const std::string& afile(_si.file);
     os << "SITE_CRAWLER STATE:\n";
     os << "\tchrom: " << chrom();
     os << "\tposition: " << pos << " offset: " << _locus_offset << "\n";
@@ -438,7 +438,7 @@ update(bool is_store_header){
                 _is_sample_end_state = true;
                 return;
             }
-            const std::string& afile(_sip->file);
+            const std::string& afile(_si.file);
             _tabs=new tabix_streamer(afile.c_str(),_chr_region);
             if(! _tabs) {
                 log_os << "ERROR:: Can't open gvcf file: " << afile << "\n";
