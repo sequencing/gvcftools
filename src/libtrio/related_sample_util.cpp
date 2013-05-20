@@ -31,8 +31,11 @@
 
 
 #include "related_sample_util.hh"
+#include "string_util.hh"
 #include "tabix_streamer.hh"
 #include "vcf_util.hh"
+
+#include <boost/algorithm/string/predicate.hpp>
 
 #include <cctype>
 #include <cerrno>
@@ -184,11 +187,12 @@ site_crawler(const sample_info& si,
              const unsigned sample_id,
              const shared_crawler_options& opt,
              const char* chr_region,
-             const reference_contig_segment& ref_seg)
+             const reference_contig_segment& ref_seg,
+             const bool is_store_header)
     : pos(0)
     , is_call(false)
     , _chrom(NULL)
-    , _si(si)
+    , _sip(&si)
     , _sample_id(sample_id)
     , _opt(opt)
     , _chr_region(chr_region)
@@ -203,7 +207,7 @@ site_crawler(const sample_info& si,
     , _skip_call_begin_pos(0)
     , _skip_call_end_pos(0)
 {
-    update();
+    update(is_store_header);
 }
 
 
@@ -220,7 +224,7 @@ site_crawler::
 void
 site_crawler::
 dump_state(std::ostream& os) const {
-    const std::string& afile(_si.file);
+    const std::string& afile(_sip->file);
     os << "SITE_CRAWLER STATE:\n";
     os << "\tchrom: " << chrom();
     os << "\tposition: " << pos << " offset: " << _locus_offset << "\n";
@@ -364,7 +368,20 @@ process_record_line(char* line) {
 
 void
 site_crawler::
-update(){
+dump_header(std::ostream& os) const {
+
+    const unsigned header_size(_header.size());
+    for(unsigned i(0);(i+1)<header_size;++i) {
+        os << _header[i] << '\n';
+    }
+}
+
+
+
+
+void
+site_crawler::
+update(bool is_store_header){
     if(_is_sample_end_state) return;
 
 
@@ -421,7 +438,7 @@ update(){
                 _is_sample_end_state = true;
                 return;
             }
-            const std::string& afile(_si.file);
+            const std::string& afile(_sip->file);
             _tabs=new tabix_streamer(afile.c_str(),_chr_region);
             if(! _tabs) {
                 log_os << "ERROR:: Can't open gvcf file: " << afile << "\n";
@@ -433,11 +450,26 @@ update(){
         // read through file to get to a data line:
         bool is_eof(true);
         char* line(NULL);
+        const bool is_header_empty(_header.empty());
         while(_tabs->next()) {
             line=_tabs->getline();
             if(NULL == line) break;
             assert(strlen(line));
-            if(line[0] == '#') continue;
+            if(line[0] == '#') {
+                if(is_store_header && is_header_empty) {
+                    _header.push_back(line);
+                }
+                if(_sample_name.empty() && boost::starts_with(line,"#CHROM")) {
+                    std::vector<std::string> words;
+                    split_string(line,'\t',words);
+                    if(words.size()>VCFID::SAMPLE) {
+                        _sample_name = words[VCFID::SAMPLE];
+                    } else {
+                        _sample_name = "UNKNOWN";
+                    }
+                }
+                continue;
+            }
             is_eof=false;
             break;
         }

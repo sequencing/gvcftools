@@ -325,7 +325,7 @@ private:
 
 
 
-// used to be a big stuct!!
+// used to be a big struct!!
 struct sample_info {
     std::string file;
 };
@@ -360,12 +360,22 @@ struct site_crawler {
                  const unsigned sample_id,
                  const shared_crawler_options& opt,
                  const char* chr_region,
-                 const reference_contig_segment& ref_seg);
+                 const reference_contig_segment& ref_seg,
+                 const bool is_store_header = false);
 
     ~site_crawler();
 
+    const char*
+    sample_name() const {
+        return _sample_name.c_str();
+    }
+
+    // dump all but last line of header to os if is_store_header was set;
     void
-    update();
+    dump_header(std::ostream& os) const;
+
+    void
+    update(const bool is_store_header = false);
 
     bool
     is_pos_valid() const { return (! _is_sample_end_state); }
@@ -393,8 +403,12 @@ private:
     bool
     process_record_line(char* line);
 
+    // information from header (sample_name is always stored but full header is optional
+    std::vector<std::string> _header;
+    std::string _sample_name;
+
     const char* _chrom;
-    const sample_info& _si;
+    const sample_info* _sip;
     const unsigned _sample_id; // only used for debugging...
     const shared_crawler_options& _opt;
     const char* _chr_region;

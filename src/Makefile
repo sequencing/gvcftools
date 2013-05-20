@@ -21,6 +21,7 @@ LIBTRIO_DIR = $(CURDIR)/libtrio
 LIBBLOCK_DIR = $(CURDIR)/libblock
 export LIBUTIL_DIR = $(CURDIR)/libutil
 
+CXX := clang++
 CC := $(CXX) # this gets the linker to include libc++
 
 export CXXFLAGS = $(XFLAGS) -I$(LIBUTIL_DIR) -I$(BOOST_INCLUDE_DIR) -I$(TABIX_INCLUDE_DIR)
@@ -28,7 +29,7 @@ export LDFLAGS = -L$(BOOST_LIB_DIR) -L$(TABIX_LIB_DIR)
 export LDLIBS = -ltabix_and_faidx -lz -lm
 
 PROGS = $(TRIOPROGS) $(BLOCKPROGS) 
-TRIOPROGS := trio twins
+TRIOPROGS := trio twins merge_variants
 BLOCKPROGS := break_blocks extract_variants gatk_to_gvcf set_haploid_region
 OBJS = $(PROGS:%=%.o)
 
