@@ -408,7 +408,7 @@ private:
     std::string _sample_name;
 
     const char* _chrom;
-    const sample_info* _sip;
+    const sample_info _si;
     const unsigned _sample_id; // only used for debugging...
     const shared_crawler_options& _opt;
     const char* _chr_region;
