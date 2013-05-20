@@ -188,7 +188,7 @@ print_pos(const std::vector<boost::shared_ptr<site_crawler> >& sa,
             _os << merged_filters.get_key(filter_index);
         }
     } else {
-        _os << '.';
+        _os << "PASS";
     }
 
     _os << '\t' << '.'; // INFO
