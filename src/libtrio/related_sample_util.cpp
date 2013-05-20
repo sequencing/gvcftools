@@ -439,6 +439,26 @@ update(bool is_store_header){
                 return;
             }
             const std::string& afile(_si.file);
+            if(0 == _next_file) {
+                // open a separate header streamer:
+                tabix_header_streamer ths(afile.c_str());
+                while(ths.next()){
+                    const char* line(ths.getline());
+                    if(NULL == line) break;
+                    if(is_store_header) {
+                        _header.push_back(line);
+                    }
+                    if(_sample_name.empty() && boost::starts_with(line,"#CHROM")) {
+                        std::vector<std::string> words;
+                        split_string(line,'\t',words);
+                        if(words.size()>VCFID::SAMPLE) {
+                            _sample_name = words[VCFID::SAMPLE];
+                        } else {
+                            _sample_name = "UNKNOWN";
+                        }
+                    }
+                }
+            }
             _tabs=new tabix_streamer(afile.c_str(),_chr_region);
             if(! _tabs) {
                 log_os << "ERROR:: Can't open gvcf file: " << afile << "\n";
@@ -450,26 +470,11 @@ update(bool is_store_header){
         // read through file to get to a data line:
         bool is_eof(true);
         char* line(NULL);
-        const bool is_header_empty(_header.empty());
         while(_tabs->next()) {
             line=_tabs->getline();
             if(NULL == line) break;
             assert(strlen(line));
-            if(line[0] == '#') {
-                if(is_store_header && is_header_empty) {
-                    _header.push_back(line);
-                }
-                if(_sample_name.empty() && boost::starts_with(line,"#CHROM")) {
-                    std::vector<std::string> words;
-                    split_string(line,'\t',words);
-                    if(words.size()>VCFID::SAMPLE) {
-                        _sample_name = words[VCFID::SAMPLE];
-                    } else {
-                        _sample_name = "UNKNOWN";
-                    }
-                }
-                continue;
-            }
+            if(line[0] == '#') continue;
             is_eof=false;
             break;
         }
