@@ -93,8 +93,9 @@ print_pos(const std::vector<boost::shared_ptr<site_crawler> >& sa,
         _is_header_output=true;
     }
 
-    // start out getting ref, alt and gt for all samples:
-
+    //
+    // get ref, alt and gt for all samples:
+    //
     const char ref_base(ref_seg.get_base(sa[0]->pos-1));
 
     std::vector<std::string> genotypes;
@@ -105,14 +106,24 @@ print_pos(const std::vector<boost::shared_ptr<site_crawler> >& sa,
     for(unsigned st(0);st<n_samples;++st) {
         const site_crawler& sample(*(sa[st]));
         const unsigned n_allele(sample.get_allele_size());
+
+        bool is_nonstandard(false);
         std::ostringstream oss;
         for(unsigned ai(0); ai<n_allele; ai++) {
             const char allele(sample.get_allele(ai));
-            const unsigned code(alleles.insert_key(allele));
-            oss << code;
-            if(ai==0) oss << "/";
+            if(allele != 'N') {
+                const unsigned code(alleles.insert_key(allele));
+                if(ai) oss << '/';
+                oss << code;
+            } else {
+                is_nonstandard=true;
+            }
         }
-        genotypes.push_back(oss.str());
+        if(is_nonstandard) {
+            genotypes.push_back(".");
+        } else {
+            genotypes.push_back(oss.str());
+        }
     }
 
     assert(genotypes.size() == n_samples);
