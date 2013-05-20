@@ -33,6 +33,7 @@
 #include "id_map.hh"
 #include "related_sample_util.hh"
 #include "ref_util.hh"
+#include "string_util.hh"
 #include "tabix_util.hh"
 #include "trio_option_util.hh"
 
@@ -114,11 +115,43 @@ print_pos(const std::vector<boost::shared_ptr<site_crawler> >& sa,
         genotypes.push_back(oss.str());
     }
 
+    assert(genotypes.size() == n_samples);
+
     std::ostringstream alt;
     const unsigned n_alleles(alleles.size());
     for(unsigned i(1);i<n_alleles;++i) {
         if(i>1) alt << ",";
         alt << alleles.get_key(i);
+    }
+
+    //
+    // merge all format fields
+    //
+    static const char format_delim(':');
+    typedef id_set<std::string> fkey_t;
+    fkey_t merged_keys;
+    std::vector<fkey_t> sample_keys(n_samples);
+    std::vector<std::string> words;
+
+    for(unsigned st(0);st<n_samples;++st) {
+        const site_crawler& sample(*(sa[st]));
+        const char* format(sample.word(VCFID::FORMAT));
+        if(0 != strcmp(format,".")) {
+            split_string(format,format_delim,words);
+            BOOST_FOREACH(const std::string& w, words)
+            {
+                merged_keys.insert_key(w);
+                sample_keys[st].insert_key(w);
+            }
+        }
+    }
+
+    // create merged format tag:
+    std::ostringstream format;
+    const unsigned n_keys(merged_keys.size());
+    for(unsigned i(0);i<n_keys;++i) {
+        if(i) format << format_delim;
+        format << merged_keys.get_key(i);
     }
 
     _os << sa[0]->chrom()
@@ -129,11 +162,34 @@ print_pos(const std::vector<boost::shared_ptr<site_crawler> >& sa,
         << '\t' << '.' // QUAL
         << '\t' << '.' // FILT
         << '\t' << '.' // INFO
-        << '\t' << "GT"; // FORMAT
+        << '\t' << format.str(); // FORMAT
 
-    const unsigned sample_size(genotypes.size());
-    for(unsigned i(0);i<sample_size;++i) {
-        _os << '\t' << genotypes[i];
+    for(unsigned st(0);st<n_samples;++st) {
+        const site_crawler& sample(*(sa[st]));
+        const fkey_t& sample_key(sample_keys[st]);
+        const char* vcf_sample(sample.word(VCFID::SAMPLE));
+
+        if(0 != strcmp(vcf_sample,".")) {
+            split_string(vcf_sample,format_delim,words);
+        } else {
+            words.clear();
+        }
+
+        // print out values in merged order:
+        _os << '\t';
+        for(unsigned key_index(0);key_index<n_keys;++key_index) {
+            if(key_index) _os << format_delim;
+            const std::string& key(merged_keys.get_key(key_index));
+            if(sample_key.test_key(key)) {
+                if(key == "GT") {
+                    _os << genotypes[st];
+                } else {
+                    _os << words[sample_key.get_id(key)];
+                }
+            } else {
+                _os << '.';
+            }
+        }
     }
 
     _os << '\n';
@@ -241,10 +297,11 @@ disallow_option(const boost::program_options::variables_map& vm,
 static
 void
 merge_variants(const std::vector<std::string>& input_files,
-                             const shared_crawler_options& opt,
-                             const std::string& ref_seq_file,
-                             const char* region,
-                             merge_reporter& mr) {
+               const shared_crawler_options& opt,
+               const std::string& ref_seq_file,
+               const char* region,
+               merge_reporter& mr)
+{
 
     // setup reference sequence:
     reference_contig_segment ref_seg;
