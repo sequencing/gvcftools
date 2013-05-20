@@ -219,6 +219,7 @@ site_crawler(const sample_info& si,
     , _locus_offset(0)
     , _skip_call_begin_pos(0)
     , _skip_call_end_pos(0)
+    , _is_allele_current(false)
 {
     update(is_store_header);
 }
@@ -245,6 +246,17 @@ dump_state(std::ostream& os) const {
     os << "\tline: '";
     dump_line(os);
     os << "'\n";
+}
+
+
+
+bool
+site_crawler::
+update_allele() const {
+    const char ref_base(_ref_seg.get_base(pos-1));
+    const bool retval(_opt.sti().get_allele(_allele,_word,_locus_offset,ref_base));
+    _is_allele_current=true;
+    return retval;
 }
 
 
@@ -284,6 +296,8 @@ process_record_line(char* line) {
     _chrom=_opt.sti().chrom(_word);
     pos=_opt.sti().pos(_word);
 
+    _is_allele_current=false;
+
     const bool is_indel(_opt.sti().get_is_indel(_word));
 
     if(pos<1) {
@@ -318,7 +332,7 @@ process_record_line(char* line) {
 
     _locus_offset=0;
 
-    // deal with vcf records which fully preceed the region of interest:
+    // deal with vcf records which fully proceed the region of interest:
     if(_opt.is_region()) {
         if((pos+_locus_size-1)<_opt.region_begin) return false;
     }
@@ -335,13 +349,7 @@ process_record_line(char* line) {
     }
 
     if(is_call) {
-        const char ref_base=_ref_seg.get_base(pos-1);
-        if(! _opt.sti().get_allele(allele,_word,_locus_offset,ref_base)) {
-            is_call=false;
-            //log_os << "ERROR: Failed to read site genotype from record:\n";
-            //dump_state(log_os);
-            //exit(EXIT_FAILURE);
-        }
+        is_call=update_allele();
     }
 
     // don't allow failed block read-through, so that we can get through indel-overlap errors
@@ -435,7 +443,7 @@ update(bool is_store_header){
 
             if(is_call) {
                 const char ref_base=_ref_seg.get_base(pos-1);
-                if(! _opt.sti().get_allele(allele,_word,_locus_offset,ref_base)) {
+                if(! _opt.sti().get_allele(_allele,_word,_locus_offset,ref_base)) {
                     log_os << "ERROR: Failed to read site genotype from record:\n";
                     dump_state(log_os);
                     exit(EXIT_FAILURE);
