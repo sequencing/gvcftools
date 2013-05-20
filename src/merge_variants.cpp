@@ -116,8 +116,8 @@ print_pos(const std::vector<boost::shared_ptr<site_crawler> >& sa,
 
     std::ostringstream alt;
     const unsigned n_alleles(alleles.size());
-    for(unsigned i(0);i<n_alleles;++i) {
-        if(i) alt << ",";
+    for(unsigned i(1);i<n_alleles;++i) {
+        if(i>1) alt << ",";
         alt << alleles.get_key(i);
     }
 

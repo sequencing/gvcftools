@@ -34,6 +34,7 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <cstring>
 
 #include <iostream>
 #include <set>
@@ -42,6 +43,66 @@
 namespace {
 std::ostream& log_os(std::cerr);
 }
+
+
+tabix_header_streamer::
+tabix_header_streamer(const char* filename)
+    : _is_record_set(false)
+    , _is_stream_end(false)
+    , _tfp(NULL)
+    , _titer(NULL)
+    , _linebuf(NULL)
+{
+
+    if(NULL == filename){
+        throw blt_exception("vcf filename is null ptr");
+    }
+
+    if('\0' == *filename){
+        throw blt_exception("vcf filename is empty string");
+    }
+
+    _tfp = ti_open(filename, 0);
+
+    if(NULL == _tfp) {
+        log_os << "ERROR: Failed to open VCF file: '" << filename << "'\n";
+        exit(EXIT_FAILURE);
+    }
+
+    _titer = ti_query(_tfp, 0, 0, 0);
+}
+
+
+
+tabix_header_streamer::
+~tabix_header_streamer() {
+    if(NULL != _titer) ti_iter_destroy(_titer);
+    if(NULL != _tfp) ti_close(_tfp);
+}
+
+
+
+bool
+tabix_header_streamer::
+next() {
+    if(_is_stream_end || (NULL==_tfp) || (NULL==_titer)) return false;
+
+    int len;
+    _linebuf = (char*) ti_read(_tfp, _titer, &len);
+
+    if(NULL == _linebuf) {
+        _is_stream_end=true;
+    } else {
+        if((strlen(_linebuf)<1) || (_linebuf[0] != '#')){
+            _is_stream_end=true;
+        }
+    }
+
+    _is_record_set=(! _is_stream_end);
+
+    return _is_record_set;
+}
+
 
 
 

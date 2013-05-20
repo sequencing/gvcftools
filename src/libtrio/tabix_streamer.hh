@@ -43,6 +43,30 @@ extern "C" {
 #include <iosfwd>
 #include <string>
 
+struct tabix_header_streamer {
+
+    explicit
+    tabix_header_streamer(const char* filename);
+
+    ~tabix_header_streamer();
+
+    bool next();
+
+    char* getline() const {
+        if(_is_record_set) return _linebuf;
+        else            return NULL;
+    }
+
+private:
+    bool _is_record_set;
+    bool _is_stream_end;
+
+    tabix_t* _tfp;
+    ti_iter_t _titer;
+
+    char* _linebuf;
+};
+
 
 struct tabix_streamer {
 
