@@ -43,6 +43,7 @@ split_string(const char* str,
              const char delimiter,
              std::vector<std::string>& v) {
 
+    v.clear();
     while(true) {
         const char* next(strchr(str,delimiter));
         if((NULL == next) || (delimiter == '\0')) {
@@ -61,6 +62,7 @@ split_string(const std::string& str,
              const char delimiter,
              std::vector<std::string>& v) {
 
+    v.clear();
     size_t start(0);
     while(true) {
         size_t next(str.find(delimiter,start));
