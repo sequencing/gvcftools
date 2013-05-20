@@ -400,6 +400,14 @@ struct site_crawler {
         return _chrom;
     }
 
+    const char*
+    word(const unsigned i) const {
+        static const char* unknown = "";
+        if(NULL == _word) return unknown;
+        if(_n_word <= i) return unknown;
+        return _word[i];
+    }
+
     pos_t pos;
     bool is_call;
     char allele[2];
