@@ -431,7 +431,7 @@ try_main(int argc,char* argv[]){
     std::vector<std::string> exclude_list;
 
     sample_info si[SAMPLE_SIZE];
-    snp_param sp;
+    snp_param& sp(opt.sp());
 
     std::vector<info_filter> max_info_filters;
 
@@ -513,10 +513,6 @@ try_main(int argc,char* argv[]){
 
     sp.is_min_qd=(vm.count("min-qd"));
     sp.is_min_pos_rank_sum=(vm.count("min-pos-rank-sum"));
-
-    // setup snp_mode (artifact of former ability to choose style:
-    snp_type_info stiv(sp);
-    opt.stip=&stiv;
 
 #if 0
     for(unsigned st(0);st<SAMPLE_SIZE;++st) {
