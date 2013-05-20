@@ -334,19 +334,26 @@ struct sample_info {
 
 struct shared_crawler_options {
     shared_crawler_options()
-        : stip(NULL)
-        , is_murdock_mode(false)
+        : region_begin(0),
+          region_end(0),
+          is_murdock_mode(false),
+          _sti(_sp)
     {}
 
-    const snp_type_info& sti() const { return *stip; }
+    snp_param& sp() { return _sp; }
+
+    const snp_type_info& sti() const { return _sti; }
 
     bool is_region() const { return (! region.empty()); }
 
-    snp_type_info* stip;
     std::string region;
     int region_begin;
     int region_end;
     bool is_murdock_mode;
+
+private:
+    snp_param _sp;
+    snp_type_info _sti;
 };
 
 

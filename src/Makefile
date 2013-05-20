@@ -21,7 +21,7 @@ LIBTRIO_DIR = $(CURDIR)/libtrio
 LIBBLOCK_DIR = $(CURDIR)/libblock
 export LIBUTIL_DIR = $(CURDIR)/libutil
 
-CXX := clang++
+#CXX := clang++
 CC := $(CXX) # this gets the linker to include libc++
 
 export CXXFLAGS = $(XFLAGS) -I$(LIBUTIL_DIR) -I$(BOOST_INCLUDE_DIR) -I$(TABIX_INCLUDE_DIR)
