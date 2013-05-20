@@ -149,9 +149,9 @@ processSite(const site_crawler* sa,
 
         if(sa[st].is_pos_valid() && (sa[st].pos==low_pos) && sa[st].is_call){
             ss.sample_called[st]++;
-            if(! ((ref_base==sa[st].allele[0]) && (ref_base==sa[st].allele[1]))){
+            if(! ((ref_base==sa[st].get_allele(0)) && (ref_base==sa[st].get_allele(1)))){
                 ss.sample_snp[st]++;
-                if(sa[st].allele[0] != sa[st].allele[1]){
+                if(sa[st].get_allele(0) != sa[st].get_allele(1)){
                     ss.sample_snp_het[st]++;
                 }
             }
@@ -174,12 +174,12 @@ processSite(const site_crawler* sa,
         ss.all_called++;
     }
 
-    const char c1(sa[CHILD].allele[0]);
-    const char c2(sa[CHILD].allele[1]);
-    const char f1(sa[FATHER].allele[0]);
-    const char f2(sa[FATHER].allele[1]);
-    const char m1(sa[MOTHER].allele[0]);
-    const char m2(sa[MOTHER].allele[1]);
+    const char c1(sa[CHILD].get_allele(0));
+    const char c2(sa[CHILD].get_allele(1));
+    const char f1(sa[FATHER].get_allele(0));
+    const char f2(sa[FATHER].get_allele(1));
+    const char m1(sa[MOTHER].get_allele(0));
+    const char m2(sa[MOTHER].get_allele(1));
 
     const bool isc1f((c1==f1) || (c1==f2));
     const bool isc1m((c1==m1) || (c1==m2));

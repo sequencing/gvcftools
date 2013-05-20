@@ -36,6 +36,7 @@
 #include "vcf_util.hh"
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/foreach.hpp>
 
 #include <cctype>
 #include <cerrno>
@@ -83,27 +84,39 @@ get_digt_code(const char * const * word,
 
 bool
 snp_type_info::
-get_allele(char allele[2],
+get_allele(std::vector<char>& allele,
            const char * const * word,
            const unsigned offset,
            const char ref_base) const {
 
-    // get the genotype code numbers:
-    if(! get_digt_code(word,_gtcode)) { return false; }
+    allele.clear();
 
-    for(unsigned i(0);i<2;++i) {
-        if(_gtcode[i]==0) {
-            allele[i] = ref_base;
+    get_digt_code(word,_gtcode);
+
+    bool is_standard_diploid(true);
+
+    BOOST_FOREACH(const int gt, _gtcode)
+    {
+        if(gt==0) {
+            allele.push_back(ref_base);
             continue;
         }
+
         const char* alt(word[VCFID::ALT]);
-        for(int ai(0);(ai+1)<_gtcode[i];alt++) {
-            if(! *alt) return false;
+        for(int ai(0);(ai+1)<gt;alt++) {
+            if(! *alt) break;
             if((*alt)==',') ai++;
         }
-        allele[i]=alt[offset];
+
+        if((! *alt) || (gt<0)) {
+            allele.push_back('N');
+            is_standard_diploid=false;
+        } else {
+            allele.push_back(alt[offset]);
+        }
     }
-    return true;
+
+    return (is_standard_diploid && _gtcode.size()==2);
 }
 
 
@@ -271,7 +284,7 @@ process_record_line(char* line) {
     _chrom=_opt.sti().chrom(_word);
     pos=_opt.sti().pos(_word);
 
-    const bool is_indel=_opt.sti().get_is_indel(_word);
+    const bool is_indel(_opt.sti().get_is_indel(_word));
 
     if(pos<1) {
         log_os << "ERROR: gcvf record position less than 1. position: " << pos << " "; 
@@ -440,7 +453,7 @@ update(bool is_store_header){
             }
             const std::string& afile(_si.file);
             if(0 == _next_file) {
-                // open a separate header streamer:
+                // open a separate header streamer to get sample_name and optional header capture:
                 tabix_header_streamer ths(afile.c_str());
                 while(ths.next()){
                     const char* line(ths.getline());

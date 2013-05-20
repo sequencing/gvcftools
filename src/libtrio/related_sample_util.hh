@@ -191,7 +191,7 @@ struct snp_type_info {
 
 
     bool
-    get_allele(char allele[2],
+    get_allele(std::vector<char>& allele,
                const char * const * word,
                const unsigned offset,
                const char ref_base) const;
@@ -408,9 +408,20 @@ struct site_crawler {
         return _word[i];
     }
 
+    unsigned
+    get_allele_size() const {
+        return allele.size();
+    }
+
+    char
+    get_allele(const unsigned index) const {
+        if(index>get_allele_size()) return 'N';
+        return allele[index];
+    }
+
+
     pos_t pos;
     bool is_call;
-    char allele[2];
     unsigned n_total;
 
 private:
@@ -443,6 +454,8 @@ private:
 
     mutable pos_t _skip_call_begin_pos;
     mutable pos_t _skip_call_end_pos;
+
+    std::vector<char> allele;
 };
 
 

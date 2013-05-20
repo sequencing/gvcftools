@@ -104,10 +104,10 @@ print_pos(const std::vector<boost::shared_ptr<site_crawler> >& sa,
     const unsigned n_samples(sa.size());
     for(unsigned st(0);st<n_samples;++st) {
         const site_crawler& sample(*(sa[st]));
-        static const unsigned n_allele(2);
+        const unsigned n_allele(sample.get_allele_size());
         std::ostringstream oss;
         for(unsigned ai(0); ai<n_allele; ai++) {
-            const char allele(sample.allele[ai]);
+            const char allele(sample.get_allele(ai));
             const unsigned code(alleles.insert_key(allele));
             oss << code;
             if(ai==0) oss << "/";
@@ -256,12 +256,11 @@ merge_site(const std::vector<boost::shared_ptr<site_crawler> >& sa,
 
         if(site.is_pos_valid() && (site.pos==low_pos) && site.is_call){
             // position is called in sample st
-            if(! ((ref_base==site.allele[0]) && (ref_base==site.allele[1]))){
-                // position is called and non-ref at sample st
-                is_any_nonref_called=true;
-//                if(sa[st].allele[0] != sa[st].allele[1]){
-//                    ss.sample_snp_het[st]++;
-//                }
+            const unsigned n_allele(site.get_allele_size());
+            for(unsigned allele_index(0);allele_index<n_allele;allele_index++) {
+                if(ref_base != site.get_allele(allele_index)) {
+                    is_any_nonref_called=true;
+                }
             }
             is_any_called=true;
         } else {
