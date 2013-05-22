@@ -16,7 +16,7 @@ TABIX_LIB_DIR = $(TABIX_ROOT)
 # debug:
 WARNFLAGS = -Wall -Wextra
 #XFLAGS= -g3 -fno-inline -O0 $(WARNFLAGS)
-XFLAGS= -O3 -Wall -Wextra $(WARNFLAGS)
+XFLAGS= -O3 $(WARNFLAGS)
 
 LIBTRIO_DIR = $(CURDIR)/libtrio
 LIBBLOCK_DIR = $(CURDIR)/libblock

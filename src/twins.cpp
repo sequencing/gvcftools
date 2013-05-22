@@ -124,14 +124,14 @@ processSite(const site_crawler* sa,
     if(ref_base=='N') return;
 
     for(unsigned st(0);st<SAMPLE_SIZE;++st) {
-        if(sa[st].is_pos_valid() && (sa[st].pos==low_pos) && (sa[st].n_total != 0)) {
+        if(sa[st].is_pos_valid() && (sa[st].pos()==low_pos) && (sa[st].n_total() != 0)) {
             ss.sample_mapped[st]++;
             is_any_mapped=true;
         } else {
             is_all_mapped=false;
         }
 
-        if(sa[st].is_pos_valid() && (sa[st].pos==low_pos) && sa[st].is_call){
+        if(sa[st].is_pos_valid() && (sa[st].pos()==low_pos) && sa[st].is_site_call()){
             ss.sample_called[st]++;
             if(! ((ref_base==sa[st].get_allele(0)) && (ref_base==sa[st].get_allele(1)))){
                 ss.sample_snp[st]++;
@@ -299,8 +299,8 @@ accumulate_region_statistics(const sample_info* const si,
         pos_t low_pos(0);
         for(unsigned st(0);st<SAMPLE_SIZE;++st) {
             if(! sa[st].is_pos_valid()) continue;
-            if((! is_low_pos_set) || (sa[st].pos < low_pos)){
-                low_pos = sa[st].pos;
+            if((! is_low_pos_set) || (sa[st].pos() < low_pos)){
+                low_pos = sa[st].pos();
                 is_low_pos_set=true;
             }
         }
@@ -309,7 +309,7 @@ accumulate_region_statistics(const sample_info* const si,
         processSite(sa,low_pos,ref_seg,pr,ss);
 
         for(unsigned st(0);st<SAMPLE_SIZE;++st) {
-            if(sa[st].is_pos_valid() && (low_pos == sa[st].pos)){
+            if(sa[st].is_pos_valid() && (low_pos == sa[st].pos())){
                 sa[st].update();
             }
         }

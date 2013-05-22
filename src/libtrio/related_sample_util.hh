@@ -130,12 +130,11 @@ struct snp_type_info {
     bool
     get_is_call(char** word,
                 const pos_t pos,
-                const bool is_indel,
                 pos_t& skip_call_begin_pos,
                 pos_t& skip_call_end_pos) const { 
 
-        update_skip_call_range(word,pos,is_indel,skip_call_begin_pos,skip_call_end_pos);
-        bool is_bad_call(is_indel || (0!=strcmp(word[VCFID::FILT],"PASS")));
+        //update_skip_call_range(word,pos,is_indel,skip_call_begin_pos,skip_call_end_pos);
+        bool is_bad_call(0!=strcmp(word[VCFID::FILT],"PASS"));
         if(is_bad_call) return false;
         if(_sp.min_gqx > 0) {
             float gqx(0);
@@ -191,7 +190,7 @@ struct snp_type_info {
 
 
     bool
-    get_allele(std::vector<char>& allele,
+    get_site_allele(std::vector<char>& allele,
                const char * const * word,
                const unsigned offset,
                const char ref_base) const;
@@ -297,8 +296,8 @@ private:
     update_skip_call_range(const char * const * word,
                            const pos_t pos,
                            const bool is_indel,
-			   pos_t& skip_call_begin_pos,
-			   pos_t& skip_call_end_pos) const {
+                           pos_t& skip_call_begin_pos,
+                           pos_t& skip_call_end_pos) const {
         const unsigned locus_size=get_ref_length(word);
         if(locus_size<=1) return;
         if(! is_indel) return;
@@ -361,6 +360,37 @@ private:
 struct tabix_streamer;
 
 
+
+// Extend the concept of pos to include indel status, so that positions with
+// the same number sort with site record first, followed by indel record.
+// This is the same ordering that's in the vcf already
+//
+struct vcf_pos {
+
+    vcf_pos()
+        : pos(0), is_indel(false)
+    {}
+
+    bool
+    operator<(const vcf_pos& rhs) const {
+        if(pos<rhs.pos) return true;
+        if(pos==rhs.pos) {
+            return ((!is_indel) && rhs.is_indel);
+        }
+        return false;
+    }
+
+    bool
+    operator==(const vcf_pos& rhs) const {
+        return ((pos==rhs.pos) && (is_indel==rhs.is_indel));
+    }
+
+    pos_t pos;
+    bool is_indel;
+};
+
+
+
 struct site_crawler {
     
     site_crawler(const sample_info& si,
@@ -421,10 +451,35 @@ struct site_crawler {
         return _allele[index];
     }
 
+    pos_t
+    pos() const {
+        return vpos().pos;
+    }
 
-    pos_t pos;
-    bool is_call;
-    unsigned n_total;
+    bool
+    is_indel() const {
+        return vpos().is_indel;
+    }
+
+    vcf_pos
+    vpos() const {
+        return _vpos;
+    }
+
+    bool
+    is_site_call() const {
+        return (_is_call && (!is_indel()));
+    }
+
+    bool
+    is_indel_call() const {
+        return (_is_call && (is_indel()));
+    }
+
+    unsigned
+    n_total() const {
+        return _n_total;
+    }
 
 private:
 
@@ -433,6 +488,10 @@ private:
 
     bool
     process_record_line(char* line);
+
+    vcf_pos _vpos;
+    bool _is_call;
+    unsigned _n_total;
 
     // information from header (sample_name is always stored but full header is optional
     std::vector<std::string> _header;
@@ -462,6 +521,7 @@ private:
 
     mutable bool _is_allele_current;
     mutable std::vector<char> _allele;
+    mutable std::vector<std::string> _indel_allele;
 };
 
 
