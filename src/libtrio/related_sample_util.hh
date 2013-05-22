@@ -361,6 +361,31 @@ private:
 struct tabix_streamer;
 
 
+
+// Extend the concept of pos to include indel status, so that positions with
+// the same number sort with site record first, followed by indel record.
+// This is the same ordering that's in the vcf already
+//
+struct vcf_pos {
+
+    vcf_pos()
+        : pos(0), is_indel(false)
+    {}
+
+    bool
+    operator<(const vcf_pos& rhs) const {
+        if(pos<rhs.pos) return true;
+        if(pos==rhs.pos) {
+            return ((!is_indel) && rhs.is_indel);
+        }
+    }
+
+    pos_t pos;
+    bool is_indel;
+};
+
+
+
 struct site_crawler {
     
     site_crawler(const sample_info& si,
@@ -421,10 +446,30 @@ struct site_crawler {
         return _allele[index];
     }
 
+    pos_t
+    pos() const {
+        return vpos().pos;
+    }
 
-    pos_t pos;
-    bool is_call;
-    unsigned n_total;
+    bool
+    is_indel() const {
+        return vpos().is_indel;
+    }
+
+    vcf_pos
+    vpos() const {
+        return _vpos;
+    }
+
+    bool
+    is_call() const {
+        return _is_call;
+    }
+
+    unsigned
+    n_total() const {
+        return _n_total;
+    }
 
 private:
 
@@ -433,6 +478,10 @@ private:
 
     bool
     process_record_line(char* line);
+
+    vcf_pos _vpos;
+    bool _is_call;
+    unsigned _n_total;
 
     // information from header (sample_name is always stored but full header is optional
     std::vector<std::string> _header;

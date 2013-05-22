@@ -96,7 +96,7 @@ print_pos(const std::vector<boost::shared_ptr<site_crawler> >& sa,
     //
     // get ref, alt and gt for all samples:
     //
-    const char ref_base(ref_seg.get_base(sa[0]->pos-1));
+    const char ref_base(ref_seg.get_base(sa[0]->pos()-1));
 
     std::vector<std::string> genotypes;
     id_set<char> alleles;
@@ -172,7 +172,7 @@ print_pos(const std::vector<boost::shared_ptr<site_crawler> >& sa,
     }
 
     _os << sa[0]->chrom()     // CHROM
-        << '\t' << sa[0]->pos // POS
+        << '\t' << sa[0]->pos() // POS
         << '\t' << '.'        // ID
         << '\t' << ref_base;  // REF
 
@@ -303,14 +303,14 @@ merge_site(const std::vector<boost::shared_ptr<site_crawler> >& sa,
 
     for(unsigned st(0);st<n_samples;++st) {
         const site_crawler& site(*(sa[st]));
-        if(site.is_pos_valid() && (site.pos==low_pos) && (site.n_total != 0)) {
+        if(site.is_pos_valid() && (site.pos()==low_pos) && (site.n_total() != 0)) {
             //ss.sample_mapped[st]++;
             is_any_mapped=true;
         } else {
             is_all_mapped=false;
         }
 
-        if(site.is_pos_valid() && (site.pos==low_pos) && site.is_call){
+        if(site.is_pos_valid() && (site.pos()==low_pos) && site.is_call()){
             // position is called in sample st
             const unsigned n_allele(site.get_allele_size());
             for(unsigned allele_index(0);allele_index<n_allele;allele_index++) {
@@ -371,7 +371,7 @@ merge_variants(const std::vector<std::string>& input_files,
     ss.known_size += segment_known_size;
 #endif
 
-    // setup allele crawlers:
+    // setup locus crawlers:
     std::vector<boost::shared_ptr<site_crawler> > sa;
     const unsigned n_samples(input_files.size());
     for(unsigned i(0);i<n_samples;++i){
@@ -387,8 +387,8 @@ merge_variants(const std::vector<std::string>& input_files,
         pos_t low_pos(0);
         for(unsigned st(0);st<n_samples;++st) {
             if(! sa[st]->is_pos_valid()) continue;
-            if((! is_low_pos_set) || (sa[st]->pos < low_pos)){
-                low_pos = sa[st]->pos;
+            if((! is_low_pos_set) || (sa[st]->pos() < low_pos)){
+                low_pos = sa[st]->pos();
                 is_low_pos_set=true;
             }
         }
@@ -397,7 +397,7 @@ merge_variants(const std::vector<std::string>& input_files,
         merge_site(sa,low_pos,ref_seg,mr);
 
         for(unsigned st(0);st<n_samples;++st) {
-            if(sa[st]->is_pos_valid() && (low_pos == sa[st]->pos)){
+            if(sa[st]->is_pos_valid() && (low_pos == sa[st]->pos())){
                 sa[st]->update();
             }
         }

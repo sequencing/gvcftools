@@ -194,8 +194,7 @@ site_crawler(const sample_info& si,
              const char* chr_region,
              const reference_contig_segment& ref_seg,
              const bool is_store_header)
-    : pos(0)
-    , is_call(false)
+    : _is_call(false)
     , _chrom(NULL)
     , _si(si)
     , _sample_id(sample_id)
@@ -231,9 +230,10 @@ void
 site_crawler::
 dump_state(std::ostream& os) const {
     const std::string& afile(_si.file);
-    os << "SITE_CRAWLER STATE:\n";
+    os << "LOCUS_CRAWLER STATE:\n";
     os << "\tchrom: " << chrom();
-    os << "\tposition: " << pos << " offset: " << _locus_offset << "\n";
+    os << "\tposition: " << pos() << " offset: " << _locus_offset << "\n";
+    os << "\tis_indel: " << is_indel() << "\n";
     os << "\tfile: '" << afile << "'\n";
     os << "\tline: '";
     dump_line(os);
@@ -245,7 +245,7 @@ dump_state(std::ostream& os) const {
 bool
 site_crawler::
 update_allele() const {
-    const char ref_base(_ref_seg.get_base(pos-1));
+    const char ref_base(_ref_seg.get_base(pos()-1));
     const bool retval(_opt.sti().get_allele(_allele,_word,_locus_offset,ref_base));
     _is_allele_current=true;
     return retval;
@@ -284,39 +284,39 @@ process_record_line(char* line) {
         }
     }
 
-    const pos_t last_pos(pos);
+    const pos_t last_pos(pos());
     _chrom=_opt.sti().chrom(_word);
-    pos=_opt.sti().pos(_word);
+    _vpos.pos=_opt.sti().pos(_word);
 
     _is_allele_current=false;
 
     const bool is_indel(_opt.sti().get_is_indel(_word));
 
-    if(pos<1) {
-        log_os << "ERROR: gcvf record position less than 1. position: " << pos << " "; 
+    if(pos()<1) {
+        log_os << "ERROR: gcvf record position less than 1. position: " << pos() << " ";
         dump_state(log_os);
         exit(EXIT_FAILURE);
     }
 
     if(_opt.is_region()) {
         // deal with vcf records after the region of interest:
-        if(pos>_opt.region_end) {
+        if(pos()>_opt.region_end) {
             _is_sample_begin_state = false;
             _is_sample_end_state = true;
             return true;
         }
     } else {
-        if(pos>static_cast<pos_t>(_ref_seg.end())) {
+        if(pos()>static_cast<pos_t>(_ref_seg.end())) {
             log_os << "ERROR: allele file position exceeds final position in reference sequence segment . position: " 
-                   << pos << " ref_contig_end: " << _ref_seg.end() << "\n";
+                   << pos() << " ref_contig_end: " << _ref_seg.end() << "\n";
             dump_state(log_os);
             exit(EXIT_FAILURE);
         }
     }
 
-    if(! _opt.sti().get_nonindel_ref_length(pos,is_indel,_word,_locus_size)) {
+    if(! _opt.sti().get_nonindel_ref_length(pos(),is_indel,_word,_locus_size)) {
         //log_os << "ERROR: failed to parse locus at pos: "  << pos << "\n";
-        log_os << "WARNING: failed to parse locus at pos: "  << pos << "\n";
+        log_os << "WARNING: failed to parse locus at pos: "  << pos() << "\n";
         dump_state(log_os);
         //exit(EXIT_FAILURE);
         _locus_size=0;
@@ -326,22 +326,22 @@ process_record_line(char* line) {
 
     // deal with vcf records which fully proceed the region of interest:
     if(_opt.is_region()) {
-        if((pos+_locus_size-1)<_opt.region_begin) return false;
+        if((pos()+_locus_size-1)<_opt.region_begin) return false;
     }
 
     //const bool last_is_call(is_call);
-    is_call = _opt.sti().get_is_call(_word,pos,is_indel,_skip_call_begin_pos,_skip_call_end_pos);
+    _is_call = _opt.sti().get_is_call(_word,pos(),is_indel,_skip_call_begin_pos,_skip_call_end_pos);
 
-    n_total = _opt.sti().total(_word);
+    _n_total = _opt.sti().total(_word);
 
     if(is_indel) {
-       pos=last_pos;
+       _vpos.pos=last_pos;
        _locus_size=0;
        return false;
     }
 
-    if(is_call) {
-        is_call=update_allele();
+    if(is_call()) {
+        _is_call=update_allele();
     }
 
     // don't allow failed block read-through, so that we can get through indel-overlap errors
@@ -351,16 +351,16 @@ process_record_line(char* line) {
     
     if(! _is_sample_begin_state) {
         // we've already filtered out indels, so we can require that valid records do not have the same pos or lower.
-        if(pos<=last_pos) {
+        if(pos()<=last_pos) {
             if(_opt.is_murdock_mode) {
-                pos=last_pos; 
+                _vpos.pos=last_pos;
                 _locus_size=0;
                 return false;
                 //pos=last_pos;
                 //is_call=last_is_call;
             } else {
                 log_os << "ERROR: unexpected position order in variant file. current_pos: " 
-                       << pos << " last_pos: " << last_pos << "\n";
+                       << pos() << " last_pos: " << last_pos << "\n";
                 dump_state(log_os);
                 exit(EXIT_FAILURE);
             }
@@ -371,7 +371,7 @@ process_record_line(char* line) {
 
     // deal with vcf records which partially overlap the region of interest:
     if(_opt.is_region()) {
-        if(pos<_opt.region_begin) return false;
+        if(pos()<_opt.region_begin) return false;
     }
 
     return true;
@@ -410,31 +410,31 @@ update(bool is_store_header){
         if(_locus_offset < _locus_size) {
             // check for pos moving past the end of region of interest:
             if(_opt.is_region()) {
-                if((pos+1)>(_opt.region_end)){
+                if((pos()+1)>(_opt.region_end)){
                     _is_sample_begin_state = false;
                     _is_sample_end_state = true;
                     return;
                 }
             }
 
-            pos++;
+            _vpos.pos++;
 
             if(_opt.is_region()) {
                 // check for pos preceeding the start of region of interest in a multi-base record:
-                if((pos)<(_opt.region_begin)){
+                if(pos()<_opt.region_begin){
                     continue;
                 }
             }
 
-            if(pos>static_cast<pos_t>(_ref_seg.end())) {
+            if(pos()>static_cast<pos_t>(_ref_seg.end())) {
                 log_os << "ERROR: allele file position exceeds final position in reference sequence segment. position: " 
-                       << pos << " ref_contig_end: " << _ref_seg.end() << "\n";
+                       << pos() << " ref_contig_end: " << _ref_seg.end() << "\n";
                 dump_state(log_os);
                 exit(EXIT_FAILURE);
             }
 
-            if(is_call) {
-                const char ref_base=_ref_seg.get_base(pos-1);
+            if(is_call()) {
+                const char ref_base=_ref_seg.get_base(pos()-1);
                 if(! _opt.sti().get_allele(_allele,_word,_locus_offset,ref_base)) {
                     log_os << "ERROR: Failed to read site genotype from record:\n";
                     dump_state(log_os);
@@ -551,7 +551,7 @@ void
 pos_reporter::
 print_pos(const site_crawler* sa) {
     if(! is_pos_report) return;
-    *pos_fs_ptr << "EVENT\t" << sa[0].chrom() << "\t" << sa[0].pos << "\n";
+    *pos_fs_ptr << "EVENT\t" << sa[0].chrom() << "\t" << sa[0].pos() << "\n";
     for(unsigned i(0);i<sample_size;++i){
         *pos_fs_ptr << _sample_label[i] << "\t";
         *pos_fs_ptr << "\t";
