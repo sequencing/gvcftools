@@ -310,7 +310,7 @@ merge_site(const std::vector<boost::shared_ptr<site_crawler> >& sa,
             is_all_mapped=false;
         }
 
-        if(site.is_pos_valid() && (site.pos()==low_pos) && site.is_call()){
+        if(site.is_pos_valid() && (site.pos()==low_pos) && site.is_site_call()){
             // position is called in sample st
             const unsigned n_allele(site.get_allele_size());
             for(unsigned allele_index(0);allele_index<n_allele;allele_index++) {

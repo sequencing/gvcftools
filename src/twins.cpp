@@ -131,7 +131,7 @@ processSite(const site_crawler* sa,
             is_all_mapped=false;
         }
 
-        if(sa[st].is_pos_valid() && (sa[st].pos()==low_pos) && sa[st].is_call()){
+        if(sa[st].is_pos_valid() && (sa[st].pos()==low_pos) && sa[st].is_site_call()){
             ss.sample_called[st]++;
             if(! ((ref_base==sa[st].get_allele(0)) && (ref_base==sa[st].get_allele(1)))){
                 ss.sample_snp[st]++;

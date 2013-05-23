@@ -76,10 +76,12 @@ get_digt_code(const char * const * word,
 
 bool
 snp_type_info::
-get_allele(std::vector<char>& allele,
-           const char * const * word,
-           const unsigned offset,
-           const char ref_base) const {
+get_site_allele(
+        std::vector<char>& allele,
+        const char * const * word,
+        const unsigned offset,
+        const char ref_base) const
+{
 
     allele.clear();
 
@@ -245,10 +247,14 @@ dump_state(std::ostream& os) const {
 bool
 site_crawler::
 update_allele() const {
-    const char ref_base(_ref_seg.get_base(pos()-1));
-    const bool retval(_opt.sti().get_allele(_allele,_word,_locus_offset,ref_base));
-    _is_allele_current=true;
-    return retval;
+    if(is_indel()) {
+        return false;
+    } else {
+        const char ref_base(_ref_seg.get_base(pos()-1));
+        const bool retval(_opt.sti().get_site_allele(_allele,_word,_locus_offset,ref_base));
+        _is_allele_current=true;
+        return retval;
+    }
 }
 
 
@@ -290,7 +296,7 @@ process_record_line(char* line) {
 
     _is_allele_current=false;
 
-    const bool is_indel(_opt.sti().get_is_indel(_word));
+    _vpos.is_indel=(_opt.sti().get_is_indel(_word));
 
     if(pos()<1) {
         log_os << "ERROR: gcvf record position less than 1. position: " << pos() << " ";
@@ -314,7 +320,7 @@ process_record_line(char* line) {
         }
     }
 
-    if(! _opt.sti().get_nonindel_ref_length(pos(),is_indel,_word,_locus_size)) {
+    if(! _opt.sti().get_nonindel_ref_length(pos(),is_indel(),_word,_locus_size)) {
         //log_os << "ERROR: failed to parse locus at pos: "  << pos << "\n";
         log_os << "WARNING: failed to parse locus at pos: "  << pos() << "\n";
         dump_state(log_os);
@@ -330,17 +336,17 @@ process_record_line(char* line) {
     }
 
     //const bool last_is_call(is_call);
-    _is_call = _opt.sti().get_is_call(_word,pos(),is_indel,_skip_call_begin_pos,_skip_call_end_pos);
+    _is_call = _opt.sti().get_is_call(_word,pos(),_skip_call_begin_pos,_skip_call_end_pos);
 
     _n_total = _opt.sti().total(_word);
 
-    if(is_indel) {
+    if(is_indel()) {
        _vpos.pos=last_pos;
        _locus_size=0;
        return false;
     }
 
-    if(is_call()) {
+    if(is_site_call()) {
         _is_call=update_allele();
     }
 
@@ -433,9 +439,9 @@ update(bool is_store_header){
                 exit(EXIT_FAILURE);
             }
 
-            if(is_call()) {
+            if(is_site_call()) {
                 const char ref_base=_ref_seg.get_base(pos()-1);
-                if(! _opt.sti().get_allele(_allele,_word,_locus_offset,ref_base)) {
+                if(! _opt.sti().get_site_allele(_allele,_word,_locus_offset,ref_base)) {
                     log_os << "ERROR: Failed to read site genotype from record:\n";
                     dump_state(log_os);
                     exit(EXIT_FAILURE);

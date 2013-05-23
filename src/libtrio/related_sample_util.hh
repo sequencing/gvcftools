@@ -130,12 +130,11 @@ struct snp_type_info {
     bool
     get_is_call(char** word,
                 const pos_t pos,
-                const bool is_indel,
                 pos_t& skip_call_begin_pos,
                 pos_t& skip_call_end_pos) const { 
 
-        update_skip_call_range(word,pos,is_indel,skip_call_begin_pos,skip_call_end_pos);
-        bool is_bad_call(is_indel || (0!=strcmp(word[VCFID::FILT],"PASS")));
+        //update_skip_call_range(word,pos,is_indel,skip_call_begin_pos,skip_call_end_pos);
+        bool is_bad_call(0!=strcmp(word[VCFID::FILT],"PASS"));
         if(is_bad_call) return false;
         if(_sp.min_gqx > 0) {
             float gqx(0);
@@ -191,7 +190,7 @@ struct snp_type_info {
 
 
     bool
-    get_allele(std::vector<char>& allele,
+    get_site_allele(std::vector<char>& allele,
                const char * const * word,
                const unsigned offset,
                const char ref_base) const;
@@ -297,8 +296,8 @@ private:
     update_skip_call_range(const char * const * word,
                            const pos_t pos,
                            const bool is_indel,
-			   pos_t& skip_call_begin_pos,
-			   pos_t& skip_call_end_pos) const {
+                           pos_t& skip_call_begin_pos,
+                           pos_t& skip_call_end_pos) const {
         const unsigned locus_size=get_ref_length(word);
         if(locus_size<=1) return;
         if(! is_indel) return;
@@ -378,6 +377,12 @@ struct vcf_pos {
         if(pos==rhs.pos) {
             return ((!is_indel) && rhs.is_indel);
         }
+        return false;
+    }
+
+    bool
+    operator==(const vcf_pos& rhs) const {
+        return ((pos==rhs.pos) && (is_indel==rhs.is_indel));
     }
 
     pos_t pos;
@@ -462,8 +467,13 @@ struct site_crawler {
     }
 
     bool
-    is_call() const {
-        return _is_call;
+    is_site_call() const {
+        return (_is_call && (!is_indel()));
+    }
+
+    bool
+    is_indel_call() const {
+        return (_is_call && (is_indel()));
     }
 
     unsigned
@@ -511,6 +521,7 @@ private:
 
     mutable bool _is_allele_current;
     mutable std::vector<char> _allele;
+    mutable std::vector<std::string> _indel_allele;
 };
 
 
