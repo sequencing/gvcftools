@@ -53,30 +53,22 @@ std::ostream& log_os(std::cerr);
 }
 
 
-#if 0
-static
-const char*
-get_format_string(const char* const * word,
-                  const char* key) {
-
-    const char* str(get_format_string_nocopy(word,key));
-    if(NULL==str) return NULL;
-    unsigned len(0);
-    while(str[len]!='\0' && (str[len]!=':')) {
-        len++;
-    }
-    return strndup(str,len);
-}
-#endif
-
-
 
 static
 bool
 get_digt_code(const char * const * word,
               std::vector<int>& digt_code) {
 
-    parse_gt(get_format_string_nocopy(word,"GT"),digt_code,true);
+    const char* gtstr(get_format_string_nocopy(word,"GT"));
+    if(gtstr == NULL)
+    {
+        digt_code.clear();
+        digt_code.push_back(-1);
+    }
+    else
+    {
+        parse_gt(gtstr,digt_code,true);
+    }
     return (digt_code.size()==2 && digt_code[0]>=0 && digt_code[1]>=0);
 }
 

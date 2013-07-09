@@ -32,6 +32,7 @@
 #include "blt_exception.hh"
 #include "vcf_util.hh"
 
+#include <cassert>
 #include <cctype>
 
 #include <iostream>
@@ -113,6 +114,8 @@ void
 parse_gt(const char* gt,
          std::vector<int>& gti,
          const bool is_allow_bad_end_char) {
+
+    assert(NULL != gt);
 
     if(! gt_parse_helper::start(gt,gti,is_allow_bad_end_char)) {
         std::ostringstream oss;

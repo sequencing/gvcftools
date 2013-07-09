@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE( test_split_string ) {
     std::vector<std::string> words;
     words.push_back("DECOY");
     split_string(test,delim,words);
-    BOOST_CHECK_EQUAL(words.size(), 3);
+    BOOST_CHECK_EQUAL(words.size(), 3u);
     BOOST_CHECK_EQUAL(words[0], "A");
 }
 
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE( test_split_string_cstr ) {
     std::vector<std::string> words;
     words.push_back("DECOY");
     split_string(test,delim,words);
-    BOOST_CHECK_EQUAL(words.size(), 3);
+    BOOST_CHECK_EQUAL(words.size(), 3u);
     BOOST_CHECK_EQUAL(words[0], "A");
 }
 
