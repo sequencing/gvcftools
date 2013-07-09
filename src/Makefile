@@ -27,10 +27,11 @@ export CXXFLAGS = $(XFLAGS) -I$(LIBUTIL_DIR) -I$(BOOST_INCLUDE_DIR) -I$(TABIX_IN
 export LDFLAGS = -L$(BOOST_LIB_DIR) -L$(TABIX_LIB_DIR)
 export LDLIBS = -ltabix_and_faidx -lz -lm
 
-PROGS = $(TRIOPROGS) $(BLOCKPROGS) 
+GVCFTOOLS_HH := gvcftools.hh
 TRIOPROGS := trio twins
 BLOCKPROGS := break_blocks extract_variants gatk_to_gvcf set_haploid_region
-OBJS = $(PROGS:%=%.o)
+PROGS = $(TRIOPROGS) $(BLOCKPROGS) 
+PROG_OBJS = $(PROGS:%=%.o)
 
 LIBTRIO_PATH = $(LIBTRIO_DIR)/libtrio.a
 LIBBLOCK_PATH = $(LIBBLOCK_DIR)/libblock.a
@@ -43,6 +44,8 @@ LIBUTIL_PATH = $(LIBUTIL_DIR)/libutil.a
 all: build
 
 build: $(PROGS)
+
+$(PROG_OBJS): $(GVCFTOOLS_HH) 
 
 
 $(TRIOPROGS): %: %.o $(LIBTRIO_PATH) $(LIBUTIL_PATH)
@@ -62,7 +65,13 @@ $(LIBBLOCK_PATH):
 $(LIBUTIL_PATH):
 	$(MAKE) -C $(LIBUTIL_DIR) $(LIBUTIL)
 
-include devel.mk
+# if GVCFTOOLS_VERSION is unset, attempt to get version from git, else set to unknown:
+$(GVCFTOOLS_HH): $(GVCFTOOLS_HH).in .FORCE
+	version="$(GVCFTOOLS_VERSION)" && \
+	if [ "$$version" == "" ]; then if gitversion=$$(git describe 2> /dev/null); then version=$$gitversion; else version="UNKNOWN"; fi; fi && \
+	sed "s/\$${VERSION}/$$version/" < $@.in > $@
+
+.FORCE:
 
 install: build
 	cp $(PROGS) *.pl $(BIN_DIR)
@@ -76,4 +85,4 @@ clean:
 	$(MAKE) -C $(LIBTRIO_DIR) $@
 	$(MAKE) -C $(LIBBLOCK_DIR) $@
 	$(MAKE) -C $(LIBUTIL_DIR) $@
-	rm -f $(PROGS) $(OBJS) $(VERSION)
+	rm -f $(PROGS) $(PROG_OBJS) $(GVCFTOOLS_HH)

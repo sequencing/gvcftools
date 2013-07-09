@@ -24,17 +24,15 @@
 //
 //
 
-/// \file
-
 /// \author Chris Saunders
 ///
-#ifndef __GVCFTOOLS_HH
-#define __GVCFTOOLS_HH
+
+#pragma once
 
 inline
-const char* gvcftools_version() {
+const char*
+gvcftools_version() {
     static const char* version = "${VERSION}";
     return version;
 }
 
-#endif

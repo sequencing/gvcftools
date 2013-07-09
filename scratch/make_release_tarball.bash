@@ -43,25 +43,22 @@ pname=$outdir/$pname_root
 mkdir -p $pname
 
 cd ..
-git archive --prefix=$pname_root/ HEAD | tar -x -C $outdir 
+git archive --prefix=$pname_root/ HEAD | tar -x -C $outdir
 
 # don't include scratch
 rm -rf $pname/scratch
 
 # make version number substitutions:
-gh=src/gvcftools.hh
-for f in README.txt $gh.in; do
+for f in README.txt; do
     sed "s/\${VERSION}/$gitversion/" < $f >| $pname/$f
 done
-mv $pname/$gh.in $pname/$gh
 
 # fix makefile
-rm -f $pname/src/devel.mk
 for f in src/Makefile; do
-    awk '! /^include/' < $f >| $pname/$f
+    echo -e "\nGVCFTOOLS_VERSION = $gitversion\n" | cat - $f >| $pname/$f
 done
 
 cd $outdir
 tar -cz $pname_root -f $pname.tar.gz
-rm -rf $pname 
+rm -rf $pname
 
