@@ -1,3 +1,5 @@
+v0.14
+- 
 v0.13
 - change all tools to handle longer vcf input lines by modifying istream_splitter
 v0.12
