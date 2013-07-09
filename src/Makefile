@@ -14,8 +14,9 @@ TABIX_INCLUDE_DIR = $(TABIX_ROOT)
 TABIX_LIB_DIR = $(TABIX_ROOT)
 
 # debug:
-#export XFLAGS= -g3 -fno-inline -O0 -Wall -Wextra
-XFLAGS= -O3 -Wall -Wextra
+WARNFLAGS = -Wall -Wextra
+#XFLAGS= -g3 -fno-inline -O0 $(WARNFLAGS)
+XFLAGS= -O3 -Wall -Wextra $(WARNFLAGS)
 
 LIBTRIO_DIR = $(CURDIR)/libtrio
 LIBBLOCK_DIR = $(CURDIR)/libblock
