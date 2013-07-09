@@ -24,12 +24,10 @@
 //
 //
 
-/// \file
-
 /// \author Chris Saunders
 ///
-#ifndef __VCF_UTIL_HH
-#define __VCF_UTIL_HH
+
+#pragma once
 
 #include <cstring>
 #include <vector>
@@ -99,5 +97,3 @@ parse_gt(const char* gt,
          std::vector<int>& gti,
          const bool is_allow_bad_end_char=false);
 
-
-#endif
