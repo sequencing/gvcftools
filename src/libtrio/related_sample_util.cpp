@@ -86,12 +86,13 @@ get_digt_code(const char * const * word,
 bool
 snp_type_info::
 get_indel_allele(
+        std::string& indel_ref,
         std::vector<std::string>& allele,
         const char * const * word) const
 {
     allele.clear();
 
-    const char* ref(word[VCFID::REF]);
+    indel_ref=(word[VCFID::REF]);
     const char* alt(word[VCFID::ALT]);
 
     std::vector<std::string> altWord;
@@ -106,7 +107,7 @@ get_indel_allele(
         assert(gt>=0);
 
         if(gt==0) {
-            allele.push_back(ref);
+            allele.push_back(indel_ref);
         }
         else
         {
@@ -309,7 +310,7 @@ bool
 site_crawler::
 update_indel_allele() const
 {
-    const bool retval(_opt.sti().get_indel_allele(_indel_allele, _word));
+    const bool retval(_opt.sti().get_indel_allele(_indel_ref,_indel_allele, _word));
     _is_indel_allele_current=true;
     return retval;
 }

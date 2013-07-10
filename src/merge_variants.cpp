@@ -87,6 +87,31 @@ const char merge_reporter::format_delim(':');
 
 
 
+template <typename T>
+void
+refAltWriter(
+        const id_set<T>& alleles,
+        std::ostream& os)
+{
+    const unsigned n_alleles(alleles.size());
+    assert(0 != n_alleles);
+
+    os << '\t' << alleles.get_key(0);  // REF
+
+    // ALT:
+    os << '\t';
+    if(n_alleles>1) {
+        for(unsigned i(1);i<n_alleles;++i) {
+            if(i>1) os << ",";
+            os << alleles.get_key(i);
+        }
+    } else {
+        os << '.';
+    }
+}
+
+
+
 void
 merge_reporter::
 print_locus(
@@ -154,7 +179,6 @@ print_locus(
 
     if(! is_indel)
     {
-        //
         // get ref, alt and gt for all samples:
         //
         const char ref_base(ref_seg.get_base(sa[0]->pos()-1));
@@ -185,32 +209,53 @@ print_locus(
             }
         }
 
-        assert(genotypes.size() == n_samples);
-
-
-
-
-        _os << '\t' << ref_base;  // REF
-
-        // ALT:
-        _os << '\t';
-        const unsigned n_alleles(alleles.size());
-        if(n_alleles>1) {
-            for(unsigned i(1);i<n_alleles;++i) {
-                if(i>1) _os << ",";
-                _os << alleles.get_key(i);
-            }
-        } else {
-            _os << '.';
-        }
+        refAltWriter(alleles,_os);
     }
     else
     {   //indel case:
-        genotypes.resize(n_samples);
-        std::fill(genotypes.begin(),genotypes.end(),".");
 
-        _os << "REF" << "\t" << "ALT";
+        // get ref, alt and gt for all samples:
+        //
+        std::string ref_allele;
+        for(unsigned st(0);st<n_samples;++st) {
+            const site_crawler& sample(*(sa[st]));
+            if(sample.get_indel_ref().size() > ref_allele.size())
+            {
+                ref_allele=sample.get_indel_ref();
+            }
+        }
+
+        id_set<std::string> alleles;
+        alleles.insert_key(ref_allele);
+
+        for(unsigned st(0);st<n_samples;++st) {
+            const site_crawler& sample(*(sa[st]));
+            const unsigned n_allele(sample.get_indel_allele_size());
+
+            bool is_nonstandard(false);
+            std::ostringstream oss;
+            for(unsigned ai(0); ai<n_allele; ai++) {
+                const std::string allele(sample.get_indel_allele(ai));
+                if(allele != "X") {
+                    const unsigned code(alleles.insert_key(allele));
+                    if(ai) oss << '/';
+                    oss << code;
+                } else {
+                    is_nonstandard=true;
+                }
+            }
+            if(is_nonstandard) {
+                genotypes.push_back(".");
+            } else {
+                genotypes.push_back(oss.str());
+            }
+        }
+
+        refAltWriter(alleles,_os);
     }
+
+    assert(genotypes.size() == n_samples);
+
 
     _os << '\t' << '.'; // QUAL
 
