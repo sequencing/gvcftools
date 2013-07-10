@@ -35,8 +35,8 @@
 #include "tabix_streamer.hh"
 #include "vcf_util.hh"
 
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/foreach.hpp>
+#include "boost/algorithm/string/predicate.hpp"
+#include "boost/foreach.hpp"
 
 #include <cctype>
 #include <cerrno>
@@ -104,10 +104,12 @@ get_indel_allele(
 
     BOOST_FOREACH(const int gt, _gtcode)
     {
-        assert(gt>=0);
-
         if(gt==0) {
             allele.push_back(indel_ref);
+        }
+        else if(gt<0)
+        {
+            allele.push_back("X");
         }
         else
         {
@@ -335,7 +337,8 @@ static const char sep('\t');
 // return true if current position in record is valid and usable
 bool
 site_crawler::
-process_record_line(char* line) {
+process_record_line(char* line)
+{
     static const unsigned MAX_WORD(50);
     
     // do a low-level tab parse:
