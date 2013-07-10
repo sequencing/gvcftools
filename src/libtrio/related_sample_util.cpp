@@ -54,6 +54,15 @@ std::ostream& log_os(std::cerr);
 
 
 
+std::ostream&
+operator<<(std::ostream& os, const vcf_pos& vpos)
+{
+    os << "pos: " << vpos.pos << " is_indel: " << vpos.is_indel;
+    return os;
+}
+
+
+
 static
 bool
 get_digt_code(const char * const * word,
@@ -70,6 +79,43 @@ get_digt_code(const char * const * word,
         parse_gt(gtstr,digt_code,true);
     }
     return (digt_code.size()==2 && digt_code[0]>=0 && digt_code[1]>=0);
+}
+
+
+
+bool
+snp_type_info::
+get_indel_allele(
+        std::vector<std::string>& allele,
+        const char * const * word) const
+{
+    allele.clear();
+
+    const char* ref(word[VCFID::REF]);
+    const char* alt(word[VCFID::ALT]);
+
+    std::vector<std::string> altWord;
+    split_string(alt,',',altWord);
+
+    get_digt_code(word,_gtcode);
+
+    bool is_standard_diploid(true);
+
+    BOOST_FOREACH(const int gt, _gtcode)
+    {
+        assert(gt>=0);
+
+        if(gt==0) {
+            allele.push_back(ref);
+        }
+        else
+        {
+            assert(gt<=static_cast<int>(altWord.size()));
+            allele.push_back(altWord[gt-1]);
+        }
+    }
+
+    return (is_standard_diploid && _gtcode.size()==2);
 }
 
 
@@ -195,13 +241,15 @@ site_crawler(const sample_info& si,
              const shared_crawler_options& opt,
              const char* chr_region,
              const reference_contig_segment& ref_seg,
-             const bool is_store_header)
+             const bool is_store_header,
+             const bool is_return_indels)
     : _is_call(false)
     , _chrom(NULL)
     , _si(si)
     , _sample_id(sample_id)
     , _opt(opt)
     , _chr_region(chr_region)
+    , _is_return_indels(is_return_indels)
     , _tabs(NULL)
     , _is_sample_begin_state(true)
     , _is_sample_end_state(false)
@@ -212,7 +260,8 @@ site_crawler(const sample_info& si,
     , _locus_offset(0)
     , _skip_call_begin_pos(0)
     , _skip_call_end_pos(0)
-    , _is_allele_current(false)
+    , _is_site_allele_current(false)
+    , _is_indel_allele_current(false)
 {
     update(is_store_header);
 }
@@ -246,15 +295,35 @@ dump_state(std::ostream& os) const {
 
 bool
 site_crawler::
+update_site_allele() const
+{
+    const char ref_base(_ref_seg.get_base(pos()-1));
+    const bool retval(_opt.sti().get_site_allele(_site_allele,_word,_locus_offset,ref_base));
+    _is_site_allele_current=true;
+    return retval;
+}
+
+
+
+bool
+site_crawler::
+update_indel_allele() const
+{
+    const bool retval(_opt.sti().get_indel_allele(_indel_allele, _word));
+    _is_indel_allele_current=true;
+    return retval;
+}
+
+
+
+bool
+site_crawler::
 update_allele() const {
     if(is_indel()) {
-        return false;
+        return update_indel_allele();
     } else {
-        const char ref_base(_ref_seg.get_base(pos()-1));
-        const bool retval(_opt.sti().get_site_allele(_allele,_word,_locus_offset,ref_base));
-        _is_allele_current=true;
-        return retval;
-    }
+        return update_site_allele();
+   }
 }
 
 
@@ -290,16 +359,17 @@ process_record_line(char* line) {
         }
     }
 
-    const pos_t last_pos(pos());
+    const vcf_pos last_vpos(vpos());
     _chrom=_opt.sti().chrom(_word);
     _vpos.pos=_opt.sti().pos(_word);
 
-    _is_allele_current=false;
+    _is_site_allele_current=false;
+    _is_indel_allele_current=false;
 
     _vpos.is_indel=(_opt.sti().get_is_indel(_word));
 
     if(pos()<1) {
-        log_os << "ERROR: gcvf record position less than 1. position: " << pos() << " ";
+        log_os << "ERROR: gvcf record position less than 1. position: " << pos() << " ";
         dump_state(log_os);
         exit(EXIT_FAILURE);
     }
@@ -322,7 +392,7 @@ process_record_line(char* line) {
 
     if(! _opt.sti().get_nonindel_ref_length(pos(),is_indel(),_word,_locus_size)) {
         //log_os << "ERROR: failed to parse locus at pos: "  << pos << "\n";
-        log_os << "WARNING: failed to parse locus at pos: "  << pos() << "\n";
+        log_os << "WARNING: failed to parse locus at: "  << vpos() << "\n";
         dump_state(log_os);
         //exit(EXIT_FAILURE);
         _locus_size=0;
@@ -341,12 +411,19 @@ process_record_line(char* line) {
     _n_total = _opt.sti().total(_word);
 
     if(is_indel()) {
-       _vpos.pos=last_pos;
-       _locus_size=0;
-       return false;
+        if(! _is_return_indels)
+        {
+            _vpos.pos=last_vpos.pos;
+            _locus_size=0;
+            return false;
+        }
+        else
+        {
+            _locus_size=0;
+        }
     }
 
-    if(is_site_call()) {
+    if(is_any_call()) {
         _is_call=update_allele();
     }
 
@@ -356,17 +433,14 @@ process_record_line(char* line) {
     //}
     
     if(! _is_sample_begin_state) {
-        // we've already filtered out indels, so we can require that valid records do not have the same pos or lower.
-        if(pos()<=last_pos) {
+        if(! (last_vpos < vpos()) ) {
             if(_opt.is_murdock_mode) {
-                _vpos.pos=last_pos;
+                _vpos=last_vpos;
                 _locus_size=0;
                 return false;
-                //pos=last_pos;
-                //is_call=last_is_call;
             } else {
                 log_os << "ERROR: unexpected position order in variant file. current_pos: " 
-                       << pos() << " last_pos: " << last_pos << "\n";
+                       << pos() << " last " << last_vpos << "\n";
                 dump_state(log_os);
                 exit(EXIT_FAILURE);
             }
@@ -426,7 +500,7 @@ update(bool is_store_header){
             _vpos.pos++;
 
             if(_opt.is_region()) {
-                // check for pos preceeding the start of region of interest in a multi-base record:
+                // check for pos preceding the start of region of interest in a multi-base record:
                 if(pos()<_opt.region_begin){
                     continue;
                 }
@@ -441,7 +515,7 @@ update(bool is_store_header){
 
             if(is_site_call()) {
                 const char ref_base=_ref_seg.get_base(pos()-1);
-                if(! _opt.sti().get_site_allele(_allele,_word,_locus_offset,ref_base)) {
+                if(! _opt.sti().get_site_allele(_site_allele,_word,_locus_offset,ref_base)) {
                     log_os << "ERROR: Failed to read site genotype from record:\n";
                     dump_state(log_os);
                     exit(EXIT_FAILURE);

@@ -185,15 +185,17 @@ struct snp_type_info {
 
         return (pos<skip_call_begin_pos || pos>=skip_call_end_pos);
     }
-  
-
-
 
     bool
     get_site_allele(std::vector<char>& allele,
                const char * const * word,
                const unsigned offset,
                const char ref_base) const;
+
+    bool
+    get_indel_allele(
+            std::vector<std::string>& allele,
+            const char * const * word) const;
 
     unsigned
     total(const char * const * word) const {
@@ -390,6 +392,9 @@ struct vcf_pos {
 };
 
 
+std::ostream&
+operator<<(std::ostream& os, const vcf_pos& vpos);
+
 
 struct site_crawler {
     
@@ -398,7 +403,8 @@ struct site_crawler {
                  const shared_crawler_options& opt,
                  const char* chr_region,
                  const reference_contig_segment& ref_seg,
-                 const bool is_store_header = false);
+                 const bool is_store_header = false,
+                 const bool is_return_indels = false);
 
     ~site_crawler();
 
@@ -440,15 +446,28 @@ struct site_crawler {
 
     unsigned
     get_allele_size() const {
-        if(! _is_allele_current) update_allele();
-        return _allele.size();
+        if(! _is_site_allele_current) update_site_allele();
+        return _site_allele.size();
     }
 
     char
     get_allele(const unsigned index) const {
-        if(! _is_allele_current) update_allele();
+        if(! _is_site_allele_current) update_site_allele();
         if(index>get_allele_size()) return 'N';
-        return _allele[index];
+        return _site_allele[index];
+    }
+
+    unsigned
+    get_indel_allele_size() const {
+        if(! _is_indel_allele_current) update_indel_allele();
+        return _indel_allele.size();
+    }
+
+    std::string
+    get_indel_allele(const unsigned index) const {
+        if(! _is_indel_allele_current) update_indel_allele();
+        if(index>get_indel_allele_size()) return "";
+        return _indel_allele[index];
     }
 
     pos_t
@@ -464,6 +483,12 @@ struct site_crawler {
     vcf_pos
     vpos() const {
         return _vpos;
+    }
+
+    bool
+    is_any_call() const
+    {
+        return _is_call;
     }
 
     bool
@@ -487,6 +512,12 @@ private:
     update_allele() const;
 
     bool
+    update_site_allele() const;
+
+    bool
+    update_indel_allele() const;
+
+    bool
     process_record_line(char* line);
 
     vcf_pos _vpos;
@@ -502,6 +533,8 @@ private:
     const unsigned _sample_id; // only used for debugging...
     const shared_crawler_options& _opt;
     const char* _chr_region;
+
+    bool _is_return_indels;
 
     tabix_streamer* _tabs;
     bool _is_sample_begin_state;
@@ -519,8 +552,9 @@ private:
     mutable pos_t _skip_call_begin_pos;
     mutable pos_t _skip_call_end_pos;
 
-    mutable bool _is_allele_current;
-    mutable std::vector<char> _allele;
+    mutable bool _is_site_allele_current;
+    mutable bool _is_indel_allele_current;
+    mutable std::vector<char> _site_allele;
     mutable std::vector<std::string> _indel_allele;
 };
 
