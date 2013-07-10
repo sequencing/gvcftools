@@ -238,7 +238,7 @@ get_format_unsigned(const char* const * word,
 
 site_crawler::
 site_crawler(const sample_info& si,
-             const unsigned sample_id,
+             const unsigned /*sample_id*/,
              const shared_crawler_options& opt,
              const char* chr_region,
              const reference_contig_segment& ref_seg,
@@ -247,7 +247,7 @@ site_crawler(const sample_info& si,
     : _is_call(false)
     , _chrom(NULL)
     , _si(si)
-    , _sample_id(sample_id)
+    //, _sample_id(sample_id)
     , _opt(opt)
     , _chr_region(chr_region)
     , _is_return_indels(is_return_indels)
