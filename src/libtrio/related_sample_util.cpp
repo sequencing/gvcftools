@@ -35,8 +35,8 @@
 #include "tabix_streamer.hh"
 #include "vcf_util.hh"
 
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/foreach.hpp>
+#include "boost/algorithm/string/predicate.hpp"
+#include "boost/foreach.hpp"
 
 #include <cctype>
 #include <cerrno>
@@ -86,12 +86,13 @@ get_digt_code(const char * const * word,
 bool
 snp_type_info::
 get_indel_allele(
+        std::string& indel_ref,
         std::vector<std::string>& allele,
         const char * const * word) const
 {
     allele.clear();
 
-    const char* ref(word[VCFID::REF]);
+    indel_ref=(word[VCFID::REF]);
     const char* alt(word[VCFID::ALT]);
 
     std::vector<std::string> altWord;
@@ -103,10 +104,12 @@ get_indel_allele(
 
     BOOST_FOREACH(const int gt, _gtcode)
     {
-        assert(gt>=0);
-
         if(gt==0) {
-            allele.push_back(ref);
+            allele.push_back(indel_ref);
+        }
+        else if(gt<0)
+        {
+            allele.push_back("X");
         }
         else
         {
@@ -237,7 +240,7 @@ get_format_unsigned(const char* const * word,
 
 site_crawler::
 site_crawler(const sample_info& si,
-             const unsigned sample_id,
+             const unsigned /*sample_id*/,
              const shared_crawler_options& opt,
              const char* chr_region,
              const reference_contig_segment& ref_seg,
@@ -246,7 +249,7 @@ site_crawler(const sample_info& si,
     : _is_call(false)
     , _chrom(NULL)
     , _si(si)
-    , _sample_id(sample_id)
+    //, _sample_id(sample_id)
     , _opt(opt)
     , _chr_region(chr_region)
     , _is_return_indels(is_return_indels)
@@ -309,7 +312,7 @@ bool
 site_crawler::
 update_indel_allele() const
 {
-    const bool retval(_opt.sti().get_indel_allele(_indel_allele, _word));
+    const bool retval(_opt.sti().get_indel_allele(_indel_ref,_indel_allele, _word));
     _is_indel_allele_current=true;
     return retval;
 }
@@ -334,7 +337,8 @@ static const char sep('\t');
 // return true if current position in record is valid and usable
 bool
 site_crawler::
-process_record_line(char* line) {
+process_record_line(char* line)
+{
     static const unsigned MAX_WORD(50);
     
     // do a low-level tab parse:

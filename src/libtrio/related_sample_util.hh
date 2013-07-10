@@ -194,6 +194,7 @@ struct snp_type_info {
 
     bool
     get_indel_allele(
+            std::string& indel_ref,
             std::vector<std::string>& allele,
             const char * const * word) const;
 
@@ -463,11 +464,18 @@ struct site_crawler {
         return _indel_allele.size();
     }
 
-    std::string
+    const std::string&
     get_indel_allele(const unsigned index) const {
+        static const std::string nullStr("X");
         if(! _is_indel_allele_current) update_indel_allele();
-        if(index>get_indel_allele_size()) return "";
+        if(index>get_indel_allele_size()) return nullStr;
         return _indel_allele[index];
+    }
+
+    const std::string&
+    get_indel_ref() const {
+        if(! _is_indel_allele_current) update_indel_allele();
+        return _indel_ref;
     }
 
     pos_t
@@ -530,7 +538,7 @@ private:
 
     const char* _chrom;
     const sample_info _si;
-    const unsigned _sample_id; // only used for debugging...
+    //const unsigned _sample_id; // only used for debugging...
     const shared_crawler_options& _opt;
     const char* _chr_region;
 
@@ -555,6 +563,7 @@ private:
     mutable bool _is_site_allele_current;
     mutable bool _is_indel_allele_current;
     mutable std::vector<char> _site_allele;
+    mutable std::string _indel_ref;
     mutable std::vector<std::string> _indel_allele;
 };
 
