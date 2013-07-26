@@ -1,7 +1,7 @@
 #
 # IDS must be defined:
 #
-IDS := CXXFLAGS LIBUTIL_DIR
+IDS := CXXFLAGS
 
 assert-defined-indirect = $(if $($1),,$(error Variable '$1' must be defined))
 $(foreach I,$(IDS), $(call assert-defined-indirect,$I))
@@ -11,8 +11,6 @@ OBJS = $(SRCS:%.cpp=%.o)
 
 LIBLABEL=$(notdir $(CURDIR))
 LIBNAME=$(LIBLABEL).a
-
-$(OBJS) : CXXFLAGS += -I$(LIBUTIL_DIR)
 
 $(LIBNAME): $(OBJS)
 	$(AR) -csru $@ $(OBJS)

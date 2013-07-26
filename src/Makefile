@@ -18,9 +18,13 @@ WARNFLAGS = -Wall -Wextra
 #XFLAGS= -g3 -fno-inline -O0 $(WARNFLAGS)
 XFLAGS= -O3 $(WARNFLAGS)
 
-LIBTRIO_DIR = $(CURDIR)/libtrio
-LIBBLOCK_DIR = $(CURDIR)/libblock
-export LIBUTIL_DIR = $(CURDIR)/libutil
+LIBTRIO = libtrio
+LIBBLOCK = libblock
+LIBUTIL = libutil
+
+LIBTRIO_DIR = $(CURDIR)/$(LIBTRIO)
+LIBBLOCK_DIR = $(CURDIR)/$(LIBBLOCK)
+LIBUTIL_DIR = $(CURDIR)/$(LIBUTIL)
 
 #CXX := clang++
 CC := $(CXX) # this gets the linker to include libc++
@@ -35,9 +39,9 @@ BLOCKPROGS := break_blocks extract_variants gatk_to_gvcf set_haploid_region
 PROGS = $(TRIOPROGS) $(BLOCKPROGS) 
 PROG_OBJS = $(PROGS:%=%.o)
 
-LIBTRIO_PATH = $(LIBTRIO_DIR)/libtrio.a
-LIBBLOCK_PATH = $(LIBBLOCK_DIR)/libblock.a
-LIBUTIL_PATH = $(LIBUTIL_DIR)/libutil.a
+LIBTRIO_PATH = $(LIBTRIO_DIR)/$(LIBTRIO).a
+LIBBLOCK_PATH = $(LIBBLOCK_DIR)/$(LIBBLOCK).a
+LIBUTIL_PATH = $(LIBUTIL_DIR)/$(LIBUTIL).a
 
 
 .PHONY: all build clean install test
@@ -51,21 +55,23 @@ $(PROG_OBJS): $(GVCFTOOLS_HH)
 
 
 $(TRIOPROGS): %: %.o $(LIBTRIO_PATH) $(LIBUTIL_PATH)
-$(TRIOPROGS): CXXFLAGS += -I$(LIBUTIL_DIR) -I$(LIBTRIO_DIR) 
+$(TRIOPROGS): CXXFLAGS += -I$(LIBTRIO_DIR) 
 $(TRIOPROGS): LDLIBS += -lboost_program_options
 
 $(BLOCKPROGS): %: %.o $(LIBBLOCK_PATH) $(LIBUTIL_PATH)
-$(BLOCKPROGS): CXXFLAGS += -I$(LIBUTIL_DIR) -I$(LIBBLOCK_DIR) 
+$(BLOCKPROGS): CXXFLAGS += -I$(LIBBLOCK_DIR) 
 $(BLOCKPROGS): LDLIBS += -lboost_program_options
 
-$(LIBTRIO_PATH):
-	$(MAKE) -C $(LIBTRIO_DIR) $(LIBTRIO)
+$(LIBTRIO_PATH): .FORCE
+	$(MAKE) -C $(LIBTRIO_DIR) $(notdir $(LIBTRIO_PATH)) 
 
-$(LIBBLOCK_PATH):
-	$(MAKE) -C $(LIBBLOCK_DIR) $(LIBBLOCK)
+$(LIBBLOCK_PATH): .FORCE
+	$(MAKE) -C $(LIBBLOCK_DIR) $(notdir $(LIBBLOCK_PATH)) 
 
-$(LIBUTIL_PATH):
-	$(MAKE) -C $(LIBUTIL_DIR) $(LIBUTIL)
+$(LIBUTIL_PATH): .FORCE
+	$(MAKE) -C $(LIBUTIL_DIR) $(notdir $(LIBUTIL_PATH))
+
+.FORCE:
 
 # if GVCFTOOLS_VERSION is unset, attempt to get version from git, else set to unknown:
 $(GVCFTOOLS_HH): $(GVCFTOOLS_HH).in .FORCE
