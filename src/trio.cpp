@@ -440,7 +440,7 @@ try_main(int argc,char* argv[]){
     req.add_options()
         ("ref", po::value<std::string >(&ref_seq_file),"samtools reference sequence (required)")
         ("region", po::value<std::string>(&opt.region), "samtools reference region (optional)")
-        ("exclude", po::value<std::vector<std::string> >(&exclude_list), "name of chromsome to skip over (argument may be specified multiple times). Exclusions will be ignored if a region argument is provided")
+        ("exclude", po::value<std::vector<std::string> >(&exclude_list), "name of chromosome to skip over (argument may be specified multiple times). Exclusions will be ignored if a region argument is provided")
         ("mother", po::value<std::string>(&si[MOTHER].file),
          "mother gvcf file")
         ("father", po::value<std::string>(&si[FATHER].file),
@@ -453,7 +453,7 @@ try_main(int argc,char* argv[]){
         ("no-variable-metadata",
          "Remove timestamp and any other metadata from output during validation testing")
         ("murdock",
-         "In murdock mode trio doesn't stop because of any out-of-order position conflicts. Any out of order positions are ignored. In case of an overlap the first observation is used and subsequent repeats are ignored.");
+         "If true, don't stop because of any out-of-order position conflicts. Any out of order positions are ignored. In case of an overlap the first observation is used and subsequent repeats are ignored.");
 
     po::options_description filter("filtration");
     filter.add_options()

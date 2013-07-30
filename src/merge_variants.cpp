@@ -520,10 +520,10 @@ try_main(int argc,char* argv[]){
     req.add_options()
         ("ref", po::value<std::string>(&ref_seq_file),"samtools reference sequence (required)")
         ("region", po::value<std::string>(&opt.region), "samtools reference region (optional)")
-        ("exclude", po::value<std::vector<std::string> >(&exclude_list), "name of chromsome to skip over (argument may be specified multiple times). Exclusions will be ignored if a region argument is provided")
+        ("exclude", po::value<std::vector<std::string> >(&exclude_list), "name of chromosome to skip over (argument may be specified multiple times). Exclusions will be ignored if a region argument is provided")
         ("input", po::value<std::vector<std::string> >(&input_files)->multitoken(), "merge files (can be specified multiple times)")
         ("murdock",
-         "In murdock mode trio doesn't stop because of any out-of-order position conflicts. Any out of order positions are ignored. In case of an overlap the first observation is used and subsequent repeats are ignored.")
+         "If true, don't stop because of any out-of-order position conflicts. Any out of order positions are ignored. In case of an overlap the first observation is used and subsequent repeats are ignored.")
         ;
 
     po::options_description help("help");
