@@ -91,9 +91,16 @@ struct CallRegionVcfRecordHandler {
        unsigned begin_pos(0), end_pos(0);
        get_vcf_record_range(vparse.word, begin_pos, end_pos);
 
+       // special check for insertions:
+       if(end_pos+1 == begin_pos) return;
+
        assert(begin_pos > 0);
        assert(end_pos > 0);
-       assert(end_pos >= begin_pos);
+       if(end_pos < begin_pos) {
+           log_os << "ERROR: Can't parse record range. [begin,end] = " << begin_pos << "," << end_pos <<"\n";
+           vparse.dump(log_os);
+           exit(EXIT_FAILURE);
+       }
 
        const char* chromStr(vparse.word[VCFID::CHROM]);
        addPassedRange(chromStr,begin_pos-1,end_pos);
