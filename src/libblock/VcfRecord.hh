@@ -24,16 +24,18 @@
 //
 //
 
-/// \file
-
+///
 /// \author Chris Saunders
 ///
-#ifndef __VCF_RECORD_HH
-#define __VCF_RECORD_HH
+
+#pragma once
+
 
 #include "istream_line_splitter.hh"
 #include "string_util.hh"
 #include "vcf_util.hh"
+
+#include "boost/foreach.hpp"
 
 #include <cassert>
 #include <cstring>
@@ -84,11 +86,26 @@ struct VcfRecord {
         return false;
     }
 
-    // strictly, we need to check gt as well to determin if the site is actually genotyped as variant,
+    // strictly, we need to check gt as well to determine if the site is actually genotyped as variant,
     //
     bool IsVariant() const {
         return (! GetAlt().empty());
     }
+
+    bool
+    IsStrictVariant() const {
+        if(GetAlt().empty()) return false;
+
+        const char* gtstr(GetSampleVal("GT"));
+        if (NULL == gtstr) return false;
+
+        parse_gt(gtstr, _gtparse);
+        BOOST_FOREACH(const int allele, _gtparse) {
+            if(allele>0) return true;
+        }
+        return false;
+    }
+
 
     bool IsNonvariantBlock() const {
         return ((GetRef().size() != 1) && (! IsVariant()));
@@ -326,9 +343,9 @@ private:
     std::vector<std::string> _info;
     std::vector<std::string> _format;
     std::vector<std::string> _sample;
+
+
+    mutable std::vector<int> _gtparse; ///< cache variable to reduce total sys calls
 };
 
 //std::ostream& operator<<(std::ostream& os, const VcfRecord& vcfr);
-
-
-#endif

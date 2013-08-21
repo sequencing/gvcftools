@@ -80,19 +80,9 @@ struct VariantsVcfRecordHandler {
            exit(EXIT_FAILURE);
        }
 
-       const char* altstr(vparse.word[VCFID::ALT]);
-       if(0==strcmp(".",altstr)) return;
-       
-       parse_gt(get_format_string_nocopy(vparse.word,"GT"),_gtparse,true);
-        
-       bool is_variant(false);
-       for(unsigned i(0);i<_gtparse.size();++i) {
-           if(_gtparse[i]>0) is_variant=true;
-       }
+       if (! is_variant_record(vparse.word, _gtparse)) return;
 
-       if(is_variant) {
-           vparse.write_line(_opt.outfp);
-       }
+       vparse.write_line(_opt.outfp);
     }
 
 private:

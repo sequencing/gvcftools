@@ -77,7 +77,10 @@ private:
             } else {
                 vcfr.DeleteInfoKeyVal("END");
             }
-            vcfr.WriteUnaltered(_opt.outfp);
+            /// TODO: is it safe to pull the above if/else into this block?
+            if(is_write_off_region_record(vcfr)) {
+                vcfr.WriteUnaltered(_opt.outfp);
+            }
         } else {
             vcfr.DeleteInfoKeyVal("END");
             vcfr.WriteUnaltered(_opt.outfp);
@@ -113,9 +116,6 @@ process_vcf_input(const RegionVcfOptions& opt,
 
 
 
-
-
-
 static
 void
 try_main(int argc,char* argv[]){
@@ -135,8 +135,14 @@ try_main(int argc,char* argv[]){
     namespace po = boost::program_options;
     po::options_description req("configuration");
     req.add_options()
-        ("region-file",po::value<std::string>(&region_file),"A bed file specifying regions where non-refernece blocks should be broken into individual positions (required)")
-        ("ref", po::value<std::string >(&opt.ref_seq_file),"samtools reference sequence (required)");
+        ("region-file",po::value(&region_file),
+            "A bed file specifying regions where call blocks should be broken into individual positions (required)")
+        ("ref", po::value(&opt.refSeqFile),
+            "samtools reference sequence (required)")
+        ("exclude-off-target",
+            "Don't output off-target vcf records. 'targeted' records include all those intersecting the input region plus any optionally included types specified below (default: output all records)")
+        ("include-variants",
+            "Add all variant calls to the targeted record set (only applies when exclude-off-target is used)");
 
     po::options_description help("help");
     help.add_options()
@@ -163,12 +169,15 @@ try_main(int argc,char* argv[]){
         exit(EXIT_FAILURE);
     }
 
+    opt.isExcludeOffTarget=vm.count("exclude-off-target");
+    opt.isIncludeVariants=vm.count("include-variants");
+
     if(region_file.empty()) {
         log_os << "ERROR: no region file specified\n";
         exit(EXIT_FAILURE);
     }
 
-    if(opt.ref_seq_file.empty()) {
+    if(opt.refSeqFile.empty()) {
         log_os << "ERROR: no reference file specified\n";
         exit(EXIT_FAILURE);
     }

@@ -32,6 +32,8 @@
 #include "blt_exception.hh"
 #include "vcf_util.hh"
 
+#include "boost/foreach.hpp"
+
 #include <cassert>
 #include <cctype>
 
@@ -122,4 +124,22 @@ parse_gt(const char* gt,
         oss << "ERROR: can't parse genotype string: '" << gt << "'\n";
         throw blt_exception(oss.str().c_str());
     }
+}
+
+
+
+bool
+is_variant_record(
+    const char* const * word,
+    std::vector<int>& gtparse) {
+
+    const char* altstr(word[VCFID::ALT]);
+    if(0==strcmp(".",altstr)) return false;
+
+    parse_gt(get_format_string_nocopy(word,"GT"),gtparse,true);
+
+    BOOST_FOREACH(const int allele, gtparse) {
+        if(allele>0) return true;
+    }
+    return false;
 }

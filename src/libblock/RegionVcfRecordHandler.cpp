@@ -46,8 +46,10 @@ std::ostream& log_os(std::cerr);
 
 
 RegionVcfOptions::
-RegionVcfOptions()
-    : outfp(std::cout)
+RegionVcfOptions() :
+    outfp(std::cout),
+    isExcludeOffTarget(false),
+    isIncludeVariants(false)
 {}
 
 
@@ -68,7 +70,9 @@ process_line(const istream_line_splitter& vparse) {
     // successive calls for the record region.
     //
     if(! is_record_in_region(vparse)) {
-        vparse.write_line(_opt.outfp);
+        if(is_write_off_region_record(vparse)) {
+            vparse.write_line(_opt.outfp);
+        }
         return;
     }
 
@@ -127,6 +131,32 @@ is_record_in_region(const istream_line_splitter& vparse) {
             }
         }
         _is_skip_chrom=true;
+    }
+    return false;
+}
+
+
+
+bool
+RegionVcfRecordHandler::
+is_write_off_region_record(const istream_line_splitter& vparse) const {
+    if (! _opt.isExcludeOffTarget) return true;
+
+    if (_opt.isIncludeVariants) {
+        if (is_variant_record(vparse.word, _gtparse)) return true;
+    }
+    return false;
+}
+
+
+/// \brief do we output this record, assuming it is off-region
+bool
+RegionVcfRecordHandler::
+is_write_off_region_record(const VcfRecord& vcfr) const {
+    if (! _opt.isExcludeOffTarget) return true;
+
+    if (_opt.isIncludeVariants) {
+        if (vcfr.IsStrictVariant()) return true;
     }
     return false;
 }

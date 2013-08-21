@@ -70,7 +70,6 @@ get_format_key_index(const char* format,
 }
 
 
-
 // return pointer to 
 //
 inline
@@ -90,10 +89,19 @@ get_format_string_nocopy(const char* const * word,
 }
 
 
-
 // returns -1 for '.' alleles
 void
 parse_gt(const char* gt,
          std::vector<int>& gti,
          const bool is_allow_bad_end_char=false);
+
+
+/// \brief determine if the vcf record represents a variant
+///
+/// \param[out] gti genotype allele list, this is only guaranteed to be valid when the function returns true
+///
+bool
+is_variant_record(
+    const char* const * word,
+    std::vector<int>& gti);
 

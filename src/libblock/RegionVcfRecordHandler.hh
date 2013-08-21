@@ -24,13 +24,11 @@
 //
 //
 
-/// \file
 ///
 /// \author Chris Saunders
 ///
 
-#ifndef __REGION_VCF_RECORD_HANDLER
-#define __REGION_VCF_RECORD_HANDLER
+#pragma once
 
 
 #include "istream_line_splitter.hh"
@@ -48,8 +46,10 @@ struct RegionVcfOptions {
     RegionVcfOptions();
 
     std::ostream& outfp;
-    std::string ref_seq_file;
+    std::string refSeqFile;
     region_util::region_t regions;
+    bool isExcludeOffTarget;
+    bool isIncludeVariants;
 };
 
 
@@ -60,7 +60,7 @@ struct RegionVcfRecordHandler {
 
     RegionVcfRecordHandler(const RegionVcfOptions& opt)
         : _opt(opt)
-        , _scp(opt.ref_seq_file.c_str())
+        , _scp(opt.refSeqFile.c_str())
     {}
 
     virtual ~RegionVcfRecordHandler() {}
@@ -72,11 +72,11 @@ private:
 
     virtual
     void
-    process_block(const bool is_in_region,
+    process_block(const bool isInRegion,
                   const unsigned end,
                   VcfRecord& vcfr) const = 0;
 
-    // does the current vcf record overlap with any regions?
+    /// \brief does the current vcf record overlap with any regions?
     bool
     is_record_in_region(const istream_line_splitter& vparse);
 
@@ -90,7 +90,16 @@ private:
     get_next_record_region_interval(bool& is_in_region,
                                     unsigned& end);
 
+    /// \brief do we output this record, assuming it is off-region
+    bool
+    is_write_off_region_record(const istream_line_splitter& vparse) const;
+
 protected:
+
+    /// \brief do we output this record, assuming it is off-region
+    bool
+    is_write_off_region_record(const VcfRecord& vcfr) const;
+
     const RegionVcfOptions& _opt;
     samtools_char_picker _scp;
 
@@ -100,7 +109,6 @@ private:
     region_util::interval_group_t::const_iterator _rhead,_rend;
 
     unsigned _begin_pos,_end_pos; // used to provide the region intercept iterator
+
+    mutable std::vector<int> _gtparse; ///< cache variable to reduce total sys calls
 };
-
-
-#endif
