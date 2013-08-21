@@ -1,3 +1,4 @@
+- fix FORMAT/SAMPLE QC check in break_blocks
 v0.14
 - add new gvcf variant merging tool
 v0.13

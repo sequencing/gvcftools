@@ -78,13 +78,21 @@ VcfRecord(const istream_line_splitter& vparse)
     if(ws > VCFID::SAMPLE) {
         Splitter(vparse.word[VCFID::SAMPLE],':',_sample);
     }
-    
+
+    // by the vcf spec, we can drop trailing fields in any sample:
+    if(_sample.size() < _format.size())
+    {
+        _sample.resize(_format.size(),".");
+    }
+
     if(_format.size() != _sample.size()) {
         std::ostringstream oss;
         oss << "FORMAT and SAMPLE fields do not agree for vcf record:\n";
         vparse.dump(oss);
         throw blt_exception(oss.str().c_str());
     }
+
+
 }
 
 
