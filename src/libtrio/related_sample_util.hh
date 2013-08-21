@@ -238,7 +238,7 @@ struct snp_type_info {
         return true;
     }
 
-    // this detects both indels and unequal or equal length 'block-substutitons'
+    // this detects both indels and unequal or equal length 'block-subsitutions'
     bool
     get_is_indel(const char * const * word) const {
         const char* alt(word[VCFID::ALT]);

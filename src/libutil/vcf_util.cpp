@@ -30,6 +30,7 @@
 ///
 
 #include "blt_exception.hh"
+#include "parse_util.hh"
 #include "vcf_util.hh"
 
 #include "boost/foreach.hpp"
@@ -142,4 +143,67 @@ is_variant_record(
         if(allele>0) return true;
     }
     return false;
+}
+
+
+
+void
+get_vcf_end_record_range(
+    const char* const * word,
+    unsigned& begin_pos,
+    unsigned& end_pos) {
+
+    // get begin pos:
+    const char* posstr(word[VCFID::POS]);
+    begin_pos=(parse_unsigned(posstr));
+
+    // get end pos:
+    static const char* endkey = "END=";
+    static const unsigned endsize = strlen(endkey);
+
+    const char* endstr(strstr(word[VCFID::INFO],"END="));
+    if(NULL==endstr) {
+        end_pos = begin_pos;
+    } else {
+        endstr += endsize;
+        end_pos = parse_unsigned(endstr);
+    }
+}
+
+
+
+void
+get_vcf_record_range(
+    const char* const * word,
+    unsigned& begin_pos,
+    unsigned& end_pos) {
+
+    get_vcf_end_record_range(word,begin_pos,end_pos);
+
+    if(begin_pos != end_pos) return;
+
+    // no END tag -- check to see if this is an indel record:
+    const char* refStr(word[VCFID::REF]);
+    const unsigned refLen(strlen(refStr));
+
+    bool isIndel(false);
+    {
+        const char* altStr(word[VCFID::ALT]);
+
+        // make sure there is an alternate:
+        if(0!=strcmp(altStr,".")) {
+            const char* tmp_ptr;
+            while(NULL != (tmp_ptr=strchr(altStr,','))){
+                if((tmp_ptr-altStr)!= refLen) isIndel=true;
+                altStr = tmp_ptr+1;
+            }
+            if (strlen(altStr) != refLen) isIndel=true;
+        }
+    }
+    if(! isIndel) return;
+
+    // if it's an indel the first position isn't really "called"
+    begin_pos += 1;
+    end_pos += (refLen-1);
+
 }

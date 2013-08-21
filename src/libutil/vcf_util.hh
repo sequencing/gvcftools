@@ -105,3 +105,18 @@ is_variant_record(
     const char* const * word,
     std::vector<int>& gti);
 
+
+/// get range (1-indexed, closed) of the vcf record based on an optional END tag
+void
+get_vcf_end_record_range(
+    const char* const * word,
+    unsigned& begin_pos,
+    unsigned& end_pos);
+
+
+/// get range (1-indexed, closed) of the vcf record based on either an end tag or reference allele length
+void
+get_vcf_record_range(
+    const char* const * word,
+    unsigned& begin_pos,
+    unsigned& end_pos);

@@ -109,19 +109,7 @@ is_record_in_region(const istream_line_splitter& vparse) {
     
     if(! _is_skip_chrom) {
         // get start pos:
-        const char* posstr(vparse.word[VCFID::POS]);
-        _begin_pos=(parse_unsigned(posstr));
-        
-        // get end pos:
-        static const char* endkey = "END=";
-        static const unsigned endsize = strlen(endkey);
-        const char* endstr(strstr(vparse.word[VCFID::INFO],"END="));
-        if(NULL==endstr) {
-            _end_pos = _begin_pos;
-        } else {
-            endstr+=endsize;
-            _end_pos=parse_unsigned(endstr);
-        }
+        get_vcf_end_record_range(vparse.word, _begin_pos, _end_pos);
         
         while(_rhead != _rend) {
             if(_begin_pos>_rhead->second) {
