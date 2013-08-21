@@ -1,3 +1,5 @@
+- Add new get_called_region tool to output a bedtrack of all PASSed regions of
+the genome
 - fix FORMAT/SAMPLE QC check in break_blocks
 v0.14
 - add new gvcf variant merging tool

@@ -67,6 +67,11 @@ struct CallRegionVcfRecordHandler {
         : _opt(opt)
     {}
 
+    ~CallRegionVcfRecordHandler() {
+        // close out any remaining passed regions:
+        writeCurrent();
+    }
+
     void
     process_line(const istream_line_splitter& vparse) {
        const unsigned nw(vparse.n_word());
