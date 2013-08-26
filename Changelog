@@ -1,3 +1,6 @@
+v0.15
+- Add options to break_blocks to output only targeted regions and optionally
+include variants
 - Add new get_called_region tool to output a bedtrack of all PASSed regions of
 the genome
 - fix FORMAT/SAMPLE QC check in break_blocks
