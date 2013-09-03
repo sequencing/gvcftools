@@ -522,7 +522,7 @@ try_main(int argc,char* argv[]) {
     ("region", po::value<std::string>(&opt.region), "samtools reference region (optional)")
     ("exclude", po::value<std::vector<std::string> >(&exclude_list), "name of chromosome to skip over (argument may be specified multiple times). Exclusions will be ignored if a region argument is provided")
     ("input", po::value<std::vector<std::string> >(&input_files)->multitoken(), "merge files (can be specified multiple times)")
-    ("murdock",
+    ("murdock", po::value(&opt.is_murdock_mode)->zero_tokens(),
      "If true, don't stop because of any out-of-order position conflicts. Any out of order positions are ignored. In case of an overlap the first observation is used and subsequent repeats are ignored.")
     ;
 
@@ -565,7 +565,6 @@ try_main(int argc,char* argv[]) {
         parse_tabix_region(input_files[0].c_str(),opt.region.c_str(),opt.region_begin,opt.region_end);
         opt.region_begin+=1;
     }
-    opt.is_murdock_mode = vm.count("murdock");
 
     merge_reporter mr(std::cout);
 //    pos_reporters pr(conflict_pos_file,allhet_pos_file,hethethom_pos_file);

@@ -201,11 +201,6 @@ try_main(int argc,char* argv[]) {
     CallRegionOptions opt;
 
     namespace po = boost::program_options;
-#if 0
-    po::options_description req("configuration");
-    req.add_options()
-    ("skip-header","Write gVCF output without header");
-#endif
 
     po::options_description help("help");
     help.add_options()

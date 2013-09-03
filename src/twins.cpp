@@ -355,7 +355,7 @@ try_main(int argc,char* argv[]) {
     ("conflict-file", po::value<std::string>(&conflict_pos_file), "Write all conflict positions to the specified file")
     ("no-variable-metadata",
      "Remove timestamp and any other metadata from output during validation testing")
-    ("murdock",
+    ("murdock", po::value(&opt.is_murdock_mode)->zero_tokens(),
      "If true, don't stop because of any out-of-order position conflicts. Any out of order positions are ignored. In case of an overlap the first observation is used and subsequent repeats are ignored.");
 
     po::options_description filter("filtration");
@@ -404,7 +404,6 @@ try_main(int argc,char* argv[]) {
     }
 
     const bool is_variable_metadata(! vm.count("no-variable-metadata"));
-    opt.is_murdock_mode = vm.count("murdock");
 
     sp.is_min_qd=(vm.count("min-qd"));
     sp.is_min_pos_rank_sum=(vm.count("min-pos-rank-sum"));

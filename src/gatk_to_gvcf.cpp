@@ -160,7 +160,8 @@ try_main(int argc,char* argv[]) {
     po::options_description req("configuration");
     req.add_options()
     ("min-blockable-nonref",po::value<print_double>(&opt.min_nonref_blockable)->default_value(opt.min_nonref_blockable),"If AD present, only compress non-variant site if 1-AD[0]/DP < value")
-    ("skip-header","Write gVCF output without header");
+    ("skip-header", po::value(&opt.is_skip_header)->zero_tokens(),
+     "Write gVCF output without header");
 
     po::options_description filters("filters");
     filters.add_options()
@@ -185,7 +186,8 @@ try_main(int argc,char* argv[]) {
      "VCF INFO key used to annotate compressed non-variant blocks")
     ("block-stats",po::value<std::string>(&opt.block_stats_file),
      "Write non-variant block stats to the file")
-    ("no-block-compression","Turn off block compression");
+    ("no-block-compression", po::value(&opt.is_skip_blocks)->zero_tokens(),
+     "Turn off block compression");
 
     po::options_description help("help");
     help.add_options()
@@ -212,8 +214,6 @@ try_main(int argc,char* argv[]) {
         log_os << visible << "\n";
         exit(2);
     }
-
-    opt.is_skip_header=vm.count("skip-header");
 
 
     if (opt.nvopt.BlockFracTol.numval() < 0) {
@@ -243,8 +243,6 @@ try_main(int argc,char* argv[]) {
             exit(2);
         }
     }
-
-    opt.is_skip_blocks=vm.count("no-block-compression");
 
     opt.finalize_filters();
 

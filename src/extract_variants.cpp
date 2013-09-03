@@ -137,8 +137,10 @@ try_main(int argc,char* argv[]) {
     namespace po = boost::program_options;
     po::options_description req("configuration");
     req.add_options()
-    ("skip-header","Write gVCF output without header")
-    ("invert","Invert the filter so that only non-variant records are output.");
+    ("skip-header", po::value(&opt.is_skip_header)->zero_tokens(),
+     "Write gVCF output without header")
+    ("invert", po::value(&opt.is_invert)->zero_tokens(),
+     "Invert the filter so that only non-variant records are output.");
 
     po::options_description help("help");
     help.add_options()
@@ -164,9 +166,6 @@ try_main(int argc,char* argv[]) {
         log_os << visible << "\n";
         exit(EXIT_FAILURE);
     }
-
-    opt.is_skip_header=vm.count("skip-header");
-    opt.is_invert=vm.count("invert");
 
     process_vcf_input(opt,infp);
 }

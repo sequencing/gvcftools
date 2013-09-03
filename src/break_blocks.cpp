@@ -139,9 +139,9 @@ try_main(int argc,char* argv[]) {
      "A bed file specifying regions where call blocks should be broken into individual positions (required)")
     ("ref", po::value(&opt.refSeqFile),
      "samtools reference sequence (required)")
-    ("exclude-off-target",
+    ("exclude-off-target", po::value(&opt.isExcludeOffTarget)->zero_tokens(),
      "Don't output off-target vcf records. 'targeted' records include all those intersecting the input region plus any optionally included types specified below (default: output all records)")
-    ("include-variants",
+    ("include-variants", po::value(&opt.isIncludeVariants)->zero_tokens(),
      "Add all variant calls to the targeted record set (only applies when exclude-off-target is used)");
 
     po::options_description help("help");
@@ -168,9 +168,6 @@ try_main(int argc,char* argv[]) {
         log_os << visible << "\n";
         exit(EXIT_FAILURE);
     }
-
-    opt.isExcludeOffTarget=vm.count("exclude-off-target");
-    opt.isIncludeVariants=vm.count("include-variants");
 
     if (region_file.empty()) {
         log_os << "ERROR: no region file specified\n";
