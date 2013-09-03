@@ -4,15 +4,18 @@
 #
 
 set -o nounset
+set -o xtrace
 
 if ! which -a astyle > /dev/null 2>&1 ; then exit 0; fi
 
 thisDir=$(dirname $0)
 
-cd $thisDir/../gvcftools/src
+cd $thisDir/../src
+pwd
 
 
 # conservative code re-formatting:
+#--lineend=linux \
 astyle \
 --align-pointer=type \
 --keep-one-line-blocks \
@@ -22,5 +25,5 @@ astyle \
 --pad-header \
 --lineend=linux \
 --recursive \
-*.cpp *.hh *.h
+"*.cpp" "*.hh" "*.h"
 
