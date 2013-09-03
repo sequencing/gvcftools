@@ -56,10 +56,12 @@ struct VariantsVcfOptions {
     VariantsVcfOptions()
         : outfp(std::cout)
         , is_skip_header(false)
+        , is_invert(false)
     {}
 
     std::ostream& outfp;
     bool is_skip_header;
+    bool is_invert;
 };
 
 
@@ -80,7 +82,14 @@ struct VariantsVcfRecordHandler {
            exit(EXIT_FAILURE);
        }
 
-       if (! is_variant_record(vparse.word, _gtparse)) return;
+       if (is_variant_record(vparse.word, _gtparse))
+       {
+           if(_opt.is_invert) return;
+       }
+       else
+       {
+           if(! _opt.is_invert) return;
+       }
 
        vparse.write_line(_opt.outfp);
     }
@@ -128,7 +137,8 @@ try_main(int argc,char* argv[]){
     namespace po = boost::program_options;
     po::options_description req("configuration");
     req.add_options()
-        ("skip-header","Write gVCF output without header");
+        ("skip-header","Write gVCF output without header")
+        ("invert","Invert the filter so that only non-variant records are output.");
 
     po::options_description help("help");
     help.add_options()
@@ -156,6 +166,7 @@ try_main(int argc,char* argv[]){
     }
 
     opt.is_skip_header=vm.count("skip-header");
+    opt.is_invert=vm.count("invert");
 
     process_vcf_input(opt,infp);
 }
