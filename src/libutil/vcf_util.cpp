@@ -51,9 +51,9 @@ struct gt_parse_helper {
           std::vector<int>& gti,
           const bool is_badend) {
         gti.clear();
-        if(isdigit(*gt)) return digit(gt,gti,is_badend);
-        
-        switch(*gt) {
+        if (isdigit(*gt)) return digit(gt,gti,is_badend);
+
+        switch (*gt) {
         case '.' :  return unknown(gt,gti,is_badend);
         default: return false;
         }
@@ -68,7 +68,7 @@ private:
             const bool is_badend) {
         gt++;
         gti.push_back(-1);
-        switch(*gt) {
+        switch (*gt) {
         case '\0' : return true;
         case '|' :
         case '/' : return sep(gt,gti,is_badend);
@@ -82,8 +82,8 @@ private:
         std::vector<int>& gti,
         const bool is_badend) {
         gt++;
-        if(isdigit(*gt)) return digit(gt,gti,is_badend);
-        switch(*gt) {
+        if (isdigit(*gt)) return digit(gt,gti,is_badend);
+        switch (*gt) {
         case '.' : return unknown(gt,gti,is_badend);
         default : return false;
         }
@@ -95,13 +95,13 @@ private:
           std::vector<int>& gti,
           const bool is_badend) {
         int val(0);
-        while(isdigit(*gt)) {
+        while (isdigit(*gt)) {
             val = val*10 + static_cast<int>(*gt-'0');
             gt++;
         }
         gti.push_back(val);
 
-        switch(*gt) {
+        switch (*gt) {
         case '\0' : return true;
         case '|' :
         case '/' : return sep(gt,gti,is_badend);
@@ -120,7 +120,7 @@ parse_gt(const char* gt,
 
     assert(NULL != gt);
 
-    if(! gt_parse_helper::start(gt,gti,is_allow_bad_end_char)) {
+    if (! gt_parse_helper::start(gt,gti,is_allow_bad_end_char)) {
         std::ostringstream oss;
         oss << "ERROR: can't parse genotype string: '" << gt << "'\n";
         throw blt_exception(oss.str().c_str());
@@ -131,16 +131,16 @@ parse_gt(const char* gt,
 
 bool
 is_variant_record(
-    const char* const * word,
+    const char* const* word,
     std::vector<int>& gtparse) {
 
     const char* altstr(word[VCFID::ALT]);
-    if(0==strcmp(".",altstr)) return false;
+    if (0==strcmp(".",altstr)) return false;
 
     parse_gt(get_format_string_nocopy(word,"GT"),gtparse,true);
 
     BOOST_FOREACH(const int allele, gtparse) {
-        if(allele>0) return true;
+        if (allele>0) return true;
     }
     return false;
 }
@@ -149,7 +149,7 @@ is_variant_record(
 
 void
 get_vcf_end_record_range(
-    const char* const * word,
+    const char* const* word,
     unsigned& begin_pos,
     unsigned& end_pos) {
 
@@ -162,7 +162,7 @@ get_vcf_end_record_range(
     static const unsigned endsize = strlen(endkey);
 
     const char* endstr(strstr(word[VCFID::INFO],"END="));
-    if(NULL==endstr) {
+    if (NULL==endstr) {
         end_pos = begin_pos;
     } else {
         endstr += endsize;
@@ -174,13 +174,13 @@ get_vcf_end_record_range(
 
 void
 get_vcf_record_range(
-    const char* const * word,
+    const char* const* word,
     unsigned& begin_pos,
     unsigned& end_pos) {
 
     get_vcf_end_record_range(word,begin_pos,end_pos);
 
-    if(begin_pos != end_pos) return;
+    if (begin_pos != end_pos) return;
 
     // no END tag -- check to see if this is an indel record:
     const char* refStr(word[VCFID::REF]);
@@ -191,16 +191,16 @@ get_vcf_record_range(
         const char* altStr(word[VCFID::ALT]);
 
         // make sure there is an alternate:
-        if(0!=strcmp(altStr,".")) {
+        if (0!=strcmp(altStr,".")) {
             const char* tmp_ptr;
-            while(NULL != (tmp_ptr=strchr(altStr,','))){
-                if((tmp_ptr-altStr)!= refLen) isIndel=true;
+            while (NULL != (tmp_ptr=strchr(altStr,','))) {
+                if ((tmp_ptr-altStr)!= refLen) isIndel=true;
                 altStr = tmp_ptr+1;
             }
             if (strlen(altStr) != refLen) isIndel=true;
         }
     }
-    if(! isIndel) return;
+    if (! isIndel) return;
 
     // if it's an indel the first position isn't really "called"
     begin_pos += 1;

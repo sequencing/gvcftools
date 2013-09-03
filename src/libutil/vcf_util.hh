@@ -34,20 +34,20 @@
 
 
 namespace VCFID {
-    enum index_t
-    {
-        CHROM,
-        POS,
-        ID,
-        REF,
-        ALT,
-        QUAL,
-        FILT,
-        INFO,
-        FORMAT,
-        SAMPLE,
-        SIZE
-    };
+enum index_t
+{
+    CHROM,
+    POS,
+    ID,
+    REF,
+    ALT,
+    QUAL,
+    FILT,
+    INFO,
+    FORMAT,
+    SAMPLE,
+    SIZE
+};
 }
 
 
@@ -62,28 +62,28 @@ get_format_key_index(const char* format,
                      unsigned& index) {
     index=0;
     do {
-        if(index) format++;
-        if(0==strncmp(format,key,strlen(key))) return true;
+        if (index) format++;
+        if (0==strncmp(format,key,strlen(key))) return true;
         index++;
-    } while(NULL != (format=strchr(format,':')));
+    } while (NULL != (format=strchr(format,':')));
     return false;
 }
 
 
-// return pointer to 
+// return pointer to
 //
 inline
 const char*
-get_format_string_nocopy(const char* const * word,
+get_format_string_nocopy(const char* const* word,
                          const char* key) {
 
     unsigned keynum(0);
-    if(! get_format_key_index(word[VCFID::FORMAT],key,keynum)) return NULL;
+    if (! get_format_key_index(word[VCFID::FORMAT],key,keynum)) return NULL;
 
     const char* sample(word[VCFID::SAMPLE]);
-    for(;keynum;sample++) {
-        if(! *sample) return NULL;
-        if((*sample)==':') keynum--;
+    for (; keynum; sample++) {
+        if (! *sample) return NULL;
+        if ((*sample)==':') keynum--;
     }
     return sample;
 }
@@ -102,14 +102,14 @@ parse_gt(const char* gt,
 ///
 bool
 is_variant_record(
-    const char* const * word,
+    const char* const* word,
     std::vector<int>& gti);
 
 
 /// get range (1-indexed, closed) of the vcf record based on an optional END tag
 void
 get_vcf_end_record_range(
-    const char* const * word,
+    const char* const* word,
     unsigned& begin_pos,
     unsigned& end_pos);
 
@@ -117,6 +117,6 @@ get_vcf_end_record_range(
 /// get range (1-indexed, closed) of the vcf record based on either an end tag or reference allele length
 void
 get_vcf_record_range(
-    const char* const * word,
+    const char* const* word,
     unsigned& begin_pos,
     unsigned& end_pos);

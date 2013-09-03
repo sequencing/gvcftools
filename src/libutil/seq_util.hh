@@ -42,8 +42,8 @@ base_error(const char* func,
 
 inline
 unsigned
-base_to_id(const char a){
-  switch(a) {
+base_to_id(const char a) {
+    switch (a) {
     case 'A': return 0;
     case 'C': return 1;
     case 'G': return 2;
@@ -62,7 +62,7 @@ char
 id_to_base(const unsigned i) {
     static const char base[] = "ACGT";
 
-    if(i>=N_BASE) id_to_base_error(i);
+    if (i>=N_BASE) id_to_base_error(i);
     return base[i];
 }
 
@@ -71,8 +71,8 @@ id_to_base(const unsigned i) {
 /// valid in the ELAND sense [ACGTN]
 inline
 bool
-is_valid_base(char a){
-    switch(a) {
+is_valid_base(char a) {
+    switch (a) {
     case 'A':
     case 'C':
     case 'G':
@@ -84,8 +84,8 @@ is_valid_base(char a){
 
 inline
 bool
-is_iupac_base(char a){
-    switch(a) {
+is_iupac_base(char a) {
+    switch (a) {
     case 'A':
     case 'C':
     case 'G':
@@ -114,8 +114,8 @@ is_valid_seq(const char* seq);
 
 inline
 char
-elandize_base(char a){
-    switch(a) {
+elandize_base(char a) {
+    switch (a) {
     case 'A': return 'A';
     case 'C': return 'C';
     case 'G': return 'G';
@@ -142,8 +142,8 @@ elandize_base(char a){
 
 inline
 char
-comp_base(char a){
-    switch(a) {
+comp_base(char a) {
+    switch (a) {
     case 'A': return 'T';
     case 'C': return 'G';
     case 'G': return 'C';

@@ -54,7 +54,7 @@ parse_exception(const char* type_label,
 
 
 unsigned
-parse_unsigned(const char*& s){
+parse_unsigned(const char*& s) {
 
     static const int base(10);
 
@@ -67,7 +67,7 @@ parse_unsigned(const char*& s){
         parse_exception("unsigned long",s);
     }
 
-    if(val > std::numeric_limits<unsigned>::max()){
+    if (val > std::numeric_limits<unsigned>::max()) {
         parse_exception("unsigned",s);
     }
 
@@ -82,7 +82,7 @@ unsigned
 parse_unsigned_str(const std::string& s) {
     const char* s2(s.c_str());
     const unsigned val(parse_unsigned(s2));
-    if((s2-s.c_str())!=static_cast<int>(s.length())) {
+    if ((s2-s.c_str())!=static_cast<int>(s.length())) {
         parse_exception("unsigned",s.c_str());
     }
     return val;
@@ -91,12 +91,12 @@ parse_unsigned_str(const std::string& s) {
 
 
 int
-parse_int(const char*& s){
+parse_int(const char*& s) {
 
     const char* endptr(s);
     const long val(parse_long(endptr));
 
-    if(val > std::numeric_limits<int>::max()){
+    if (val > std::numeric_limits<int>::max()) {
         parse_exception("int",s);
     }
 
@@ -111,7 +111,7 @@ int
 parse_int_str(const std::string& s) {
     const char* s2(s.c_str());
     const int val(parse_int(s2));
-    if((s2-s.c_str())!=static_cast<int>(s.length())) {
+    if ((s2-s.c_str())!=static_cast<int>(s.length())) {
         parse_exception("int",s.c_str());
     }
     return val;
@@ -120,7 +120,7 @@ parse_int_str(const std::string& s) {
 
 
 long
-parse_long(const char*& s){
+parse_long(const char*& s) {
 
     static const int base(10);
 
@@ -144,7 +144,7 @@ long
 parse_long_str(const std::string& s) {
     const char* s2(s.c_str());
     const long val(parse_long(s2));
-    if((s2-s.c_str())!=static_cast<int>(s.length())) {
+    if ((s2-s.c_str())!=static_cast<int>(s.length())) {
         parse_exception("long int",s.c_str());
     }
     return val;
@@ -153,7 +153,7 @@ parse_long_str(const std::string& s) {
 
 
 double
-parse_double(const char*& s){
+parse_double(const char*& s) {
 
     errno = 0;
 
@@ -173,7 +173,7 @@ double
 parse_double_str(const std::string& s) {
     const char* s2(s.c_str());
     const double val(parse_double(s2));
-    if((s2-s.c_str())!=static_cast<int>(s.length())) {
+    if ((s2-s.c_str())!=static_cast<int>(s.length())) {
         parse_exception("double",s.c_str());
     }
     return val;

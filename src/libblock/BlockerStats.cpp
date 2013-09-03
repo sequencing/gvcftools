@@ -40,7 +40,7 @@ BlockerStats::
 report(std::ostream& os) const {
 
     os << "COVERED_BLOCK_SIZE_STATS: " << _block_size << "\n";
-    
+
     os << "Avg block property coefficent of variantion for covered blocks with at least " << min_block_count() << " observations:\n";
     os << "AVG_GQX_COV: " << _gqx_cov.mean() << "\n";
     os << "AVG_DP_COV: " << _dp_cov.mean() << "\n";

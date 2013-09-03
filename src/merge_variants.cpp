@@ -64,10 +64,10 @@ struct merge_reporter {
 
     void
     print_locus(
-            const std::vector<boost::shared_ptr<site_crawler> >& sa,
-            const vcf_pos low_pos,
-            const reference_contig_segment& ref_seg,
-            const bool is_indel=false);
+        const std::vector<boost::shared_ptr<site_crawler> >& sa,
+        const vcf_pos low_pos,
+        const reference_contig_segment& ref_seg,
+        const bool is_indel=false);
 
 
     static const char filter_delim;
@@ -91,8 +91,8 @@ const char merge_reporter::format_delim(':');
 template <typename T>
 void
 refAltWriter(
-        const id_set<T>& alleles,
-        std::ostream& os)
+    const id_set<T>& alleles,
+    std::ostream& os)
 {
     const unsigned n_alleles(alleles.size());
     assert(0 != n_alleles);
@@ -101,9 +101,9 @@ refAltWriter(
 
     // ALT:
     os << '\t';
-    if(n_alleles>1) {
-        for(unsigned i(1);i<n_alleles;++i) {
-            if(i>1) os << ",";
+    if (n_alleles>1) {
+        for (unsigned i(1); i<n_alleles; ++i) {
+            if (i>1) os << ",";
             os << alleles.get_key(i);
         }
     } else {
@@ -116,19 +116,19 @@ refAltWriter(
 void
 merge_reporter::
 print_locus(
-        const std::vector<boost::shared_ptr<site_crawler> >& sa,
-        const vcf_pos low_pos,
-        const reference_contig_segment& ref_seg,
-        const bool is_indel)
+    const std::vector<boost::shared_ptr<site_crawler> >& sa,
+    const vcf_pos low_pos,
+    const reference_contig_segment& ref_seg,
+    const bool is_indel)
 {
-    if(sa.empty()) return;
+    if (sa.empty()) return;
 
-    if(! _is_header_output) {
+    if (! _is_header_output) {
         sa[0]->dump_header(_os);
         _os << "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILT\tINFO\tFORMAT";
 
         const unsigned sample_size(sa.size());
-        for(unsigned i(0);i<sample_size;++i) {
+        for (unsigned i(0); i<sample_size; ++i) {
             _os << '\t' << sa[i]->sample_name();
         }
         _os << '\n';
@@ -142,11 +142,11 @@ print_locus(
     //
     typedef id_set<std::string> fkey_t;
     fkey_t merged_filters;
-    for(unsigned st(0);st<n_samples;++st) {
+    for (unsigned st(0); st<n_samples; ++st) {
         const site_crawler& sample(*(sa[st]));
-        if(!(low_pos == sample.vpos())) continue;
+        if (!(low_pos == sample.vpos())) continue;
         const char* filter(sample.word(VCFID::FILT));
-        if((0 != strcmp(filter,".")) && (0 != strcmp(filter,"PASS"))) {
+        if ((0 != strcmp(filter,".")) && (0 != strcmp(filter,"PASS"))) {
             split_string(filter,filter_delim,words);
             BOOST_FOREACH(const std::string& w, words)
             {
@@ -160,11 +160,11 @@ print_locus(
     //
     fkey_t merged_keys;
     std::vector<fkey_t> sample_keys(n_samples);
-    for(unsigned st(0);st<n_samples;++st) {
+    for (unsigned st(0); st<n_samples; ++st) {
         const site_crawler& sample(*(sa[st]));
-        if(!(low_pos == sample.vpos())) continue;
+        if (!(low_pos == sample.vpos())) continue;
         const char* format(sample.word(VCFID::FORMAT));
-        if(0 != strcmp(format,".")) {
+        if (0 != strcmp(format,".")) {
             split_string(format,format_delim,words);
             BOOST_FOREACH(const std::string& w, words)
             {
@@ -181,7 +181,7 @@ print_locus(
 
     std::vector<std::string> genotypes;
 
-    if(! is_indel)
+    if (! is_indel)
     {
         // get ref, alt and gt for all samples:
         //
@@ -190,29 +190,29 @@ print_locus(
         id_set<char> alleles;
         alleles.insert_key(ref_base);
 
-        for(unsigned st(0);st<n_samples;++st) {
+        for (unsigned st(0); st<n_samples; ++st) {
             const site_crawler& sample(*(sa[st]));
             bool is_nonstandard(false);
             std::ostringstream oss;
-            if(low_pos == sample.vpos()) { 
-              const unsigned n_allele(sample.get_allele_size());
+            if (low_pos == sample.vpos()) {
+                const unsigned n_allele(sample.get_allele_size());
 
-              for(unsigned ai(0); ai<n_allele; ai++) {
-                const char allele(sample.get_allele(ai));
-                if(allele != 'N') {
-                    const unsigned code(alleles.insert_key(allele));
-                    if(ai) oss << '/';
-                    oss << code;
-                } else {
-                    is_nonstandard=true;
+                for (unsigned ai(0); ai<n_allele; ai++) {
+                    const char allele(sample.get_allele(ai));
+                    if (allele != 'N') {
+                        const unsigned code(alleles.insert_key(allele));
+                        if (ai) oss << '/';
+                        oss << code;
+                    } else {
+                        is_nonstandard=true;
+                    }
                 }
-              }
             }
             else
             {
-                is_nonstandard=true; 
+                is_nonstandard=true;
             }
-            if(is_nonstandard) {
+            if (is_nonstandard) {
                 genotypes.push_back(".");
             } else {
                 genotypes.push_back(oss.str());
@@ -227,20 +227,20 @@ print_locus(
         // get ref, alt and gt for all samples:
         //
         std::string ref_allele;
-        for(unsigned st(0);st<n_samples;++st) {
+        for (unsigned st(0); st<n_samples; ++st) {
             const site_crawler& sample(*(sa[st]));
-            if(!(low_pos == sample.vpos())) continue;
-            if(sample.get_indel_ref().size() > ref_allele.size())
+            if (!(low_pos == sample.vpos())) continue;
+            if (sample.get_indel_ref().size() > ref_allele.size())
             {
                 ref_allele=sample.get_indel_ref();
             }
         }
 
         std::vector<std::string> alt_adjust(n_samples);
-        for(unsigned st(0);st<n_samples;++st) {
+        for (unsigned st(0); st<n_samples; ++st) {
             const site_crawler& sample(*(sa[st]));
-            if(!(low_pos == sample.vpos())) continue;
-            if(sample.get_indel_ref().size() < ref_allele.size())
+            if (!(low_pos == sample.vpos())) continue;
+            if (sample.get_indel_ref().size() < ref_allele.size())
             {
                 alt_adjust[st] = ref_allele.substr(sample.get_indel_ref().size());
             }
@@ -249,26 +249,26 @@ print_locus(
         id_set<std::string> alleles;
         alleles.insert_key(ref_allele);
 
-        for(unsigned st(0);st<n_samples;++st) {
+        for (unsigned st(0); st<n_samples; ++st) {
             const site_crawler& sample(*(sa[st]));
-            if(low_pos == sample.vpos()) { 
-              const unsigned n_allele(sample.get_indel_allele_size());
+            if (low_pos == sample.vpos()) {
+                const unsigned n_allele(sample.get_indel_allele_size());
 
-              std::ostringstream oss;
-              for(unsigned ai(0); ai<n_allele; ai++) {
-                const std::string allele(sample.get_indel_allele(ai));
-                if(allele != "X") {
-                    const unsigned code(alleles.insert_key(allele+alt_adjust[st]));
-                    if(ai) oss << '/';
-                    oss << code;
-                } else {
-                    if(ai) oss << '/';
-                    oss << 0;
+                std::ostringstream oss;
+                for (unsigned ai(0); ai<n_allele; ai++) {
+                    const std::string allele(sample.get_indel_allele(ai));
+                    if (allele != "X") {
+                        const unsigned code(alleles.insert_key(allele+alt_adjust[st]));
+                        if (ai) oss << '/';
+                        oss << code;
+                    } else {
+                        if (ai) oss << '/';
+                        oss << 0;
+                    }
                 }
-              }
-              genotypes.push_back(oss.str());
+                genotypes.push_back(oss.str());
             }
-            else 
+            else
             {
                 genotypes.push_back(".");
             }
@@ -285,9 +285,9 @@ print_locus(
     // FILT:
     _os << '\t';
     const unsigned n_filters(merged_filters.size());
-    if(n_filters) {
-        for(unsigned filter_index(0);filter_index<n_filters;++filter_index) {
-            if(filter_index) _os << filter_delim;
+    if (n_filters) {
+        for (unsigned filter_index(0); filter_index<n_filters; ++filter_index) {
+            if (filter_index) _os << filter_delim;
             _os << merged_filters.get_key(filter_index);
         }
     } else {
@@ -299,23 +299,23 @@ print_locus(
     // FORMAT:
     _os << '\t';
     const unsigned n_keys(merged_keys.size());
-    if(n_keys) {
-        for(unsigned i(0);i<n_keys;++i) {
-            if(i) _os << format_delim;
+    if (n_keys) {
+        for (unsigned i(0); i<n_keys; ++i) {
+            if (i) _os << format_delim;
             _os << merged_keys.get_key(i);
         }
     } else {
         _os << '.';
     }
 
-    for(unsigned st(0);st<n_samples;++st) {
+    for (unsigned st(0); st<n_samples; ++st) {
         const site_crawler& sample(*(sa[st]));
         const fkey_t& sample_key(sample_keys[st]);
 
-        if(low_pos == sample.vpos()) {
+        if (low_pos == sample.vpos()) {
             const char* vcf_sample(sample.word(VCFID::SAMPLE));
 
-            if(0 != strcmp(vcf_sample,".")) {
+            if (0 != strcmp(vcf_sample,".")) {
                 split_string(vcf_sample,format_delim,words);
             } else {
                 words.clear();
@@ -328,12 +328,12 @@ print_locus(
 
         // print out values in merged order:
         _os << '\t';
-        if(n_keys && (low_pos == sample.vpos())) {
-            for(unsigned key_index(0);key_index<n_keys;++key_index) {
-                if(key_index) _os << format_delim;
+        if (n_keys && (low_pos == sample.vpos())) {
+            for (unsigned key_index(0); key_index<n_keys; ++key_index) {
+                if (key_index) _os << format_delim;
                 const std::string& key(merged_keys.get_key(key_index));
-                if(sample_key.test_key(key)) {
-                    if(key == "GT") {
+                if (sample_key.test_key(key)) {
+                    if (key == "GT") {
                         _os << genotypes[st];
                     } else {
                         _os << words[sample_key.get_id(key)];
@@ -350,7 +350,7 @@ print_locus(
     _os << '\n';
 
 #if 0
-    for(unsigned i(0);i<sample_size;++i){
+    for (unsigned i(0); i<sample_size; ++i) {
         *pos_fs_ptr << _sample_label[i] << "\t";
         *pos_fs_ptr << "\t";
         sa[i].dump_line(*pos_fs_ptr);
@@ -368,7 +368,7 @@ merge_site(const std::vector<boost::shared_ptr<site_crawler> >& sa,
            const reference_contig_segment& ref_seg,
            merge_reporter& mr) {
 
-    if(low_pos.is_indel) return;
+    if (low_pos.is_indel) return;
 
     const unsigned n_samples(sa.size());
 
@@ -377,27 +377,27 @@ merge_site(const std::vector<boost::shared_ptr<site_crawler> >& sa,
 
     bool is_all_called(true);
     bool is_any_called(false);
-    
+
     bool is_any_nonref_called(false);
 
     const char ref_base(ref_seg.get_base(low_pos.pos-1));
 
-    if(ref_base=='N') return;
+    if (ref_base=='N') return;
 
-    for(unsigned st(0);st<n_samples;++st) {
+    for (unsigned st(0); st<n_samples; ++st) {
         const site_crawler& site(*(sa[st]));
-        if(site.is_pos_valid() && (site.vpos()==low_pos) && (site.n_total() != 0)) {
+        if (site.is_pos_valid() && (site.vpos()==low_pos) && (site.n_total() != 0)) {
             //ss.sample_mapped[st]++;
             is_any_mapped=true;
         } else {
             is_all_mapped=false;
         }
 
-        if(site.is_pos_valid() && (site.vpos()==low_pos) && site.is_site_call()){
+        if (site.is_pos_valid() && (site.vpos()==low_pos) && site.is_site_call()) {
             // position is called in sample st
             const unsigned n_allele(site.get_allele_size());
-            for(unsigned allele_index(0);allele_index<n_allele;allele_index++) {
-                if(ref_base != site.get_allele(allele_index)) {
+            for (unsigned allele_index(0); allele_index<n_allele; allele_index++) {
+                if (ref_base != site.get_allele(allele_index)) {
                     is_any_nonref_called=true;
                 }
             }
@@ -408,9 +408,9 @@ merge_site(const std::vector<boost::shared_ptr<site_crawler> >& sa,
     }
 
     // only interested in printing variants
-    if(! is_any_nonref_called) return;
+    if (! is_any_nonref_called) return;
 
-    
+
     mr.print_locus(sa, low_pos, ref_seg);
 }
 
@@ -422,7 +422,7 @@ void
 disallow_option(const boost::program_options::variables_map& vm,
                 const char* label) {
 
-    if(! vm.count(label)) return;
+    if (! vm.count(label)) return;
 
     log_os << "ERROR:: option '" << label << "' is not allowed in selected snp-mode\n";
     exit(EXIT_FAILURE);
@@ -445,7 +445,7 @@ merge_variants(const std::vector<std::string>& input_files,
     reference_contig_segment ref_seg;
     unsigned segment_known_size;
     get_samtools_std_ref_segment(ref_seq_file.c_str(),region,ref_seg,segment_known_size);
-    if(opt.is_region()){
+    if (opt.is_region()) {
         ref_seg.set_offset(opt.region_begin-1);
     }
 
@@ -457,7 +457,7 @@ merge_variants(const std::vector<std::string>& input_files,
     // setup locus crawlers:
     std::vector<boost::shared_ptr<site_crawler> > sa;
     const unsigned n_samples(input_files.size());
-    for(unsigned i(0);i<n_samples;++i){
+    for (unsigned i(0); i<n_samples; ++i) {
         static const bool is_return_indels(true);
         const bool is_store_header(i==0);
         sample_info tmp;
@@ -465,20 +465,20 @@ merge_variants(const std::vector<std::string>& input_files,
         sa.push_back(boost::shared_ptr<site_crawler>(new site_crawler(tmp, i, opt, region, ref_seg, is_store_header, is_return_indels)));
     }
 
-    while(true) {
+    while (true) {
         // get lowest position:
         bool is_low_pos_set(false);
         vcf_pos low_pos;
-        for(unsigned st(0);st<n_samples;++st) {
-            if(! sa[st]->is_pos_valid()) continue;
-            if((! is_low_pos_set) || (sa[st]->vpos() < low_pos)){
+        for (unsigned st(0); st<n_samples; ++st) {
+            if (! sa[st]->is_pos_valid()) continue;
+            if ((! is_low_pos_set) || (sa[st]->vpos() < low_pos)) {
                 low_pos = sa[st]->vpos();
                 is_low_pos_set=true;
             }
         }
-        if(! is_low_pos_set) break;
-        
-        if(! low_pos.is_indel) {
+        if (! is_low_pos_set) break;
+
+        if (! low_pos.is_indel) {
             merge_site(sa, low_pos, ref_seg, mr);
         }
         else
@@ -486,8 +486,8 @@ merge_variants(const std::vector<std::string>& input_files,
             mr.print_locus(sa, low_pos, ref_seg,true);
         }
 
-        for(unsigned st(0);st<n_samples;++st) {
-            if(sa[st]->is_pos_valid() && (low_pos == sa[st]->vpos())){
+        for (unsigned st(0); st<n_samples; ++st) {
+            if (sa[st]->is_pos_valid() && (low_pos == sa[st]->vpos())) {
                 sa[st]->update();
             }
         }
@@ -498,13 +498,13 @@ merge_variants(const std::vector<std::string>& input_files,
 
 static
 void
-try_main(int argc,char* argv[]){
+try_main(int argc,char* argv[]) {
 
 //    const time_t start_time(time(0));
     const char* progname(compat_basename(argv[0]));
-    
-    for(int i(0);i<argc;++i){
-        if(i) cmdline += ' ';
+
+    for (int i(0); i<argc; ++i) {
+        if (i) cmdline += ' ';
         cmdline += argv[i];
     }
 
@@ -518,17 +518,17 @@ try_main(int argc,char* argv[]){
     namespace po = boost::program_options;
     po::options_description req("configuration");
     req.add_options()
-        ("ref", po::value<std::string>(&ref_seq_file),"samtools reference sequence (required)")
-        ("region", po::value<std::string>(&opt.region), "samtools reference region (optional)")
-        ("exclude", po::value<std::vector<std::string> >(&exclude_list), "name of chromosome to skip over (argument may be specified multiple times). Exclusions will be ignored if a region argument is provided")
-        ("input", po::value<std::vector<std::string> >(&input_files)->multitoken(), "merge files (can be specified multiple times)")
-        ("murdock",
-         "If true, don't stop because of any out-of-order position conflicts. Any out of order positions are ignored. In case of an overlap the first observation is used and subsequent repeats are ignored.")
-        ;
+    ("ref", po::value<std::string>(&ref_seq_file),"samtools reference sequence (required)")
+    ("region", po::value<std::string>(&opt.region), "samtools reference region (optional)")
+    ("exclude", po::value<std::vector<std::string> >(&exclude_list), "name of chromosome to skip over (argument may be specified multiple times). Exclusions will be ignored if a region argument is provided")
+    ("input", po::value<std::vector<std::string> >(&input_files)->multitoken(), "merge files (can be specified multiple times)")
+    ("murdock",
+     "If true, don't stop because of any out-of-order position conflicts. Any out of order positions are ignored. In case of an overlap the first observation is used and subsequent repeats are ignored.")
+    ;
 
     po::options_description help("help");
     help.add_options()
-        ("help,h","print this message");
+    ("help,h","print this message");
 
     po::options_description visible("options");
     visible.add(req).add(help);
@@ -538,22 +538,22 @@ try_main(int argc,char* argv[]){
     po::variables_map vm;
     try {
         po::store(po::parse_command_line(argc, argv, visible,
-                  po::command_line_style::unix_style ^ po::command_line_style::allow_short), vm);
-        po::notify(vm);    
-    } catch(const boost::program_options::error& e) { // todo:: find out what is the more specific exception class thrown by program options
+                                         po::command_line_style::unix_style ^ po::command_line_style::allow_short), vm);
+        po::notify(vm);
+    } catch (const boost::program_options::error& e) { // todo:: find out what is the more specific exception class thrown by program options
         log_os << "\nERROR: Exception thrown by option parser: " << e.what() << "\n";
         po_parse_fail=true;
     }
-    
+
     bool is_show_help(false);
     if ((argc<=1) || (vm.count("help")) || po_parse_fail) {
         is_show_help=true;
     }
 
-    if(ref_seq_file.empty()) is_show_help=true;
-    if(input_files.empty()) is_show_help=true;
+    if (ref_seq_file.empty()) is_show_help=true;
+    if (input_files.empty()) is_show_help=true;
 
-    if(is_show_help) {
+    if (is_show_help) {
         log_os << "\n" << progname << " merge the variants from multiple gVCF files\n\n";
         log_os << "version: " << gvcftools_version() << "\n\n";
         log_os << "usage: " << progname << " [options] > merged_variants\n\n";
@@ -561,7 +561,7 @@ try_main(int argc,char* argv[]){
         exit(2);
     }
 
-    if(opt.is_region()) {
+    if (opt.is_region()) {
         parse_tabix_region(input_files[0].c_str(),opt.region.c_str(),opt.region_begin,opt.region_end);
         opt.region_begin+=1;
     }
@@ -571,22 +571,22 @@ try_main(int argc,char* argv[]){
 //    pos_reporters pr(conflict_pos_file,allhet_pos_file,hethethom_pos_file);
 //    site_stats ss;
 
-    if(opt.is_region()) {
+    if (opt.is_region()) {
         merge_variants(input_files,opt,ref_seq_file,opt.region.c_str(),mr);
     } else {
         fasta_chrom_list fcl(ref_seq_file.c_str());
-        while(true) {
+        while (true) {
             const char* chrom = fcl.next();
-            if(NULL == chrom) break;
+            if (NULL == chrom) break;
             // don't even bother making this efficient:
             bool is_skip(false);
-            for (unsigned i(0);i<exclude_list.size();++i) {
-                if(strcmp(chrom,exclude_list[i].c_str())==0) {
+            for (unsigned i(0); i<exclude_list.size(); ++i) {
+                if (strcmp(chrom,exclude_list[i].c_str())==0) {
                     is_skip=true;
                     break;
                 }
             }
-            if(is_skip) {
+            if (is_skip) {
                 log_os << "skipping chromosome: '" << chrom << "'\n";
             } else {
                 log_os << "processing chromosome: '" << chrom << "'\n";
@@ -605,9 +605,9 @@ void
 dump_cl(int argc,
         char* argv[],
         std::ostream& os) {
- 
+
     os << "cmdline:";
-    for(int i(0);i<argc;++i){
+    for (int i(0); i<argc; ++i) {
         os << ' ' << argv[i];
     }
     os << std::endl;
@@ -616,22 +616,22 @@ dump_cl(int argc,
 
 
 int
-main(int argc,char* argv[]){
+main(int argc,char* argv[]) {
 
     std::ios_base::sync_with_stdio(false);
 
     // last chance to catch exceptions...
     //
-    try{
+    try {
         try_main(argc,argv);
 
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         log_os << "FATAL:: EXCEPTION: " << e.what() << "\n"
                << "...caught in main()\n";
         dump_cl(argc,argv,log_os);
         exit(EXIT_FAILURE);
 
-    } catch(...) {
+    } catch (...) {
         log_os << "FATAL:: UNKNOWN EXCEPTION\n"
                << "...caught in main()\n";
         dump_cl(argc,argv,log_os);

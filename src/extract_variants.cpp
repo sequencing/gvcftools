@@ -74,24 +74,24 @@ struct VariantsVcfRecordHandler {
 
     void
     process_line(const istream_line_splitter& vparse) {
-       const unsigned nw(vparse.n_word());
+        const unsigned nw(vparse.n_word());
 
-       if(nw != (VCFID::SAMPLE+1)) {
-           log_os << "ERROR: unexpected number of fields in vcf record:\n";
-           vparse.dump(log_os);
-           exit(EXIT_FAILURE);
-       }
+        if (nw != (VCFID::SAMPLE+1)) {
+            log_os << "ERROR: unexpected number of fields in vcf record:\n";
+            vparse.dump(log_os);
+            exit(EXIT_FAILURE);
+        }
 
-       if (is_variant_record(vparse.word, _gtparse))
-       {
-           if(_opt.is_invert) return;
-       }
-       else
-       {
-           if(! _opt.is_invert) return;
-       }
+        if (is_variant_record(vparse.word, _gtparse))
+        {
+            if (_opt.is_invert) return;
+        }
+        else
+        {
+            if (! _opt.is_invert) return;
+        }
 
-       vparse.write_line(_opt.outfp);
+        vparse.write_line(_opt.outfp);
     }
 
 private:
@@ -111,8 +111,8 @@ process_vcf_input(const VariantsVcfOptions& opt,
 
     istream_line_splitter vparse(infp);
 
-    while(vparse.parse_line()) {
-        if(header.process_line(vparse)) continue;
+    while (vparse.parse_line()) {
+        if (header.process_line(vparse)) continue;
         rec.process_line(vparse);
     }
 }
@@ -121,13 +121,13 @@ process_vcf_input(const VariantsVcfOptions& opt,
 
 static
 void
-try_main(int argc,char* argv[]){
+try_main(int argc,char* argv[]) {
 
     //const time_t start_time(time(0));
     const char* progname(compat_basename(argv[0]));
 
-    for(int i(0);i<argc;++i){
-        if(i) cmdline += ' ';
+    for (int i(0); i<argc; ++i) {
+        if (i) cmdline += ' ';
         cmdline += argv[i];
     }
 
@@ -137,12 +137,12 @@ try_main(int argc,char* argv[]){
     namespace po = boost::program_options;
     po::options_description req("configuration");
     req.add_options()
-        ("skip-header","Write gVCF output without header")
-        ("invert","Invert the filter so that only non-variant records are output.");
+    ("skip-header","Write gVCF output without header")
+    ("invert","Invert the filter so that only non-variant records are output.");
 
     po::options_description help("help");
     help.add_options()
-        ("help,h","print this message");
+    ("help,h","print this message");
 
     po::options_description visible("options");
     visible.add(req).add(help);
@@ -151,16 +151,16 @@ try_main(int argc,char* argv[]){
     po::variables_map vm;
     try {
         po::store(po::parse_command_line(argc, argv, visible), vm);
-        po::notify(vm);    
-    } catch(const boost::program_options::error& e) { // todo:: find out what is the more specific exception class thrown by program options
+        po::notify(vm);
+    } catch (const boost::program_options::error& e) { // todo:: find out what is the more specific exception class thrown by program options
         log_os << "\nERROR: Exception thrown by option parser: " << e.what() << "\n";
         po_parse_fail=true;
     }
-    
+
     if ((vm.count("help")) || po_parse_fail) {
-        log_os << "\n" << progname << " extracts variants from a VCF file\n\n"; 
+        log_os << "\n" << progname << " extracts variants from a VCF file\n\n";
         log_os << "version: " << gvcftools_version() << "\n\n";
-        log_os << "usage: " << progname << " [options] < (g)VCF > variants_only_VCF\n\n"; 
+        log_os << "usage: " << progname << " [options] < (g)VCF > variants_only_VCF\n\n";
         log_os << visible << "\n";
         exit(EXIT_FAILURE);
     }
@@ -178,9 +178,9 @@ void
 dump_cl(int argc,
         char* argv[],
         std::ostream& os) {
- 
+
     os << "cmdline:";
-    for(int i(0);i<argc;++i){
+    for (int i(0); i<argc; ++i) {
         os << ' ' << argv[i];
     }
     os << std::endl;
@@ -189,22 +189,22 @@ dump_cl(int argc,
 
 
 int
-main(int argc,char* argv[]){
+main(int argc,char* argv[]) {
 
     std::ios_base::sync_with_stdio(false);
 
     // last chance to catch exceptions...
     //
-    try{
+    try {
         try_main(argc,argv);
 
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         log_os << "FATAL:: EXCEPTION: " << e.what() << "\n"
                << "...caught in main()\n";
         dump_cl(argc,argv,log_os);
         exit(EXIT_FAILURE);
 
-    } catch(...) {
+    } catch (...) {
         log_os << "FATAL:: UNKNOWN EXCEPTION\n"
                << "...caught in main()\n";
         dump_cl(argc,argv,log_os);

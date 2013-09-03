@@ -90,7 +90,7 @@ get_samtools_std_ref_segment(const char* ref_file,
     standardize_ref_seq(ref_file,ref_seq);
     known_size=0;
     const std::string::size_type ref_size(ref_seq.size());
-    for(std::string::size_type i(0);i<ref_size;++i){ if(ref_seq[i]!='N') known_size++; }
+    for (std::string::size_type i(0); i<ref_size; ++i) { if (ref_seq[i]!='N') known_size++; }
 }
 
 
@@ -115,7 +115,7 @@ fasta_chrom_list::
 const char*
 fasta_chrom_list::
 next() {
-    if(_index < _nchrom) {
+    if (_index < _nchrom) {
         return faidx_fetch_seqname(_fai,_index++);
     } else {
         return NULL;

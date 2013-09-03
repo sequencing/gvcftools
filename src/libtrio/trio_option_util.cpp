@@ -61,7 +61,7 @@ validate(boost::any& v,
     infof.key = values[0];
     try {
         infof.val = boost::lexical_cast<float>(values[1]);
-    } catch(const boost::bad_lexical_cast&) {
+    } catch (const boost::bad_lexical_cast&) {
         throw po::validation_error(po::validation_error::invalid_option_value);
     }
 

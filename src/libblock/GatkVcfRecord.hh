@@ -52,13 +52,13 @@
 ///
 struct MaybeInt {
 
-    MaybeInt(const char* s) 
+    MaybeInt(const char* s)
         : IsInt((NULL != s) && ('\0' != *s) && (0 != strcmp(s,".")))
         , IntVal(0)
         , DoubleVal(0.)
     {
         if (! IsInt) return;
-        if(NULL != s) StrVal = std::string(s);
+        if (NULL != s) StrVal = std::string(s);
         DoubleVal = parse_double(s);
         IntVal = static_cast<int>(compat_round(DoubleVal));
     }

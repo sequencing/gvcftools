@@ -46,7 +46,7 @@ static
 bool
 checked_double_parse(const char* s,
                      double& val) {
-    if((NULL != s) && ('\0' != *s) && (0 != strcmp(s,"."))) return false;
+    if ((NULL != s) && ('\0' != *s) && (0 != strcmp(s,"."))) return false;
     val=parse_double(s);
     return true;
 }
@@ -59,13 +59,13 @@ VcfRecordBlocker::
     WriteBlockCvcfr();
     _opt.outfp.flush();
 
-    if(_opt.is_block_stats()) {
-        // We check that this file can be written to at the 
+    if (_opt.is_block_stats()) {
+        // We check that this file can be written to at the
         // beginning of the run. If there's an error here at
         // the very end of the run, just power-through any
         // errors and don't write the stats out.
         std::ofstream ofs(_opt.block_stats_file.c_str());
-        if(ofs) {
+        if (ofs) {
             _stats.report(ofs);
         }
     }
@@ -95,29 +95,29 @@ GroomInputRecord(GatkVcfRecord& record) {
 
     // GQX needs to be handled separately because it is derived,
     // rather than actually in, the input vcf record:
-    if(NULL != _opt.GQX_filter.get()) {
+    if (NULL != _opt.GQX_filter.get()) {
         const MaybeInt& gqx(record.GetGQX());
         if ((!gqx.IsInt) || (gqx.DoubleVal < _opt.GQX_filter->thresh.numval())) {
             record.AppendFilter(_opt.GQX_filter->label.c_str());
         }
     }
-    
+
     // high depth filter:
-    if(_opt.is_chrom_depth()) {
+    if (_opt.is_chrom_depth()) {
         // filter for high depth:
         const std::string& thisChrom(record.GetChrom());
         if ((_lastDepthChrom.empty()) || (_lastDepthChrom != thisChrom)) {
-            
+
             _is_highDepth=(0 != _opt.ChromDepth.count(thisChrom));
-            if(_is_highDepth) {
+            if (_is_highDepth) {
                 _highDepth = _opt.ChromDepth.find(thisChrom)->second * _opt.max_chrom_depth_filter_factor.numval();
             }
             _lastDepthChrom = thisChrom;
         }
-        
+
         if (_is_highDepth) {
             const char* dp(record.GetSampleVal("DP"));
-            if ((NULL != dp) && (parse_double(dp) > _highDepth)){
+            if ((NULL != dp) && (parse_double(dp) > _highDepth)) {
                 record.AppendFilter(_opt.max_chrom_depth_filter_tag.c_str());
             }
         }
@@ -144,14 +144,14 @@ AddFilter(GatkVcfRecord& record,
 
     bool is_filter(false);
     const char* tagval(NULL);
-    if(filter.is_sample_value) {
+    if (filter.is_sample_value) {
         tagval = record.GetSampleVal(filter.tag.c_str());
     } else {
         tagval = record.GetInfoVal(filter.tag.c_str());
     }
     const MaybeInt val(tagval);
     if (!val.IsInt) {
-        if(filter.is_filter_if_missing) {
+        if (filter.is_filter_if_missing) {
             is_filter=true;
         }
     } else {
@@ -159,7 +159,7 @@ AddFilter(GatkVcfRecord& record,
             ((!filter.is_max_thresh) && (val.DoubleVal < filter.thresh.numval())))
             is_filter=true;
     }
-    if(is_filter) record.AppendFilter(filter.label.c_str());
+    if (is_filter) record.AppendFilter(filter.label.c_str());
 }
 
 
@@ -208,7 +208,7 @@ struct region_info {
 
 
 
-// function used for sites inside of homozygous deletions and 
+// function used for sites inside of homozygous deletions and
 // unresolvable sites inside of heterozygous deletions:
 static
 void
@@ -236,38 +236,38 @@ adjust_overlap_record(const BlockerOptions& opt,
 
     // apply filters:
     const unsigned n_filt(rinfo.filters.size());
-    for(unsigned filt_index(0);filt_index<n_filt;++filt_index) {
+    for (unsigned filt_index(0); filt_index<n_filt; ++filt_index) {
         record.AppendFilter(rinfo.filters[filt_index].c_str());
     }
-    
+
     //apply quality minimums:
-    if(rinfo.qual.is_valid) {
+    if (rinfo.qual.is_valid) {
         double record_qual(0.);
         const bool is_valid(checked_double_parse(record.GetQual().c_str(),record_qual));
-        if(is_valid && (rinfo.qual.val<record_qual)) {
+        if (is_valid && (rinfo.qual.val<record_qual)) {
             record.SetQual(rinfo.qual.str);
         }
     }
-    
-    if(rinfo.gq.is_valid) {
+
+    if (rinfo.gq.is_valid) {
         double record_gq(0.);
         const bool is_valid(checked_double_parse(record.GetSampleVal("GQ"),record_gq));
-        if(is_valid && (rinfo.gq.val<record_gq)) {
+        if (is_valid && (rinfo.gq.val<record_gq)) {
             record.SetSampleVal("GQ",rinfo.gq.str);
         }
     }
-    
+
     // change gt conflict status based on region_copyn
     assert(rinfo.copyn<2);
 
-    if(rinfo.copyn==1) {
+    if (rinfo.copyn==1) {
         std::vector<int> gti;
-        if(! record.GetGT().empty()) {
+        if (! record.GetGT().empty()) {
             parse_gt(record.GetGT().c_str(),gti);
         }
 
-        if(gti.size() == 2) {
-            if(gti[0]==gti[1]) {
+        if (gti.size() == 2) {
+            if (gti[0]==gti[1]) {
                 if       (gti[0]>=0) {
                     std::ostringstream oss;
                     oss << gti[0];
@@ -280,7 +280,7 @@ adjust_overlap_record(const BlockerOptions& opt,
                 set_record_to_unknown_gt(record);
                 record.AppendFilter(opt.site_conflict_label.c_str());
             }
-        } else if(gti.size() != 1) {            
+        } else if (gti.size() != 1) {
             set_record_to_unknown_gt(record);
         }
     } else {
@@ -297,10 +297,10 @@ GroomRecordBuffer() {
 
     const unsigned n_records(_recordBuffer.size());
 
-#ifdef VDEBUG 
-    if(true) {
+#ifdef VDEBUG
+    if (true) {
         std::cerr << "VDEBUG input: indel count: " << _indelIndex.size() << "\n";
-        for(unsigned i(0);i<n_records;++i) {
+        for (unsigned i(0); i<n_records; ++i) {
             _recordBuffer[i].WriteUnaltered(std::cerr);
         }
     }
@@ -311,17 +311,17 @@ GroomRecordBuffer() {
     // conflict:
     region_info rinfo;
 
-    if(_indelIndex.size() > 1) {
+    if (_indelIndex.size() > 1) {
         rinfo.filters.push_back(_opt.indel_conflict_label);
     } else {
         // set additional indel filters:
         const GatkVcfRecord& record(_recordBuffer[_indelIndex[0]]);
         const std::vector<std::string>& filters(record.GetFilter());
         const unsigned n_filt(filters.size());
-        if((n_filt!=1) || filters[0] != "PASS") {
+        if ((n_filt!=1) || filters[0] != "PASS") {
             rinfo.filters = filters;
         }
-        
+
         // set additional minq:
         rinfo.qual.str=record.GetQual().c_str();
         rinfo.qual.is_valid=checked_double_parse(rinfo.qual.str,rinfo.qual.val);
@@ -329,11 +329,11 @@ GroomRecordBuffer() {
         rinfo.gq.is_valid=checked_double_parse(rinfo.gq.str,rinfo.gq.val);
 
         _gti.clear();
-        if(! record.GetGT().empty()) {
+        if (! record.GetGT().empty()) {
             parse_gt(record.GetGT().c_str(),_gti);
         }
-        if(_gti.size() == 2) {
-            if((_gti[0]==0 && _gti[1]>0) || (_gti[1]==0 && _gti[0]>0)){ rinfo.copyn=1; }
+        if (_gti.size() == 2) {
+            if ((_gti[0]==0 && _gti[1]>0) || (_gti[1]==0 && _gti[0]>0)) { rinfo.copyn=1; }
         }
     }
 
@@ -342,11 +342,11 @@ GroomRecordBuffer() {
     //
     bool is_edit(true);
     std::vector<refedit> edits;
-    for(unsigned record_index(0);record_index<n_records;++record_index) {
+    for (unsigned record_index(0); record_index<n_records; ++record_index) {
         GatkVcfRecord& record(_recordBuffer[record_index]);
         const int pos(record.GetPos());
         const bool is_in_indel((pos>=_bufferStartPos) && (pos<=_bufferEndPos));
-        if(! is_in_indel) continue;
+        if (! is_in_indel) continue;
         const unsigned offset(pos-_bufferStartPos);
         adjust_overlap_record(_opt,rinfo,offset,record,is_edit,edits);
         // regroom record to account for quality value changes, etc:
@@ -356,20 +356,20 @@ GroomRecordBuffer() {
     // 3) modify indel records according to any site conflicts or hemizygous snps present:
 
     // this is 90% done, but no easy way to make the per-allele tag adjustment reliable w/o parsing
-    // header for all cases first. not worth pursuing for now... 
+    // header for all cases first. not worth pursuing for now...
 #if 0
-    if(is_edit && (! edits.empty())) {
+    if (is_edit && (! edits.empty())) {
         // we should only get here for simple het deletions:
         GatkVcfRecord& record(_recordBuffer[_indelIndex[0]]);
         std::string allele(record.GetRef());
         bool is_diff(false);
-        for(unsigned i(0);i<edits.size();++i) {
-            if(allele[edits[i].first+1] != edits[i].second) {
+        for (unsigned i(0); i<edits.size(); ++i) {
+            if (allele[edits[i].first+1] != edits[i].second) {
                 allele[edits[i].first+1] = edits[i].second;
                 is_diff=true;
             }
         }
-        if(is_diff) {
+        if (is_diff) {
             // 1) insert new alternate allele
             // 2) update GT
             // 3) modify or delete all other allele dependent tags (this might just be AD in practice)
@@ -381,10 +381,10 @@ GroomRecordBuffer() {
 #endif
 
 
-#ifdef VDEBUG 
-    if(true) {
+#ifdef VDEBUG
+    if (true) {
         std::cerr << "VDEBUG output: indel count: " << _indelIndex.size() << "\n";
-        for(unsigned i(0);i<n_records;++i) {
+        for (unsigned i(0); i<n_records; ++i) {
             _recordBuffer[i].WriteUnaltered(std::cerr);
         }
     }
@@ -397,7 +397,7 @@ void
 VcfRecordBlocker::
 ProcessRecordBuffer() {
 
-    if(_recordBuffer.empty()) return;
+    if (_recordBuffer.empty()) return;
 
     // every record buffer should contain an indel:
     assert(_indelIndex.size() > 0);
@@ -406,10 +406,10 @@ ProcessRecordBuffer() {
 
     // if there's only one record, assume this is a simple insertion and don't process
     // it for overlap information:
-    if(n_records>1) GroomRecordBuffer();
-    
+    if (n_records>1) GroomRecordBuffer();
+
     // send recordbuffer on for printing/blocking:
-    for(unsigned i(0);i<n_records;++i) ProcessRecord(_recordBuffer[i]);
+    for (unsigned i(0); i<n_records; ++i) ProcessRecord(_recordBuffer[i]);
     _indelIndex.clear();
     _recordBuffer.clear();
 }

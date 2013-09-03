@@ -54,17 +54,17 @@ tabix_header_streamer(const char* filename)
     , _linebuf(NULL)
 {
 
-    if(NULL == filename){
+    if (NULL == filename) {
         throw blt_exception("vcf filename is null ptr");
     }
 
-    if('\0' == *filename){
+    if ('\0' == *filename) {
         throw blt_exception("vcf filename is empty string");
     }
 
     _tfp = ti_open(filename, 0);
 
-    if(NULL == _tfp) {
+    if (NULL == _tfp) {
         log_os << "ERROR: Failed to open VCF file: '" << filename << "'\n";
         exit(EXIT_FAILURE);
     }
@@ -76,8 +76,8 @@ tabix_header_streamer(const char* filename)
 
 tabix_header_streamer::
 ~tabix_header_streamer() {
-    if(NULL != _titer) ti_iter_destroy(_titer);
-    if(NULL != _tfp) ti_close(_tfp);
+    if (NULL != _titer) ti_iter_destroy(_titer);
+    if (NULL != _tfp) ti_close(_tfp);
 }
 
 
@@ -85,15 +85,15 @@ tabix_header_streamer::
 bool
 tabix_header_streamer::
 next() {
-    if(_is_stream_end || (NULL==_tfp) || (NULL==_titer)) return false;
+    if (_is_stream_end || (NULL==_tfp) || (NULL==_titer)) return false;
 
     int len;
     _linebuf = (char*) ti_read(_tfp, _titer, &len);
 
-    if(NULL == _linebuf) {
+    if (NULL == _linebuf) {
         _is_stream_end=true;
     } else {
-        if((strlen(_linebuf)<1) || (_linebuf[0] != '#')){
+        if ((strlen(_linebuf)<1) || (_linebuf[0] != '#')) {
             _is_stream_end=true;
         }
     }
@@ -118,17 +118,17 @@ tabix_streamer(const char* filename,
     , _linebuf(NULL)
 {
 
-    if(NULL == filename){
+    if (NULL == filename) {
         throw blt_exception("vcf filename is null ptr");
     }
 
-    if('\0' == *filename){
+    if ('\0' == *filename) {
         throw blt_exception("vcf filename is empty string");
     }
 
     _tfp = ti_open(filename, 0);
 
-    if(NULL == _tfp) {
+    if (NULL == _tfp) {
         log_os << "ERROR: Failed to open VCF file: '" << filename << "'\n";
         exit(EXIT_FAILURE);
     }
@@ -139,7 +139,7 @@ tabix_streamer(const char* filename,
         exit(EXIT_FAILURE);
     }
 
-    if(NULL == region) {
+    if (NULL == region) {
         // read the whole VCF file:
         _titer = ti_query(_tfp, 0, 0, 0);
         return;
@@ -159,8 +159,8 @@ tabix_streamer(const char* filename,
 
 tabix_streamer::
 ~tabix_streamer() {
-    if(NULL != _titer) ti_iter_destroy(_titer);
-    if(NULL != _tfp) ti_close(_tfp);
+    if (NULL != _titer) ti_iter_destroy(_titer);
+    if (NULL != _tfp) ti_close(_tfp);
 }
 
 
@@ -168,15 +168,15 @@ tabix_streamer::
 bool
 tabix_streamer::
 next() {
-    if(_is_stream_end || (NULL==_tfp) || (NULL==_titer)) return false;
+    if (_is_stream_end || (NULL==_tfp) || (NULL==_titer)) return false;
 
     int len;
     _linebuf = (char*) ti_read(_tfp, _titer, &len);
-    
+
     _is_stream_end=(NULL == _linebuf);
     _is_record_set=(! _is_stream_end);
-    if(_is_record_set) _record_no++;
-    
+    if (_is_record_set) _record_no++;
+
     return _is_record_set;
 }
 
@@ -188,10 +188,10 @@ report_state(std::ostream& os) const {
 
     const char* line(getline());
     os << "\tvcf_stream_label: " << name() << "\n";
-    if(NULL != line){
+    if (NULL != line) {
         os << "\tvcf_stream_record_no: " << record_no() << "\n"
            << "\tvcf_record: '" << line << "'\n";
     } else {
-       os << "\tno vcf record currently set\n";
+        os << "\tno vcf record currently set\n";
     }
 }

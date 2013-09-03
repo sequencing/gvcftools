@@ -70,7 +70,7 @@ struct VcfRecordBlocker {
             _lastChrom=thisChrom;
         }
 
-        if(IsSkipRecord(record)) return;
+        if (IsSkipRecord(record)) return;
 
         GroomInputRecord(record);
         AccumulateRecords(record);
@@ -96,7 +96,7 @@ private:
         return _blockCvcfr.Test(record);
     }
 
-    void JoinRecordToBlock(GatkVcfRecord& record){
+    void JoinRecordToBlock(GatkVcfRecord& record) {
         _blockCvcfr.Add(record);
     }
 
@@ -105,13 +105,13 @@ private:
         // check to make sure this isn't a reference block record from GATK -- I believe these are created when
         // an indel is evaluated but the reference allele is chosen, it would be nice to incorporate these
         // into the final gVCF but until there's a policy it's cleaner to filter such cases:
-        if(record.IsNonvariantBlock()) return true;
+        if (record.IsNonvariantBlock()) return true;
 
         // besides the non-variant blocks, GATK will infrequently output the same reference site twice, so filter
         // thest cases out if found:
-        if(! record.IsIndel()) {
+        if (! record.IsIndel()) {
             const unsigned pos(record.GetPos());
-            if(pos <= _lastNonindelPos) return true;
+            if (pos <= _lastNonindelPos) return true;
             _lastNonindelPos = pos;
         }
 
@@ -128,7 +128,7 @@ private:
         const bool is_indel(record.IsIndel());
         const int pos(record.GetPos());
 
-        if(is_indel) {
+        if (is_indel) {
             // update start and end pos:
             const int startPos(pos+1);
             const int endPos(pos+static_cast<int>(record.GetRef().size())-1);
@@ -137,28 +137,28 @@ private:
             // indels here such that an overlapping insertion,
             // insertion, deletion (in that order) would all fall into
             // the same buffer group.
-            
+
             const bool is_in_indel(! (startPos+1>_bufferEndPos || endPos+1<_bufferStartPos));
             //            const bool is_in_indel((pos>=_bufferStartPos) && (pos<=_bufferEndPos));
-            if(is_in_indel) {
+            if (is_in_indel) {
                 _bufferStartPos=std::min(_bufferStartPos,startPos);
             } else {
                 _bufferStartPos=startPos;
             }
 
             _bufferEndPos=std::max(_bufferEndPos,endPos);
-            
-            if(!(_recordBuffer.empty() || is_in_indel)){
+
+            if (!(_recordBuffer.empty() || is_in_indel)) {
                 ProcessRecordBuffer();
             }
             _indelIndex.push_back(_recordBuffer.size());
             _recordBuffer.push_back(record);
         } else {
             const bool is_in_indel((pos>=_bufferStartPos) && (pos<=_bufferEndPos));
-            if(is_in_indel) {
+            if (is_in_indel) {
                 _recordBuffer.push_back(record);
             } else {
-                if(!_recordBuffer.empty()) {
+                if (!_recordBuffer.empty()) {
                     ProcessRecordBuffer();
                 }
                 ProcessRecord(record);
@@ -198,12 +198,12 @@ private:
 
         const bool is_indel(record.IsIndel());
         const unsigned fs(filters.size());
-        for(unsigned i(0);i<fs;++i) {
+        for (unsigned i(0); i<fs; ++i) {
             const FILTERTYPE::index_t ft(filters[i].filter_type);
             if       (ft == FILTERTYPE::SITE) {
-                if(is_indel) continue;
-            } else if(ft == FILTERTYPE::INDEL) {
-                if(! is_indel) continue;
+                if (is_indel) continue;
+            } else if (ft == FILTERTYPE::INDEL) {
+                if (! is_indel) continue;
             }
             AddFilter(record,filters[i]);
         }
@@ -232,9 +232,9 @@ private:
         // info DP (unfiltered) instead of sample DP (filtered)
         const MaybeInt info_dp(record.GetInfoVal("DP"));
         const MaybeInt ad(record.GetSampleVal("AD"));
-        if(ad.IsInt && info_dp.IsInt) {
+        if (ad.IsInt && info_dp.IsInt) {
             const double reffrac(static_cast<double>(ad.IntVal)/static_cast<double>(info_dp.IntVal));
-            if((reffrac+_opt.min_nonref_blockable.numval()) <= 1.0) return false;
+            if ((reffrac+_opt.min_nonref_blockable.numval()) <= 1.0) return false;
         }
 
         return true;

@@ -44,9 +44,9 @@ split_string(const char* str,
              std::vector<std::string>& v) {
 
     v.clear();
-    while(true) {
+    while (true) {
         const char* next(strchr(str,delimiter));
-        if((NULL == next) || (delimiter == '\0')) {
+        if ((NULL == next) || (delimiter == '\0')) {
             v.push_back(std::string(str));
             return;
         }
@@ -64,10 +64,10 @@ split_string(const std::string& str,
 
     v.clear();
     size_t start(0);
-    while(true) {
+    while (true) {
         size_t next(str.find(delimiter,start));
         v.push_back(std::string(str.substr(start,next-start)));
-        if(next == std::string::npos) return;
+        if (next == std::string::npos) return;
         start = next+1;
     }
 }
@@ -80,10 +80,10 @@ split_match(const std::string& str,
             const char* needle) {
 
     size_t start(0);
-    while(true) {
+    while (true) {
         size_t next(str.find(delimiter,start));
-        if(0 == str.compare(start,next-start,needle)) return true;
-        if(next == std::string::npos) break;
+        if (0 == str.compare(start,next-start,needle)) return true;
+        if (next == std::string::npos) break;
         start = next+1;
     }
     return false;
@@ -98,7 +98,7 @@ dump_result(const char* str,
     std::ostream& os(std::cerr);
 
     os << "input test string '" << str << "'\n";
-    for(unsigned i(0);i<v.size();++i) {
+    for (unsigned i(0); i<v.size(); ++i) {
         os << "word: '" << v[i] << "'\n";
     }
     os << "\n";
@@ -114,7 +114,7 @@ test_split(const char* test) {
     dump_result(test,v1);
 
     std::vector<std::string> v2;
-    std::string s(test);    
+    std::string s(test);
     split_string(s,',',v2);
     dump_result(test,v2);
 }

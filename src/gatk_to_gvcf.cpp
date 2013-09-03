@@ -65,10 +65,10 @@ process_vcf_input(const BlockerOptions& opt,
 
     istream_line_splitter vparse(infp);
 
-    while(vparse.parse_line()) {
-        if(header.process_line(vparse)) continue;
+    while (vparse.parse_line()) {
+        if (header.process_line(vparse)) continue;
 
-        if(vparse.n_word() > VCFID::SIZE) {
+        if (vparse.n_word() > VCFID::SIZE) {
             std::ostringstream oss;
             oss << "Unexpected format in vcf record:\n";
             vparse.dump(oss);
@@ -99,7 +99,7 @@ parse_chrom_depth(const std::string& chrom_depth_file,
     if (chrom_depth_file.empty()) return;
 
     std::ifstream depth_is(chrom_depth_file.c_str());
-    if (! depth_is){
+    if (! depth_is) {
         log_os << "ERROR: Failed to open chrom depth file '" << chrom_depth_file << "'\n";
         exit(EXIT_FAILURE);
     }
@@ -109,9 +109,9 @@ parse_chrom_depth(const std::string& chrom_depth_file,
 
     unsigned line_no(0);
 
-    while(true){
+    while (true) {
         depth_is.getline(buff,buff_size);
-        if(! depth_is) {
+        if (! depth_is) {
             if     (depth_is.eof()) break;
             else {
                 log_os << "ERROR: unexpected failure while attempting to read chrom depth file line " << (line_no+1) << "\n";
@@ -122,7 +122,7 @@ parse_chrom_depth(const std::string& chrom_depth_file,
         }
 
         char* word2(strchr(buff,'\t'));
-        if(NULL == word2) {
+        if (NULL == word2) {
             log_os << "ERROR: unexpected format in read chrom depth file line " << (line_no) << "\n";
             exit(EXIT_FAILURE);
         }
@@ -130,7 +130,7 @@ parse_chrom_depth(const std::string& chrom_depth_file,
         try {
             const char* s(word2);
             ChromDepth[buff] = parse_double(s);
-        } catch(const blt_exception& e) {
+        } catch (const blt_exception& e) {
             log_os << "ERROR: unexpected format in read chrom depth file line " << (line_no) << "\n";
             throw;
         }
@@ -142,13 +142,13 @@ parse_chrom_depth(const std::string& chrom_depth_file,
 
 static
 void
-try_main(int argc,char* argv[]){
+try_main(int argc,char* argv[]) {
 
     //const time_t start_time(time(0));
     const char* progname(compat_basename(argv[0]));
 
-    for(int i(0);i<argc;++i){
-        if(i) cmdline += ' ';
+    for (int i(0); i<argc; ++i) {
+        if (i) cmdline += ' ';
         cmdline += argv[i];
     }
 
@@ -159,37 +159,37 @@ try_main(int argc,char* argv[]){
     namespace po = boost::program_options;
     po::options_description req("configuration");
     req.add_options()
-        ("min-blockable-nonref",po::value<print_double>(&opt.min_nonref_blockable)->default_value(opt.min_nonref_blockable),"If AD present, only compress non-variant site if 1-AD[0]/DP < value")
-        ("skip-header","Write gVCF output without header");
+    ("min-blockable-nonref",po::value<print_double>(&opt.min_nonref_blockable)->default_value(opt.min_nonref_blockable),"If AD present, only compress non-variant site if 1-AD[0]/DP < value")
+    ("skip-header","Write gVCF output without header");
 
     po::options_description filters("filters");
     filters.add_options()
-        ("chrom-depth-file",po::value<std::string>(&chrom_depth_file),"Read mean depth for each chromosome from file, and use these values for maximum site depth filteration. File should contain one line per chromosome, where each line begins with: \"chrom_name<TAB>depth\" (default: no chrom depth filtration)")
-        ("max-depth-factor",po::value<print_double>(&opt.max_chrom_depth_filter_factor)->default_value(opt.max_chrom_depth_filter_factor),"If a chrom depth file is supplied then loci with depth exceeding the mean chrom depth times this value are filtered")
-        ("min-gqx",po::value<std::string>(&opt.min_gqx)->default_value(opt.min_gqx),"Minimum locus GQX");
+    ("chrom-depth-file",po::value<std::string>(&chrom_depth_file),"Read mean depth for each chromosome from file, and use these values for maximum site depth filteration. File should contain one line per chromosome, where each line begins with: \"chrom_name<TAB>depth\" (default: no chrom depth filtration)")
+    ("max-depth-factor",po::value<print_double>(&opt.max_chrom_depth_filter_factor)->default_value(opt.max_chrom_depth_filter_factor),"If a chrom depth file is supplied then loci with depth exceeding the mean chrom depth times this value are filtered")
+    ("min-gqx",po::value<std::string>(&opt.min_gqx)->default_value(opt.min_gqx),"Minimum locus GQX");
 
-    for(unsigned i(0);i<opt.filters.size();++i) {
+    for (unsigned i(0); i<opt.filters.size(); ++i) {
         FilterInfo& fi(opt.filters[i]);
         filters.add_options()
-            (fi.argname.c_str(),po::value<print_double>(&fi.thresh)->default_value(fi.thresh),fi.GetArgDescription().c_str());
+        (fi.argname.c_str(),po::value<print_double>(&fi.thresh)->default_value(fi.thresh),fi.GetArgDescription().c_str());
     }
 
     filters.add_options()
-        ("no-default-filters","Clear all default filters. Any individual filter threshold changes above will still be in effect");
+    ("no-default-filters","Clear all default filters. Any individual filter threshold changes above will still be in effect");
 
     po::options_description blocks("blocks");
     blocks.add_options()
-        ("block-range-factor",po::value<print_double>(&opt.nvopt.BlockFracTol)->default_value(opt.nvopt.BlockFracTol),
-         "Non-variant blocks are restricted to range [x,y], y <= max(x+3,x*(1+block-range-factor))")
-        ("block-label",po::value<std::string>(&opt.nvopt.BlockavgLabel)->default_value(opt.nvopt.BlockavgLabel),
-         "VCF INFO key used to annotate compressed non-variant blocks")
-        ("block-stats",po::value<std::string>(&opt.block_stats_file),
-         "Write non-variant block stats to the file")
-        ("no-block-compression","Turn off block compression");
+    ("block-range-factor",po::value<print_double>(&opt.nvopt.BlockFracTol)->default_value(opt.nvopt.BlockFracTol),
+     "Non-variant blocks are restricted to range [x,y], y <= max(x+3,x*(1+block-range-factor))")
+    ("block-label",po::value<std::string>(&opt.nvopt.BlockavgLabel)->default_value(opt.nvopt.BlockavgLabel),
+     "VCF INFO key used to annotate compressed non-variant blocks")
+    ("block-stats",po::value<std::string>(&opt.block_stats_file),
+     "Write non-variant block stats to the file")
+    ("no-block-compression","Turn off block compression");
 
     po::options_description help("help");
     help.add_options()
-        ("help,h","print this message");
+    ("help,h","print this message");
 
     po::options_description visible("options");
     visible.add(filters).add(req).add(blocks).add(help);
@@ -198,17 +198,17 @@ try_main(int argc,char* argv[]){
     po::variables_map vm;
     try {
         po::store(po::parse_command_line(argc, argv, visible), vm);
-        po::notify(vm);    
-    } catch(const boost::program_options::error& e) { // todo:: find out what is the more specific exception class thrown by program options
+        po::notify(vm);
+    } catch (const boost::program_options::error& e) { // todo:: find out what is the more specific exception class thrown by program options
         log_os << "\nERROR: Exception thrown by option parser: " << e.what() << "\n";
         po_parse_fail=true;
     }
 
     //    if ((argc<=1) || (vm.count("help")) || po_parse_fail) {
     if ((vm.count("help")) || po_parse_fail) {
-        log_os << "\n" << progname << " creates block-compressed gVCF from modified GATK all sites output\n\n"; 
+        log_os << "\n" << progname << " creates block-compressed gVCF from modified GATK all sites output\n\n";
         log_os << "version: " << gvcftools_version() << "\n\n";
-        log_os << "usage: " << progname << " [options] < all_sites > gVCF\n\n"; 
+        log_os << "usage: " << progname << " [options] < all_sites > gVCF\n\n";
         log_os << visible << "\n";
         exit(2);
     }
@@ -216,36 +216,36 @@ try_main(int argc,char* argv[]){
     opt.is_skip_header=vm.count("skip-header");
 
 
-    if(opt.nvopt.BlockFracTol.numval() < 0) {
+    if (opt.nvopt.BlockFracTol.numval() < 0) {
         log_os << "\nblock-range-factor must be >= 0\n\n";
         exit(2);
     }
 
-    if(vm.count("no-default-filters")) {
-        if(vm["min-gqx"].defaulted()) opt.min_gqx.clear();
+    if (vm.count("no-default-filters")) {
+        if (vm["min-gqx"].defaulted()) opt.min_gqx.clear();
 
         std::vector<FilterInfo> new_filters;
-        for(unsigned i(0);i<opt.filters.size();++i) {
+        for (unsigned i(0); i<opt.filters.size(); ++i) {
             const FilterInfo& fi(opt.filters[i]);
-            if(! vm[fi.argname.c_str()].defaulted()) new_filters.push_back(fi);
+            if (! vm[fi.argname.c_str()].defaulted()) new_filters.push_back(fi);
         }
         opt.filters = new_filters;
     }
 
-    if(! chrom_depth_file.empty()) {
+    if (! chrom_depth_file.empty()) {
         parse_chrom_depth(chrom_depth_file,opt.ChromDepth);
     }
 
-    if(opt.is_block_stats()) {
+    if (opt.is_block_stats()) {
         std::ofstream ofs(opt.block_stats_file.c_str());
-        if(! ofs) {
+        if (! ofs) {
             log_os << "ERROR: can't write stats file: " << opt.block_stats_file << "\n";
             exit(2);
         }
     }
 
     opt.is_skip_blocks=vm.count("no-block-compression");
- 
+
     opt.finalize_filters();
 
     process_vcf_input(opt,infp);
@@ -258,9 +258,9 @@ void
 dump_cl(int argc,
         char* argv[],
         std::ostream& os) {
- 
+
     os << "cmdline:";
-    for(int i(0);i<argc;++i){
+    for (int i(0); i<argc; ++i) {
         os << ' ' << argv[i];
     }
     os << std::endl;
@@ -269,22 +269,22 @@ dump_cl(int argc,
 
 
 int
-main(int argc,char* argv[]){
+main(int argc,char* argv[]) {
 
     std::ios_base::sync_with_stdio(false);
 
     // last chance to catch exceptions...
     //
-    try{
+    try {
         try_main(argc,argv);
 
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         log_os << "FATAL:: EXCEPTION: " << e.what() << "\n"
                << "...caught in main()\n";
         dump_cl(argc,argv,log_os);
         exit(EXIT_FAILURE);
 
-    } catch(...) {
+    } catch (...) {
         log_os << "FATAL:: UNKNOWN EXCEPTION\n"
                << "...caught in main()\n";
         dump_cl(argc,argv,log_os);

@@ -53,7 +53,7 @@ struct tabix_header_streamer {
     bool next();
 
     char* getline() const {
-        if(_is_record_set) return _linebuf;
+        if (_is_record_set) return _linebuf;
         else            return NULL;
     }
 
@@ -74,14 +74,14 @@ struct tabix_streamer {
     explicit
     tabix_streamer(const char* filename,
                    const char* region = NULL);
-    
+
     ~tabix_streamer();
 
     bool next();
 
     // return NULL on finish
     char* getline() const {
-        if(_is_record_set) return _linebuf;
+        if (_is_record_set) return _linebuf;
         else               return NULL;
     }
 

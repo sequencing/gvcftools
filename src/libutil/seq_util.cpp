@@ -41,7 +41,7 @@ std::ostream& log_os(std::cerr);
 }
 
 void
-base_error(const char* func, const char a){
+base_error(const char* func, const char a) {
     log_os << "ERROR:: Invalid base in " << func << ".\n"
            << "\t\tinvalid base (char): '" << a << "'\n"
            << "\t\tinvalid base (int): " << static_cast<int>(a) << "\n";
@@ -51,7 +51,7 @@ base_error(const char* func, const char a){
 
 
 void
-id_to_base_error(const unsigned i){
+id_to_base_error(const unsigned i) {
     log_os << "ERROR:: Invalid id in id_to_base. id: " << i << "\n";
     exit(EXIT_FAILURE);
 }
@@ -59,12 +59,12 @@ id_to_base_error(const unsigned i){
 
 
 bool
-is_valid_seq(const char* seq){
+is_valid_seq(const char* seq) {
 
     assert(NULL != seq);
 
-    while(*seq !=  '\0'){
-        if(! is_valid_base(*seq)) return false;
+    while (*seq !=  '\0') {
+        if (! is_valid_base(*seq)) return false;
         seq++;
     }
     return true;
@@ -73,16 +73,16 @@ is_valid_seq(const char* seq){
 
 
 void
-reverseComp(std::string& read){
+reverseComp(std::string& read) {
 
     const unsigned nr(read.size());
     const unsigned nr2(nr/2);
-    for(unsigned i(0);i<nr2;++i){
+    for (unsigned i(0); i<nr2; ++i) {
         const char tmp(comp_base(read[i]));
         read[i] = comp_base(read[nr-(i+1)]);
         read[nr-(i+1)] = tmp;
     }
-    if(nr%2==1) read[nr2] = comp_base(read[nr2]);
+    if (nr%2==1) read[nr2] = comp_base(read[nr2]);
 }
 
 
@@ -96,7 +96,7 @@ get_ref_seq(const char* ref_seq_file,
 
     std::ifstream ref_is(ref_seq_file);
 
-    if( ! ref_is ) {
+    if ( ! ref_is ) {
         log_os << "ERROR:: Can't open reference sequence file: " << ref_seq_file << "\n";
         exit(EXIT_FAILURE);
     }
@@ -110,12 +110,12 @@ get_ref_seq(const char* ref_seq_file,
 #endif
 
     ref_seq.clear();
-    while(true){
+    while (true) {
         ref_is.getline(buff,buff_size);
-        if(! ref_is) {
+        if (! ref_is) {
             if     (ref_is.eof()) break;
-            else if(ref_is.fail()) {
-                if(ref_is.bad()){
+            else if (ref_is.fail()) {
+                if (ref_is.bad()) {
                     log_os << "ERROR:: unexpected failure while attempting to read sequence file: " << ref_seq_file << "\n";
                     exit(EXIT_FAILURE);
                 }
@@ -138,12 +138,12 @@ standardize_ref_seq(const char* ref_seq_file,
                     std::string& ref_seq) {
 
     const std::string::size_type ref_size(ref_seq.size());
-    for(std::string::size_type i(0);i<ref_size;++i){
+    for (std::string::size_type i(0); i<ref_size; ++i) {
         const char old_ref(ref_seq[i]);
         char c(old_ref);
-        if(islower(c)) c = toupper(c);
-        if(! is_valid_base(c)){
-            if(! is_iupac_base(c)) {
+        if (islower(c)) c = toupper(c);
+        if (! is_valid_base(c)) {
+            if (! is_iupac_base(c)) {
                 log_os << "ERROR:: Unexpected character in reference sequence.\n";
                 log_os << "\treference-sequence: " << ref_seq_file << "\n";
                 log_os << "\tcharacter: '" << old_ref << "'\n";
@@ -152,6 +152,6 @@ standardize_ref_seq(const char* ref_seq_file,
             }
             c=elandize_base(c);
         }
-        if(c != old_ref) ref_seq[i] = c;
+        if (c != old_ref) ref_seq[i] = c;
     }
 }

@@ -38,31 +38,31 @@
 
 bool
 VcfHeaderHandler::
-process_line(const istream_line_splitter& vparse){
-    if(! _is_valid) return false;
-    
+process_line(const istream_line_splitter& vparse) {
+    if (! _is_valid) return false;
+
     const unsigned nw(vparse.n_word());
     if ((nw == 0) || (vparse.word[0][0] != '#')) {
         // shouldn't get here unless the header is missing, etc...
         _is_valid = false;
         return _is_valid;
     }
-    
+
     const bool is_last(0 == strcmp(vparse.word[0],"#CHROM"));
-    if(is_last) _is_valid = false;
-    
-    if(_is_skip_header) return true;
-    
-    if(! is_last) {
-        if(is_skip_header_line(vparse)) return _is_valid;
+    if (is_last) _is_valid = false;
+
+    if (_is_skip_header) return true;
+
+    if (! is_last) {
+        if (is_skip_header_line(vparse)) return _is_valid;
     } else {
-        if(NULL != _version) {
+        if (NULL != _version) {
             _os << "##gvcftools_version=\"" << _version << "\"\n";
         }
-        if(NULL != _cmdline) {
+        if (NULL != _cmdline) {
             _os << "##gvcftools_cmdline=\"" << _cmdline << "\"\n";
         }
-        
+
         process_final_header_line();
     }
 

@@ -46,7 +46,7 @@ struct print_double {
     print_double(const char* init = NULL)
         : _numval(0)
     {
-        if(NULL == init) {
+        if (NULL == init) {
             _strval="0";
             return;
         }

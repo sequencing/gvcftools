@@ -57,8 +57,8 @@ struct stream_stat {
 
     void add(const double x) {
         k_++;
-        if(k_==1 || x>max_) max_=x;
-        if(k_==1 || x<min_) min_=x;
+        if (k_==1 || x>max_) max_=x;
+        if (k_==1 || x<min_) min_=x;
 
         // important to do M before Q as Q uses previous iterate of M
         const double delta(x-M_);
@@ -67,7 +67,7 @@ struct stream_stat {
     }
 
     int size() const { return k_; }
-    bool empty() const { return (k_==0); } 
+    bool empty() const { return (k_==0); }
 
     double min() const { return ((k_<1) ? nan() : min_); }
     double max() const { return ((k_<1) ? nan() : max_); }

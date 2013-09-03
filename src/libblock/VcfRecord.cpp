@@ -48,9 +48,9 @@ VcfRecord(const istream_line_splitter& vparse)
         vparse.dump(oss);
         throw blt_exception(oss.str().c_str());
     }
-    
+
     _chrom = vparse.word[VCFID::CHROM];
-    
+
     const char* pos_ptr(vparse.word[VCFID::POS]);
     _pos = parse_unsigned(pos_ptr);
 
@@ -61,7 +61,7 @@ VcfRecord(const istream_line_splitter& vparse)
 
     Splitter(vparse.word[VCFID::ALT],',',_alt);
 
-    for(unsigned i(0);i<_alt.size();++i) {
+    for (unsigned i(0); i<_alt.size(); ++i) {
         assert(_alt[i].size() > 0);
     }
 
@@ -70,22 +70,22 @@ VcfRecord(const istream_line_splitter& vparse)
     Splitter(vparse.word[VCFID::FILT],';',_filt);
 
     Splitter(vparse.word[VCFID::INFO],';',_info);
-    
-    if(ws > VCFID::FORMAT) {
+
+    if (ws > VCFID::FORMAT) {
         Splitter(vparse.word[VCFID::FORMAT],':',_format);
     }
-    
-    if(ws > VCFID::SAMPLE) {
+
+    if (ws > VCFID::SAMPLE) {
         Splitter(vparse.word[VCFID::SAMPLE],':',_sample);
     }
 
     // by the vcf spec, we can drop trailing fields in any sample:
-    if(_sample.size() < _format.size())
+    if (_sample.size() < _format.size())
     {
         _sample.resize(_format.size(),".");
     }
 
-    if(_format.size() != _sample.size()) {
+    if (_format.size() != _sample.size()) {
         std::ostringstream oss;
         oss << "FORMAT and SAMPLE fields do not agree for vcf record:\n";
         vparse.dump(oss);
@@ -129,13 +129,13 @@ VcfRecord::
 DumpVectorString(const std::vector<std::string>& v,
                  const char delimiter,
                  std::ostream& os) {
-    if(v.empty()) {
+    if (v.empty()) {
         os << '.';
         return;
     }
     const unsigned vs(v.size());
-    for(unsigned i(0);i<vs;++i) {
-        if(i) os << delimiter;
+    for (unsigned i(0); i<vs; ++i) {
+        if (i) os << delimiter;
         os << v[i];
     }
 }

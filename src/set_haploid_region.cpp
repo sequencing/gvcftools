@@ -83,7 +83,7 @@ struct SetHapVcfHeaderHandler : public VcfHeaderHandler {
 private:
     bool
     is_skip_header_line(const istream_line_splitter& vparse) {
-        if(0 == strncmp(vparse.word[0],_haploid_filter_prefix.c_str(),_haploid_filter_prefix.size())) {
+        if (0 == strncmp(vparse.word[0],_haploid_filter_prefix.c_str(),_haploid_filter_prefix.size())) {
             _is_add_filter_tag=false;
         }
         return false;
@@ -91,13 +91,13 @@ private:
 
     void
     process_final_header_line() {
-        if(_is_add_filter_tag) {
+        if (_is_add_filter_tag) {
             _os << _haploid_filter_prefix
                 << ",Description=\"Locus has heterozygous genotype in a haploid region.\">\n";
         }
         write_format(_opt.orig_pl_tag.c_str(),".","Integer","Original PL value before ploidy correction");
     }
-    
+
 
     const SetHapOptions& _opt;
     bool _is_add_filter_tag;
@@ -122,34 +122,34 @@ private:
                   const unsigned end,
                   VcfRecord& vcfr) const {
 
-        if(end>vcfr.GetPos()) {
+        if (end>vcfr.GetPos()) {
             vcfr.SetInfoVal("END",_intstr.get32(end));
         } else {
             vcfr.DeleteInfoKeyVal("END");
         }
-        if(is_in_region) make_record_haploid(vcfr);
+        if (is_in_region) make_record_haploid(vcfr);
         vcfr.WriteUnaltered(_opt.outfp);
     }
 
     void
     make_record_haploid(VcfRecord& vcfr) const {
         const char* gt(vcfr.GetSampleVal("GT"));
-        if(NULL == gt)  return;
+        if (NULL == gt)  return;
         parse_gt(gt,_gti);
-            
-        if(_gti.size() == 2) { // record is diploid
-            if(_gti[0] == _gti[1]) {
+
+        if (_gti.size() == 2) { // record is diploid
+            if (_gti[0] == _gti[1]) {
                 // change GT:
                 static const char* unknown(".");
                 const char* val(unknown);
-                if(_gti[0]>=0) {
+                if (_gti[0]>=0) {
                     val=_intstr.get32(_gti[0]);
                 }
                 vcfr.SetSampleVal("GT",val);
 
                 // move PL field to 'backup' OPL field:
                 const char* pl(vcfr.GetSampleVal("PL"));
-                if(NULL != pl) {
+                if (NULL != pl) {
                     vcfr.SetSampleVal(_shopt.orig_pl_tag.c_str(),pl);
                     vcfr.DeleteSampleKeyVal("PL");
                 }
@@ -176,8 +176,8 @@ process_vcf_input(const SetHapOptions& opt,
 
     istream_line_splitter vparse(infp);
 
-    while(vparse.parse_line()) {
-        if(header.process_line(vparse)) continue;
+    while (vparse.parse_line()) {
+        if (header.process_line(vparse)) continue;
         rec.process_line(vparse);
     }
 }
@@ -186,13 +186,13 @@ process_vcf_input(const SetHapOptions& opt,
 
 static
 void
-try_main(int argc,char* argv[]){
+try_main(int argc,char* argv[]) {
 
     //const time_t start_time(time(0));
     const char* progname(compat_basename(argv[0]));
 
-    for(int i(0);i<argc;++i){
-        if(i) cmdline += ' ';
+    for (int i(0); i<argc; ++i) {
+        if (i) cmdline += ' ';
         cmdline += argv[i];
     }
 
@@ -203,12 +203,12 @@ try_main(int argc,char* argv[]){
     namespace po = boost::program_options;
     po::options_description req("configuration");
     req.add_options()
-        ("region-file",po::value<std::string>(&region_file),"A bed file specifying the regions to be converted (required)")
-        ("ref", po::value<std::string >(&opt.refSeqFile),"samtools reference sequence (required)");
+    ("region-file",po::value<std::string>(&region_file),"A bed file specifying the regions to be converted (required)")
+    ("ref", po::value<std::string >(&opt.refSeqFile),"samtools reference sequence (required)");
 
     po::options_description help("help");
     help.add_options()
-        ("help,h","print this message");
+    ("help,h","print this message");
 
     po::options_description visible("options");
     visible.add(req).add(help);
@@ -217,26 +217,26 @@ try_main(int argc,char* argv[]){
     po::variables_map vm;
     try {
         po::store(po::parse_command_line(argc, argv, visible), vm);
-        po::notify(vm);    
-    } catch(const boost::program_options::error& e) { // todo:: find out what is the more specific exception class thrown by program options
+        po::notify(vm);
+    } catch (const boost::program_options::error& e) { // todo:: find out what is the more specific exception class thrown by program options
         log_os << "\nERROR: Exception thrown by option parser: " << e.what() << "\n";
         po_parse_fail=true;
     }
-    
+
     if ((argc<=1) || (vm.count("help")) || po_parse_fail) {
-        log_os << "\n" << progname << " converts regions of a gVCF or VCF from diploid to haploid\n\n"; 
+        log_os << "\n" << progname << " converts regions of a gVCF or VCF from diploid to haploid\n\n";
         log_os << "version: " << gvcftools_version() << "\n\n";
-        log_os << "usage: " << progname << " [options] < (g)VCF > haploid_region_(g)VCF\n\n"; 
+        log_os << "usage: " << progname << " [options] < (g)VCF > haploid_region_(g)VCF\n\n";
         log_os << visible << "\n";
         exit(EXIT_FAILURE);
     }
 
-    if(region_file.empty()) {
+    if (region_file.empty()) {
         log_os << "ERROR: no region file specified\n";
         exit(EXIT_FAILURE);
     }
 
-    if(opt.refSeqFile.empty()) {
+    if (opt.refSeqFile.empty()) {
         log_os << "ERROR: no reference file specified\n";
         exit(EXIT_FAILURE);
     }
@@ -252,9 +252,9 @@ void
 dump_cl(int argc,
         char* argv[],
         std::ostream& os) {
- 
+
     os << "cmdline:";
-    for(int i(0);i<argc;++i){
+    for (int i(0); i<argc; ++i) {
         os << ' ' << argv[i];
     }
     os << std::endl;
@@ -263,22 +263,22 @@ dump_cl(int argc,
 
 
 int
-main(int argc,char* argv[]){
+main(int argc,char* argv[]) {
 
     std::ios_base::sync_with_stdio(false);
 
     // last chance to catch exceptions...
     //
-    try{
+    try {
         try_main(argc,argv);
 
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         log_os << "FATAL:: EXCEPTION: " << e.what() << "\n"
                << "...caught in main()\n";
         dump_cl(argc,argv,log_os);
         exit(EXIT_FAILURE);
 
-    } catch(...) {
+    } catch (...) {
         log_os << "FATAL:: UNKNOWN EXCEPTION\n"
                << "...caught in main()\n";
         dump_cl(argc,argv,log_os);

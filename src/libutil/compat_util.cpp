@@ -39,7 +39,7 @@
 
 double
 compat_round(const double x) {
-    if(x>=0.) {
+    if (x>=0.) {
         return std::floor(x+0.5);
     } else {
         return std::ceil(x-0.5);
@@ -56,7 +56,7 @@ compat_basename(const char* str) {
     static const char pathsep('/');
 #endif
     const char* res(strrchr(str,pathsep));
-    if(NULL==res) return str;
+    if (NULL==res) return str;
     return res+1;
 }
 
@@ -76,19 +76,19 @@ test_bn(const char* x) {
 
 void
 test_compat() {
-  test_round(3.5);
-  test_round(3.2);
-  test_round(3.7);
-  test_round(-1);
-  test_round(-1.5);
-  test_round(-1.7);
-  test_round(-1.2);
+    test_round(3.5);
+    test_round(3.2);
+    test_round(3.7);
+    test_round(-1);
+    test_round(-1.5);
+    test_round(-1.7);
+    test_round(-1.2);
 
-  test_bn("/foo");
-  test_bn("foo");
-  test_bn("//");
-  test_bn("/");
-  test_bn("");
+    test_bn("/foo");
+    test_bn("foo");
+    test_bn("//");
+    test_bn("/");
+    test_bn("");
 }
 
 

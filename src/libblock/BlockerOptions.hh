@@ -42,25 +42,25 @@
 
 
 namespace FILTERTYPE {
-    enum index_t {
-        SITE,
-        INDEL,
-        BOTH
-    };
+enum index_t {
+    SITE,
+    INDEL,
+    BOTH
+};
 
-    inline
-    const char*
-    label(const index_t x) {
-        static const char* label[] = {"site","indel","locus"};
-        return label[x];
-    }
+inline
+const char*
+label(const index_t x) {
+    static const char* label[] = {"site","indel","locus"};
+    return label[x];
+}
 
-    inline
-    const char*
-    Label(const index_t x) {
-        static const char* Label[] = {"Site","Indel","Locus"};
-        return Label[x];
-    }
+inline
+const char*
+Label(const index_t x) {
+    static const char* Label[] = {"Site","Indel","Locus"};
+    return Label[x];
+}
 }
 
 

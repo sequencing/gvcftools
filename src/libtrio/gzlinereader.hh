@@ -51,8 +51,8 @@ struct gzlinereader {
     ~gzlinereader();
 
     // returns NULL at EOF
-    // 
-    char* getline(); 
+    //
+    char* getline();
 
 private:
 

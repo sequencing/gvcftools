@@ -50,7 +50,7 @@
 
 inline
 double
-ratio(const unsigned n, const unsigned d){
+ratio(const unsigned n, const unsigned d) {
     return ((d==0)? 0. : (static_cast<double>(n)/static_cast<double>(d)));
 }
 
@@ -68,7 +68,7 @@ struct site_stats_core {
         , incorrect(0)
         , snp_correct(0)
     {
-        for(unsigned st(0);st<SAMPLE_SIZE;++st) {
+        for (unsigned st(0); st<SAMPLE_SIZE; ++st) {
             sample_mapped[st] = 0;
             sample_called[st] = 0;
             sample_snp[st] = 0;
@@ -131,53 +131,53 @@ struct snp_type_info {
     get_is_call(char** word,
                 const pos_t pos,
                 pos_t& skip_call_begin_pos,
-                pos_t& skip_call_end_pos) const { 
+                pos_t& skip_call_end_pos) const {
 
         //update_skip_call_range(word,pos,is_indel,skip_call_begin_pos,skip_call_end_pos);
         bool is_bad_call(0!=strcmp(word[VCFID::FILT],"PASS"));
-        if(is_bad_call) return false;
-        if(_sp.min_gqx > 0) {
+        if (is_bad_call) return false;
+        if (_sp.min_gqx > 0) {
             float gqx(0);
-            if(get_format_float(word,"GQX",gqx)) {
-                if(gqx<_sp.min_gqx) return false;
+            if (get_format_float(word,"GQX",gqx)) {
+                if (gqx<_sp.min_gqx) return false;
             }
         }
 #if 0
-        if(_sp.vcf_min_ref_qual > 0) {
+        if (_sp.vcf_min_ref_qual > 0) {
             const char* qword(word[QVAR_COL]);
-            if(strcmp(".",qword)!=0) {
+            if (strcmp(".",qword)!=0) {
                 unsigned digt_code[2];
-                if(get_digt_code(word, digt_code) &&
-                   (digt_code[0]==0) &&
-                   (digt_code[1]==0)) {
+                if (get_digt_code(word, digt_code) &&
+                    (digt_code[0]==0) &&
+                    (digt_code[1]==0)) {
                     float qual(casava::blt_util::parse_double(qword));
-                    if(qual<_sp.vcf_min_ref_qual) return false;
+                    if (qual<_sp.vcf_min_ref_qual) return false;
                 }
             }
         }
 #endif
-        if(_sp.is_min_qd) {
+        if (_sp.is_min_qd) {
             float qd(0);
-            if(get_info_float(word[VCFID::INFO],"QD",qd)) {
-                if(qd<_sp.min_qd) return false;
+            if (get_info_float(word[VCFID::INFO],"QD",qd)) {
+                if (qd<_sp.min_qd) return false;
             }
         }
-        if(_sp.is_min_pos_rank_sum) {
+        if (_sp.is_min_pos_rank_sum) {
             float pos_rank_sum(0);
-            if(get_info_float(word[VCFID::INFO],"BaseQRankSum",pos_rank_sum)) {
-                if(pos_rank_sum<_sp.min_pos_rank_sum) return false;
+            if (get_info_float(word[VCFID::INFO],"BaseQRankSum",pos_rank_sum)) {
+                if (pos_rank_sum<_sp.min_pos_rank_sum) return false;
             }
         }
 
         // handle the custom info filters:
-        if(! _sp.infof.empty()) {
-            for(unsigned i(0);i<_sp.infof.size();++i) {
+        if (! _sp.infof.empty()) {
+            for (unsigned i(0); i<_sp.infof.size(); ++i) {
                 float record_val(0);
-                if(get_info_float(word[VCFID::INFO],_sp.infof[i].key.c_str(),record_val)) {
-                    if(_sp.infof[i].is_min) {
-                        if(record_val<_sp.infof[i].val) return false;
+                if (get_info_float(word[VCFID::INFO],_sp.infof[i].key.c_str(),record_val)) {
+                    if (_sp.infof[i].is_min) {
+                        if (record_val<_sp.infof[i].val) return false;
                     } else {
-                        if(record_val>_sp.infof[i].val) return false;
+                        if (record_val>_sp.infof[i].val) return false;
                     }
                 }
             }
@@ -188,20 +188,20 @@ struct snp_type_info {
 
     bool
     get_site_allele(std::vector<char>& allele,
-               const char * const * word,
-               const unsigned offset,
-               const char ref_base) const;
+                    const char* const* word,
+                    const unsigned offset,
+                    const char ref_base) const;
 
     bool
     get_indel_allele(
-            std::string& indel_ref,
-            std::vector<std::string>& allele,
-            const char * const * word) const;
+        std::string& indel_ref,
+        std::vector<std::string>& allele,
+        const char* const* word) const;
 
     unsigned
-    total(const char * const * word) const {
+    total(const char* const* word) const {
         unsigned dp;
-        if(! get_format_unsigned(word,"DP",dp)) return 0;
+        if (! get_format_unsigned(word,"DP",dp)) return 0;
         return dp;
     }
 
@@ -209,30 +209,30 @@ struct snp_type_info {
     col_count() const { return 10; }
 
     const char*
-    chrom(const char* const * word) const {
+    chrom(const char* const* word) const {
         return word[_chromcol];
     }
 
     pos_t
-    pos(const char* const * word) const {
+    pos(const char* const* word) const {
         const char* s(word[_poscol]);
         return parse_type<pos_t>(s);
     }
 
 
     // Size of the site or multisite locus in reference bases.
-    // returns false on error 
+    // returns false on error
     bool
-    get_nonindel_ref_length(const pos_t pos, const bool is_indel, const char * const * word, unsigned& result) const { 
+    get_nonindel_ref_length(const pos_t pos, const bool is_indel, const char* const* word, unsigned& result) const {
         result=0;
-        if(is_indel) return true;
-        
+        if (is_indel) return true;
+
         const unsigned reflen(strlen(word[VCFID::REF]));
         unsigned iend;
-        if(! get_info_unsigned(word[VCFID::INFO],"END",iend)) {
+        if (! get_info_unsigned(word[VCFID::INFO],"END",iend)) {
             result=reflen;
         } else {
-            if( ! (iend>=pos && (reflen <= ((iend+1)-pos))) ) return false; 
+            if ( ! (iend>=pos && (reflen <= ((iend+1)-pos))) ) return false;
             result = (iend+1)-pos;
         }
         return true;
@@ -240,23 +240,23 @@ struct snp_type_info {
 
     // this detects both indels and unequal or equal length 'block-subsitutions'
     bool
-    get_is_indel(const char * const * word) const {
+    get_is_indel(const char* const* word) const {
         const char* alt(word[VCFID::ALT]);
         const char* tmp_ptr;
         // no alternate:
-        if(0==strcmp(alt,".")) return false;
+        if (0==strcmp(alt,".")) return false;
         // breakend:
-        if(NULL != (tmp_ptr=strchr(alt,'.'))) return true;
+        if (NULL != (tmp_ptr=strchr(alt,'.'))) return true;
         const unsigned reflen(strlen(word[VCFID::REF]));
         // if alt is not '.' and reflen > 1, then this must be some sort of indel/subst:
         // pathological case is alt=".,." ... don't worry about that one.
-        if(reflen>1) return true;
+        if (reflen>1) return true;
         // after the above test, we're essentially just looking for an alt with
         // length greater than one, indicating an insertion:
-        while(NULL != (tmp_ptr=strchr(alt,','))){
-            if((tmp_ptr-alt)!=static_cast<pos_t>(reflen)) return true;
+        while (NULL != (tmp_ptr=strchr(alt,','))) {
+            if ((tmp_ptr-alt)!=static_cast<pos_t>(reflen)) return true;
             alt = tmp_ptr+1;
-        } 
+        }
         return (strlen(alt)!=reflen);
     }
 
@@ -276,38 +276,38 @@ private:
 
     static
     bool
-    get_format_float(const char* const * word, 
+    get_format_float(const char* const* word,
                      const char* key,
                      float& val);
 
     static
     bool
-    get_format_unsigned(const char* const * word, 
+    get_format_unsigned(const char* const* word,
                         const char* key,
                         unsigned& val);
 
     // Size of the locus in reference bases. This has been assumed to
     // be 1 until vcf support was added.
     unsigned
-    get_ref_length(const char * const * word) const { 
+    get_ref_length(const char* const* word) const {
         return strlen(word[VCFID::REF]);
     }
 
     // if the current locus is an indel, mark out its range as no-call:
     //
     void
-    update_skip_call_range(const char * const * word,
+    update_skip_call_range(const char* const* word,
                            const pos_t pos,
                            const bool is_indel,
                            pos_t& skip_call_begin_pos,
                            pos_t& skip_call_end_pos) const {
         const unsigned locus_size=get_ref_length(word);
-        if(locus_size<=1) return;
-        if(! is_indel) return;
+        if (locus_size<=1) return;
+        if (! is_indel) return;
         // follow CASAVA begin-end convention: 0-indexed and end goes 1 past range
         const pos_t indel_begin_pos(pos+1);
         const pos_t indel_end_pos(pos+locus_size);
-        if(skip_call_end_pos<pos){
+        if (skip_call_end_pos<pos) {
             skip_call_begin_pos=indel_begin_pos;
         }
         skip_call_end_pos=std::max(skip_call_end_pos,indel_end_pos);
@@ -315,7 +315,7 @@ private:
 
 
 // data:
-    
+
     const snp_param& _sp;
 
     const unsigned _chromcol;
@@ -376,8 +376,8 @@ struct vcf_pos {
 
     bool
     operator<(const vcf_pos& rhs) const {
-        if(pos<rhs.pos) return true;
-        if(pos==rhs.pos) {
+        if (pos<rhs.pos) return true;
+        if (pos==rhs.pos) {
             return ((!is_indel) && rhs.is_indel);
         }
         return false;
@@ -398,7 +398,7 @@ operator<<(std::ostream& os, const vcf_pos& vpos);
 
 
 struct site_crawler {
-    
+
     site_crawler(const sample_info& si,
                  const unsigned sample_id,
                  const shared_crawler_options& opt,
@@ -433,48 +433,48 @@ struct site_crawler {
     const char*
     chrom() const {
         static const char* unknown = "unknown";
-        if(NULL == _chrom) return unknown;
+        if (NULL == _chrom) return unknown;
         return _chrom;
     }
 
     const char*
     word(const unsigned i) const {
         static const char* unknown = "";
-        if(NULL == _word) return unknown;
-        if(_n_word <= i) return unknown;
+        if (NULL == _word) return unknown;
+        if (_n_word <= i) return unknown;
         return _word[i];
     }
 
     unsigned
     get_allele_size() const {
-        if(! _is_site_allele_current) update_site_allele();
+        if (! _is_site_allele_current) update_site_allele();
         return _site_allele.size();
     }
 
     char
     get_allele(const unsigned index) const {
-        if(! _is_site_allele_current) update_site_allele();
-        if(index>get_allele_size()) return 'N';
+        if (! _is_site_allele_current) update_site_allele();
+        if (index>get_allele_size()) return 'N';
         return _site_allele[index];
     }
 
     unsigned
     get_indel_allele_size() const {
-        if(! _is_indel_allele_current) update_indel_allele();
+        if (! _is_indel_allele_current) update_indel_allele();
         return _indel_allele.size();
     }
 
     const std::string&
     get_indel_allele(const unsigned index) const {
         static const std::string nullStr("X");
-        if(! _is_indel_allele_current) update_indel_allele();
-        if(index>get_indel_allele_size()) return nullStr;
+        if (! _is_indel_allele_current) update_indel_allele();
+        if (index>get_indel_allele_size()) return nullStr;
         return _indel_allele[index];
     }
 
     const std::string&
     get_indel_ref() const {
-        if(! _is_indel_allele_current) update_indel_allele();
+        if (! _is_indel_allele_current) update_indel_allele();
         return _indel_ref;
     }
 

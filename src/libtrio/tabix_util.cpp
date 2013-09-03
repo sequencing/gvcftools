@@ -39,7 +39,7 @@
 
 
 namespace {
-    std::ostream& log_os(std::cerr);
+std::ostream& log_os(std::cerr);
 }
 
 
@@ -57,10 +57,10 @@ is_prefix(const char* a,
 bool
 is_tabix_index(const char* f) {
 
-    if(NULL == f) return false;
+    if (NULL == f) return false;
 
     // punt on remote case:
-    if(is_prefix(f,"ftp://") || is_prefix(f,"http://")) return true;
+    if (is_prefix(f,"ftp://") || is_prefix(f,"http://")) return true;
 
     std::string idx(f);
     idx += ".tbi";
@@ -75,7 +75,7 @@ is_tabix_index(const char* f) {
 
 void
 enforce_tabix_index(const char* f) {
-    if(is_tabix_index(f)) return;
+    if (is_tabix_index(f)) return;
 
     std::ostringstream oss;
     oss << "ERROR: Missing or outdated index for vcf file: " << f << "\n";
@@ -90,15 +90,15 @@ parse_tabix_region(const char* filename,
                    int& begin,
                    int& end) {
 
-    if(NULL == region) {
+    if (NULL == region) {
         return false;
     }
 
-    if(NULL == filename){
+    if (NULL == filename) {
         throw blt_exception("vcf filename is null ptr");
     }
 
-    if('\0' == *filename){
+    if ('\0' == *filename) {
         throw blt_exception("vcf filename is empty string");
     }
 
@@ -106,7 +106,7 @@ parse_tabix_region(const char* filename,
 
     tabix_t* _tfp = ti_open(filename, 0);
 
-    if(NULL == _tfp) {
+    if (NULL == _tfp) {
         log_os << "ERROR: Failed to open VCF file: '" << filename << "'\n";
         exit(EXIT_FAILURE);
     }
@@ -133,17 +133,17 @@ tabix_chrom_list(const char* filename)
     , _tptr(NULL)
     , _tfp(NULL)
 {
-    if(NULL == filename){
+    if (NULL == filename) {
         throw blt_exception("vcf filename is null ptr");
     }
 
-    if('\0' == *filename){
+    if ('\0' == *filename) {
         throw blt_exception("vcf filename is empty string");
     }
 
     tabix_t* _tfp = ti_open(filename, 0);
 
-    if(NULL == _tfp) {
+    if (NULL == _tfp) {
         log_os << "ERROR: Failed to open VCF file: '" << filename << "'\n";
         exit(EXIT_FAILURE);
     }
@@ -160,6 +160,6 @@ tabix_chrom_list(const char* filename)
 
 tabix_chrom_list::
 ~tabix_chrom_list() {
-    if(NULL != _tptr) free(_tptr);
-    if(NULL != _tfp) ti_close(_tfp);
+    if (NULL != _tptr) free(_tptr);
+    if (NULL != _tfp) ti_close(_tfp);
 }

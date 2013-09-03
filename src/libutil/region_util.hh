@@ -41,13 +41,13 @@
 
 namespace region_util {
 
-    typedef std::pair<unsigned,unsigned> interval_t;
-    typedef std::vector<interval_t> interval_group_t;
-    typedef std::map<std::string,interval_group_t> region_t;
+typedef std::pair<unsigned,unsigned> interval_t;
+typedef std::vector<interval_t> interval_group_t;
+typedef std::map<std::string,interval_group_t> region_t;
 
-    void
-    get_regions(const std::string& region_file,
-                region_t& regions);
+void
+get_regions(const std::string& region_file,
+            region_t& regions);
 }
 
 #endif

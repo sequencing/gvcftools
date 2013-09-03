@@ -51,7 +51,7 @@ struct BlockerVcfHeaderHandler : public VcfHeaderHandler {
         static const char* rmHeaderTags[] = { "AC", "AF", "AN" };
         static const unsigned n_tags(sizeof(rmHeaderTags)/sizeof(char*));
 
-        for(unsigned i(0);i<n_tags;++i) {
+        for (unsigned i(0); i<n_tags; ++i) {
             _rmKeys.push_back(std::string("INFO=<ID=")+rmHeaderTags[i]);
         }
     }
@@ -66,7 +66,7 @@ private:
 
     void
     write_split_line(const istream_line_splitter& vparse) {
-        if(_opt.is_skip_header) return;
+        if (_opt.is_skip_header) return;
         vparse.write_line(_os);
     }
 

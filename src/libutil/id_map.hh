@@ -50,7 +50,7 @@ struct id_set {
     /// number in either case
     unsigned insert_key(const K& key) {
         const typename k2id_t::const_iterator i(_k2id.find(key));
-        if(i==_k2id.end()) {
+        if (i==_k2id.end()) {
             const unsigned id(_id2k.size());
             _k2id[key]=id;
             _id2k.push_back(key);
@@ -68,7 +68,7 @@ struct id_set {
     /// \brief Get id of inserted key
     unsigned get_id(const K& key) const {
         const typename k2id_t::const_iterator i(_k2id.find(key));
-        if(i==_k2id.end()) {
+        if (i==_k2id.end()) {
             throw blt_exception("ERROR: id_set.get_id(): invalid key\n");
         }
         return i->second;
@@ -76,7 +76,7 @@ struct id_set {
 
     /// \brief Get pre-existing key
     const K& get_key(const unsigned id) const {
-        if(id>=_id2k.size()) {
+        if (id>=_id2k.size()) {
             throw blt_exception("ERROR: id_set.get_key(): invalid id\n");
         }
         return _id2k[id];
@@ -108,7 +108,7 @@ struct id_map {
     /// return id number in either case
     unsigned insert(const K& key, const V& value) {
         const typename k2id_t::const_iterator i(_k2id.find(key));
-        if(i==_k2id.end()) {
+        if (i==_k2id.end()) {
             const unsigned id(_id2kv.size());
             _k2id[key]=id;
             _id2kv.push_back(std::make_pair(key,value));
@@ -126,7 +126,7 @@ struct id_map {
     /// \brief Get id of inserted key
     unsigned get_id(const K& key) const {
         const typename k2id_t::const_iterator i(_k2id.find(key));
-        if(i==_k2id.end()) {
+        if (i==_k2id.end()) {
             throw blt_exception("ERROR: id_map.get_id(): invalid key\n");
         }
         return i->second;
@@ -134,7 +134,7 @@ struct id_map {
 
     /// \brief Get pre-existing key
     const K& get_key(const unsigned id) const {
-        if(id>=_id2kv.size()) {
+        if (id>=_id2kv.size()) {
             throw blt_exception("ERROR: idmap.get_key(): invalid id\n");
         }
         return _id2kv[id].first;
@@ -142,7 +142,7 @@ struct id_map {
 
     /// \brief Get pre-existing key
     const V& get_value(const unsigned id) const {
-        if(id>=_id2kv.size()) {
+        if (id>=_id2kv.size()) {
             throw blt_exception("ERROR: idmap.get_value(): invalid id\n");
         }
         return _id2kv[id].second;

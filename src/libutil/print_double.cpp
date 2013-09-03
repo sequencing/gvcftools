@@ -36,7 +36,7 @@
 
 
 std::ostream&
-operator<<(std::ostream& os,const print_double& pd){
+operator<<(std::ostream& os,const print_double& pd) {
     os << pd.strval();
     return os;
 }

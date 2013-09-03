@@ -42,7 +42,7 @@ extern "C" {
 
 // specialized ref reader -- picks out many calls to individual positions:
 struct samtools_char_picker {
-    
+
     samtools_char_picker(const char* ref_file)
         : _fai(fai_load(ref_file))
     {}

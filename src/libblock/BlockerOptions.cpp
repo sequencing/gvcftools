@@ -36,7 +36,7 @@
 
 
 std::ostream&
-operator<<(std::ostream& os,const FilterInfo& fi){
+operator<<(std::ostream& os,const FilterInfo& fi) {
 
     os << "FilterInfo\n"
        << "\tlabel " << fi.label << "\n"
@@ -69,7 +69,7 @@ BlockerOptions()
     filters.push_back(FilterInfo("max-hapscore",FILTERTYPE::SITE,"HighHaplotypeScore","HaplotypeScore","13.0",true));
     filters.push_back(FilterInfo("min-mqrs",FILTERTYPE::SITE,"LowMQRankSum","MQRankSum","-12.5",false));
     filters.push_back(FilterInfo("min-site-rprs",FILTERTYPE::SITE,"LowReadPosRankSum","ReadPosRankSum","-2.386",false));
-    
+
     filters.push_back(FilterInfo("max-indel-fs",FILTERTYPE::INDEL,"HighIndelFS","FS","200.0",true));
     filters.push_back(FilterInfo("min-indel-rprs",FILTERTYPE::INDEL,"LowIndelReadPosRankSum","ReadPosRankSum","-20.0",false));
 }
@@ -79,7 +79,7 @@ BlockerOptions()
 void
 BlockerOptions::
 finalize_filters() {
-    if(! min_gqx.empty()) GQX_filter.reset(new FilterInfo("min-gqx",FILTERTYPE::BOTH,"LowGQX","GQX",min_gqx.c_str(),false,true,true));
+    if (! min_gqx.empty()) GQX_filter.reset(new FilterInfo("min-gqx",FILTERTYPE::BOTH,"LowGQX","GQX",min_gqx.c_str(),false,true,true));
 }
 
 

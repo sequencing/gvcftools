@@ -61,7 +61,7 @@ struct tabix_chrom_list {
 
     // returns null when names are exhuasted:
     const char* next() {
-        if(_index < _nchrom) {
+        if (_index < _nchrom) {
             return _tptr[_index++];
         } else {
             return NULL;

@@ -50,9 +50,9 @@ struct BlockerStats {
 
         _block_size.add(size);
 
-        if(gqx.size()>=min_block_count()) _gqx_cov.add(gqx.stderror());
-        if(dp.size()>=min_block_count()) _dp_cov.add(dp.stderror());
-        if(mq.size()>=min_block_count()) _mq_cov.add(mq.stderror());
+        if (gqx.size()>=min_block_count()) _gqx_cov.add(gqx.stderror());
+        if (dp.size()>=min_block_count()) _dp_cov.add(dp.stderror());
+        if (mq.size()>=min_block_count()) _mq_cov.add(mq.stderror());
     }
 
     void

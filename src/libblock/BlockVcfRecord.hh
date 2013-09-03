@@ -97,15 +97,15 @@ struct BlockVcfRecord {
         // test gq
         if (!IsNewValueBlockable(cvcfr.GetGQX(),_baseCvcfr->GetGQX(),
                                  _blockGQX,_fracTol,_absTol))
-                return false;
+            return false;
 
         if (!IsNewValueBlockable(cvcfr.GetDP(),_baseCvcfr->GetDP(),
                                  _blockDP,_fracTol,_absTol))
-                return false;
+            return false;
 
         if (!IsNewValueBlockable(cvcfr.GetMQ(),_baseCvcfr->GetMQ(),
                                  _blockMQ,_fracTol,_absTol))
-                return false;
+            return false;
 
         return true;
     }
@@ -121,12 +121,12 @@ struct BlockVcfRecord {
             _blockDP.add(cvcfr.GetDP().IntVal);
         if (cvcfr.GetMQ().IsInt)
             _blockMQ.add(cvcfr.GetMQ().IntVal);
-        
+
         _count += 1;
     }
 
     void
-    Write(std::ostream& os){
+    Write(std::ostream& os) {
 
         if (_count == 0) return;
 
@@ -166,7 +166,7 @@ struct BlockVcfRecord {
                 _baseCvcfr->AppendInfo(label.c_str());
             }
 
-            if(_opt.is_block_stats()) {
+            if (_opt.is_block_stats()) {
                 _stats.addBlock(_count,_blockGQX,_blockDP,_blockMQ);
             }
         }
@@ -192,16 +192,16 @@ private:
         }
         _baseCvcfr->SetSampleVal(label,printptr);
     }
-    
+
     static
-    bool 
+    bool
     IsNewValueBlockable(const MaybeInt& newval,
                         const MaybeInt& oldval,
                         const stream_stat& ss,
                         const double fracTol,
                         const int absTol) {
         if (!(newval.IsInt && oldval.IsInt)) {
-                return (newval.StrVal == oldval.StrVal);
+            return (newval.StrVal == oldval.StrVal);
         }
         return IsNewValueBlockableInternal(newval.IntVal, ss, fracTol, absTol);
     }
@@ -230,7 +230,7 @@ private:
     /// <summary>
     /// check that int(block_mean) is with either abs_tol of min/max or mean*frac_tol of min/max
     /// </summary>
-    static 
+    static
     bool
     CheckBlockTolerance(const stream_stat& ss,
                         const double fracTol,

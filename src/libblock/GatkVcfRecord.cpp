@@ -34,7 +34,7 @@
 #include <iostream>
 
 std::ostream&
-operator<<(std::ostream& os,const MaybeInt& mi){
+operator<<(std::ostream& os,const MaybeInt& mi) {
 
     os << "MaybeInt\n"
        << "\tIsInt " << mi.IsInt << "\n"

@@ -68,7 +68,7 @@ struct VcfRecord {
     const std::string& GetQual() const { return _qual; }
 
     void SetQual(const char* val) {
-        if((NULL == val) || (*val=='\0')) {
+        if ((NULL == val) || (*val=='\0')) {
             _qual = ".";
         } else {
             _qual = val;
@@ -78,10 +78,10 @@ struct VcfRecord {
 
     // this definition will pick up MNPs, we can refine this later if need be...
     bool IsIndel() const {
-        if(GetRef().size() > 1) return true;
+        if (GetRef().size() > 1) return true;
         const unsigned as(GetAlt().size());
-        for(unsigned i(0);i<as;++i) {
-            if(GetAlt()[i].size() > 1) return true;
+        for (unsigned i(0); i<as; ++i) {
+            if (GetAlt()[i].size() > 1) return true;
         }
         return false;
     }
@@ -94,14 +94,14 @@ struct VcfRecord {
 
     bool
     IsStrictVariant() const {
-        if(GetAlt().empty()) return false;
+        if (GetAlt().empty()) return false;
 
         const char* gtstr(GetSampleVal("GT"));
         if (NULL == gtstr) return false;
 
         parse_gt(gtstr, _gtparse);
         BOOST_FOREACH(const int allele, _gtparse) {
-            if(allele>0) return true;
+            if (allele>0) return true;
         }
         return false;
     }
@@ -123,12 +123,12 @@ struct VcfRecord {
     void AppendFilter(const char* val) {
         const unsigned fs(_filt.size());
 
-        if((fs == 1) && (_filt[0] == "PASS")) {
+        if ((fs == 1) && (_filt[0] == "PASS")) {
             _filt.clear();
         }
-        
-        for(unsigned i(0);i<fs;++i) {
-            if(_filt[i] == val) return;
+
+        for (unsigned i(0); i<fs; ++i) {
+            if (_filt[i] == val) return;
         }
         _filt.push_back(val);
     }
@@ -137,10 +137,10 @@ struct VcfRecord {
     GetInfoVal(const char* key) const {
         assert(NULL != key);
         const unsigned ic(_info.size());
-        for(unsigned i(0);i<ic;++i){
+        for (unsigned i(0); i<ic; ++i) {
             const size_t index(_info[i].find('='));
-            if(index == std::string::npos) continue;
-            if(0 == _info[i].compare(0,index,key)) {
+            if (index == std::string::npos) continue;
+            if (0 == _info[i].compare(0,index,key)) {
                 return _info[i].c_str()+index+1;
             }
         }
@@ -153,10 +153,10 @@ struct VcfRecord {
         assert(NULL != key);
         assert(NULL != val);
         const unsigned ic(_info.size());
-        for(unsigned i(0);i<ic;++i){
+        for (unsigned i(0); i<ic; ++i) {
             const size_t index(_info[i].find('='));
-            if(index == std::string::npos) continue;
-            if(0 == _info[i].compare(0,index,key)) {
+            if (index == std::string::npos) continue;
+            if (0 == _info[i].compare(0,index,key)) {
                 _info[i].replace(index+1,std::string::npos,val);
                 return;
             }
@@ -166,10 +166,10 @@ struct VcfRecord {
 
     void DeleteInfoKeyVal(const char* key) {
         const unsigned ic(_info.size());
-        for(unsigned i(0);i<ic;++i){
+        for (unsigned i(0); i<ic; ++i) {
             const size_t index(_info[i].find('='));
-            if(index == std::string::npos) continue;
-            if(0 == _info[i].compare(0,index,key)) {
+            if (index == std::string::npos) continue;
+            if (0 == _info[i].compare(0,index,key)) {
                 _info.erase(_info.begin()+i);
                 return;
             }
@@ -188,8 +188,8 @@ struct VcfRecord {
     GetSampleVal(const char* key) const {
 
         const unsigned fs(_format.size());
-        for(unsigned i(0);i<fs;++i){
-            if(_format[i] == key ) {
+        for (unsigned i(0); i<fs; ++i) {
+            if (_format[i] == key ) {
                 return _sample[i].c_str();
             }
         }
@@ -201,7 +201,7 @@ struct VcfRecord {
                     std::string& val) const {
 
         const char* s(GetSampleVal(key));
-        if(NULL==s) {
+        if (NULL==s) {
             val.clear();
             return false;
         } else {
@@ -213,11 +213,11 @@ struct VcfRecord {
     void
     SetSampleVal(const char* key,
                  const char* val) {
- 
+
         IsSampleModified();
         const unsigned fs(_format.size());
-        for(unsigned i(0);i<fs;++i){
-            if(_format[i] == key ) {
+        for (unsigned i(0); i<fs; ++i) {
+            if (_format[i] == key ) {
                 _sample[i] = val;
                 return;
             }
@@ -232,8 +232,8 @@ struct VcfRecord {
     {
         int deli = -1;
         const unsigned fs(_format.size());
-        for(unsigned i(0);i<fs;++i){
-            if(_format[i] == key ) {
+        for (unsigned i(0); i<fs; ++i) {
+            if (_format[i] == key ) {
                 deli = i;
                 break;
             }
@@ -245,12 +245,12 @@ struct VcfRecord {
         IsSampleModified();
     }
 
-    void 
+    void
     ReplaceSampleKey(const char* oldval,
                      const char* newval) {
         const unsigned fs(_format.size());
-        for(unsigned i(0);i<fs;++i){
-            if(_format[i] == oldval ) {
+        for (unsigned i(0); i<fs; ++i) {
+            if (_format[i] == oldval ) {
                 _format[i] = newval;
                 IsSampleModified();
                 return;
@@ -269,7 +269,7 @@ struct VcfRecord {
           const int printPos,
           const std::string& refPlaceholder,
           std::ostream& os) const;
-        
+
     void
     Write(std::ostream& os) {
         static const std::string RPH = "..";
@@ -321,7 +321,7 @@ private:
     }
 
     static
-    void 
+    void
     Splitter(const char* str,
              const char delimiter,
              std::vector<std::string>& v) {
