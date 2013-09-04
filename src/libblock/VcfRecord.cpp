@@ -57,7 +57,13 @@ VcfRecord(const istream_line_splitter& vparse)
     _id = vparse.word[VCFID::ID];
 
     _ref = vparse.word[VCFID::REF];
-    assert(_ref.size() > 0);
+    if(_ref.empty())
+    {
+        std::ostringstream oss;
+        oss << "Empty reference field in input vcf record:\n";
+        vparse.dump(oss);
+        throw blt_exception(oss.str().c_str());
+    }
 
     Splitter(vparse.word[VCFID::ALT],',',_alt);
 
