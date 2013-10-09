@@ -220,7 +220,7 @@ try_main(int argc,char* argv[]) {
     }
 
     if ((vm.count("help")) || po_parse_fail) {
-        log_os << "\n" << progname << " create a bed file of called regions from a gVCF\n\n";
+        log_os << "\n" << progname << " creates a bed file of called regions from a gVCF\n\n";
         log_os << "version: " << gvcftools_version() << "\n\n";
         log_os << "usage: " << progname << " [options] < gVCF > called.bed\n\n";
         log_os << visible << "\n";
