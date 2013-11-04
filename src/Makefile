@@ -76,7 +76,7 @@ $(LIBUTIL_PATH): .FORCE
 # if GVCFTOOLS_VERSION is unset, attempt to get version from git, else set to unknown:
 $(GVCFTOOLS_HH): $(GVCFTOOLS_HH).in .FORCE
 	version="$(GVCFTOOLS_VERSION)" && \
-	if [ "$$version" == "" ]; then if gitversion=$$(git describe 2> /dev/null); then version=$$gitversion; else version="UNKNOWN"; fi; fi && \
+	if test -z "$$version"; then if gitversion=$$(git describe 2> /dev/null); then version=$$gitversion; else version="UNKNOWN"; fi; fi && \
 	sed "s/\$${VERSION}/$$version/" < $@.in > $@
 
 .FORCE:
