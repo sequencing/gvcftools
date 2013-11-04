@@ -56,7 +56,7 @@ std::string cmdline;
 
 
 
-// process each vcf record for haploid setting:
+// process each vcf record 
 //
 struct RemoveVcfRecordHandler : public RegionVcfRecordHandler {
 
@@ -71,7 +71,6 @@ private:
                   const unsigned end,
                   VcfRecord& vcfr) const {
 
-
         if(! is_in_region) {
 
             if(end>vcfr.GetPos()) {
@@ -80,15 +79,6 @@ private:
                 vcfr.DeleteInfoKeyVal("END");
             }
             vcfr.WriteUnaltered(_opt.outfp);
-        } else {
-            vcfr.DeleteInfoKeyVal("END");
-            //vcfr.WriteUnaltered(_opt.outfp);
-            //while(end>vcfr.GetPos()) {
-            //    const int next_pos(vcfr.GetPos()+1);
-            //    vcfr.SetPos(next_pos);
-            //    vcfr.SetRef(_scp.get_char(vcfr.GetChrom().c_str(),next_pos));
-            //    vcfr.WriteUnaltered(_opt.outfp);
-            //}
         }
     }
 
@@ -137,7 +127,7 @@ try_main(int argc,char* argv[]){
     namespace po = boost::program_options;
     po::options_description req("configuration");
     req.add_options()
-        ("region-file",po::value<std::string>(&region_file),"A bed file specifying regions where non-refernece blocks should be broken into individual positions (required)")
+        ("region-file",po::value<std::string>(&region_file),"A bed file specifying regions which should be excluded from the gVCF. Any records contained in the excluded region will be removed, and any boundary non-refernece blocks will be altered to remove segments overlapping the excluded region (required)")
         ("ref", po::value<std::string >(&opt.refSeqFile),"samtools reference sequence (required)");
 
     po::options_description help("help");
@@ -158,9 +148,9 @@ try_main(int argc,char* argv[]){
     }
     
     if ((argc<=1) || (vm.count("help")) || po_parse_fail) {
-        log_os << "\n" << progname << " converts non-reference blocks to individual positions in specified regions\n\n"; 
+        log_os << "\n" << progname << " removes variant call information from specified regions\n\n"; 
         log_os << "version: " << gvcftools_version() << "\n\n";
-        log_os << "usage: " << progname << " [options] < (g)VCF > unblocked_(g)VCF\n\n"; 
+        log_os << "usage: " << progname << " [options] < (g)VCF > region_removed_(g)VCF\n\n"; 
         log_os << visible << "\n";
         exit(EXIT_FAILURE);
     }

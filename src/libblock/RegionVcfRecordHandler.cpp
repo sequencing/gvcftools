@@ -66,8 +66,7 @@ process_line(const istream_line_splitter& vparse) {
     }
 
     // 1. check if record region is in a target region at all,
-    // if true an iterator provides begin,end ranges on
-    // successive calls for the record region.
+    //    if not, then write out the record:
     //
     if (! is_record_in_region(vparse)) {
         if (is_write_off_region_record(vparse)) {
@@ -76,6 +75,11 @@ process_line(const istream_line_splitter& vparse) {
         return;
     }
 
+    // 2. This record interacts with the target region. To process
+    // it, an iterator provides begin,end ranges on successive calls
+    // for the record region, untill it's completely classified into
+    // intersetions with the target:
+    //
     VcfRecord vcfr(vparse);
 
     bool is_in_region;
