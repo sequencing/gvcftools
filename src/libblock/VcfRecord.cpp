@@ -57,7 +57,7 @@ VcfRecord(const istream_line_splitter& vparse)
     _id = vparse.word[VCFID::ID];
 
     _ref = vparse.word[VCFID::REF];
-    if(_ref.empty())
+    if (_ref.empty())
     {
         std::ostringstream oss;
         oss << "Empty reference field in input vcf record:\n";
