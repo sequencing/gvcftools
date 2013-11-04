@@ -372,12 +372,6 @@ merge_site(const std::vector<boost::shared_ptr<site_crawler> >& sa,
 
     const unsigned n_samples(sa.size());
 
-    bool is_all_mapped(true);
-    bool is_any_mapped(false);
-
-    bool is_all_called(true);
-    bool is_any_called(false);
-
     bool is_any_nonref_called(false);
 
     const char ref_base(ref_seg.get_base(low_pos.pos-1));
@@ -386,12 +380,6 @@ merge_site(const std::vector<boost::shared_ptr<site_crawler> >& sa,
 
     for (unsigned st(0); st<n_samples; ++st) {
         const site_crawler& site(*(sa[st]));
-        if (site.is_pos_valid() && (site.vpos()==low_pos) && (site.n_total() != 0)) {
-            //ss.sample_mapped[st]++;
-            is_any_mapped=true;
-        } else {
-            is_all_mapped=false;
-        }
 
         if (site.is_pos_valid() && (site.vpos()==low_pos) && site.is_site_call()) {
             // position is called in sample st
@@ -401,15 +389,11 @@ merge_site(const std::vector<boost::shared_ptr<site_crawler> >& sa,
                     is_any_nonref_called=true;
                 }
             }
-            is_any_called=true;
-        } else {
-            is_all_called=false;
         }
     }
 
     // only interested in printing variants
     if (! is_any_nonref_called) return;
-
 
     mr.print_locus(sa, low_pos, ref_seg);
 }
