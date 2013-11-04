@@ -1,6 +1,6 @@
 // -*- mode: c++; indent-tabs-mode: nil; -*-
 //
-// Copyright (c) 2009-2012 Illumina, Inc.
+// Copyright (c) 2009-2013 Illumina, Inc.
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -26,7 +26,7 @@
 
 /// \file
 ///
-/// \author Chris Saunders
+/// \author Chris Saunders and Subramanian Shankar Ajay
 ///
 
 #include "blt_exception.hh"
