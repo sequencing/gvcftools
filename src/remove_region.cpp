@@ -127,8 +127,8 @@ try_main(int argc,char* argv[]) {
     namespace po = boost::program_options;
     po::options_description req("configuration");
     req.add_options()
-    ("region-file",po::value<std::string>(&region_file),"A bed file specifying regions which should be excluded from the gVCF. Any records contained in the excluded region will be removed, and any boundary non-refernece blocks will be altered to remove segments overlapping the excluded region (required)")
-    ("ref", po::value<std::string >(&opt.refSeqFile),"samtools reference sequence (required)");
+    ("region-file",po::value(&region_file),"A bed file specifying regions which should be excluded from the gVCF. Any records contained in the excluded region will be removed, and any boundary non-refernece blocks will be altered to remove segments overlapping the excluded region (required)")
+    ("ref", po::value(&opt.refSeqFile),"samtools reference sequence (required)");
 
     po::options_description help("help");
     help.add_options()

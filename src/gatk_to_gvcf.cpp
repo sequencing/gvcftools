@@ -165,9 +165,9 @@ try_main(int argc,char* argv[]) {
 
     po::options_description filters("filters");
     filters.add_options()
-    ("chrom-depth-file",po::value<std::string>(&chrom_depth_file),"Read mean depth for each chromosome from file, and use these values for maximum site depth filteration. File should contain one line per chromosome, where each line begins with: \"chrom_name<TAB>depth\" (default: no chrom depth filtration)")
+    ("chrom-depth-file",po::value(&chrom_depth_file),"Read mean depth for each chromosome from file, and use these values for maximum site depth filteration. File should contain one line per chromosome, where each line begins with: \"chrom_name<TAB>depth\" (default: no chrom depth filtration)")
     ("max-depth-factor",po::value<print_double>(&opt.max_chrom_depth_filter_factor)->default_value(opt.max_chrom_depth_filter_factor),"If a chrom depth file is supplied then loci with depth exceeding the mean chrom depth times this value are filtered")
-    ("min-gqx",po::value<std::string>(&opt.min_gqx)->default_value(opt.min_gqx),"Minimum locus GQX");
+    ("min-gqx",po::value(&opt.min_gqx)->default_value(opt.min_gqx),"Minimum locus GQX");
 
     for (unsigned i(0); i<opt.filters.size(); ++i) {
         FilterInfo& fi(opt.filters[i]);
@@ -182,9 +182,9 @@ try_main(int argc,char* argv[]) {
     blocks.add_options()
     ("block-range-factor",po::value<print_double>(&opt.nvopt.BlockFracTol)->default_value(opt.nvopt.BlockFracTol),
      "Non-variant blocks are restricted to range [x,y], y <= max(x+3,x*(1+block-range-factor))")
-    ("block-label",po::value<std::string>(&opt.nvopt.BlockavgLabel)->default_value(opt.nvopt.BlockavgLabel),
+    ("block-label",po::value(&opt.nvopt.BlockavgLabel)->default_value(opt.nvopt.BlockavgLabel),
      "VCF INFO key used to annotate compressed non-variant blocks")
-    ("block-stats",po::value<std::string>(&opt.block_stats_file),
+    ("block-stats",po::value(&opt.block_stats_file),
      "Write non-variant block stats to the file")
     ("no-block-compression", po::value(&opt.is_skip_blocks)->zero_tokens(),
      "Turn off block compression");

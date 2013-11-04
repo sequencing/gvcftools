@@ -345,14 +345,14 @@ try_main(int argc,char* argv[]) {
     namespace po = boost::program_options;
     po::options_description req("configuration");
     req.add_options()
-    ("ref", po::value<std::string >(&ref_seq_file),"samtools reference sequence (required)")
-    ("region", po::value<std::string>(&opt.region), "samtools reference region (optional)")
+    ("ref", po::value(&ref_seq_file),"samtools reference sequence (required)")
+    ("region", po::value(&opt.region), "samtools reference region (optional)")
     ("exclude", po::value<std::vector<std::string> >(&exclude_list), "name of chromosome to skip over (argument may be specified multiple times). Exclusions will be ignored if a region argument is provided")
-    ("twin1", po::value<std::string>(&si[TWIN1].file),
+    ("twin1", po::value(&si[TWIN1].file),
      "twin/replicate 1 gvcf file")
-    ("twin2", po::value<std::string>(&si[TWIN2].file),
+    ("twin2", po::value(&si[TWIN2].file),
      "twin/replicate 2 gvcf file")
-    ("conflict-file", po::value<std::string>(&conflict_pos_file), "Write all conflict positions to the specified file")
+    ("conflict-file", po::value(&conflict_pos_file), "Write all conflict positions to the specified file")
     ("no-variable-metadata",
      "Remove timestamp and any other metadata from output during validation testing")
     ("murdock", po::value(&opt.is_murdock_mode)->zero_tokens(),
@@ -360,9 +360,9 @@ try_main(int argc,char* argv[]) {
 
     po::options_description filter("filtration");
     filter.add_options()
-    ("min-gqx", po::value<double>(&sp.min_gqx), "If GQX value for a record is below this value, then don't use the locus. Note that if the filter field already contains a GQX filter, this will not 'rescue' filtered variants when min-gqx is set very low -- this filter can only lower callability on a file. Any records missing the GQX field will not be filtered out. (default: 0)")
-    ("min-pos-rank-sum", po::value<double>(&sp.min_pos_rank_sum), "Filter site if the INFO field contains the key BaseQRankSum and the value is less than the minimum. (default: no-filter)")
-    ("min-qd", po::value<double>(&sp.min_qd), "Filter site if the INFO field contains the key QD and the value is less than the minimum. (default: no-filter)")
+    ("min-gqx", po::value(&sp.min_gqx), "If GQX value for a record is below this value, then don't use the locus. Note that if the filter field already contains a GQX filter, this will not 'rescue' filtered variants when min-gqx is set very low -- this filter can only lower callability on a file. Any records missing the GQX field will not be filtered out. (default: 0)")
+    ("min-pos-rank-sum", po::value(&sp.min_pos_rank_sum), "Filter site if the INFO field contains the key BaseQRankSum and the value is less than the minimum. (default: no-filter)")
+    ("min-qd", po::value(&sp.min_qd), "Filter site if the INFO field contains the key QD and the value is less than the minimum. (default: no-filter)")
     ("min-info-field",po::value<std::vector<info_filter> >(&sp.infof)->multitoken(),
      "Filter records which contain an INFO key equal to argument1, and a corresponding value less than argument2 ")
     ("max-info-field",po::value<std::vector<info_filter> >(&max_info_filters)->multitoken(),

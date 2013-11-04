@@ -502,8 +502,8 @@ try_main(int argc,char* argv[]) {
     namespace po = boost::program_options;
     po::options_description req("configuration");
     req.add_options()
-    ("ref", po::value<std::string>(&ref_seq_file),"samtools reference sequence (required)")
-    ("region", po::value<std::string>(&opt.region), "samtools reference region (optional)")
+    ("ref", po::value(&ref_seq_file),"samtools reference sequence (required)")
+    ("region", po::value(&opt.region), "samtools reference region (optional)")
     ("exclude", po::value<std::vector<std::string> >(&exclude_list), "name of chromosome to skip over (argument may be specified multiple times). Exclusions will be ignored if a region argument is provided")
     ("input", po::value<std::vector<std::string> >(&input_files)->multitoken(), "merge files (can be specified multiple times)")
     ("murdock", po::value(&opt.is_murdock_mode)->zero_tokens(),
