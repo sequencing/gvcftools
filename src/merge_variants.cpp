@@ -78,7 +78,7 @@ private:
     std::ostream& _os;
     bool _is_header_output;
 
-    // not persisistent, just used to reduce allocation:
+    // not persistent, just used to reduce allocation:
     std::vector<std::string> words;
 };
 
@@ -424,7 +424,6 @@ merge_variants(const std::vector<std::string>& input_files,
                const char* region,
                merge_reporter& mr)
 {
-
     // setup reference sequence:
     reference_contig_segment ref_seg;
     unsigned segment_known_size;
@@ -521,11 +520,20 @@ try_main(int argc,char* argv[]) {
     bool po_parse_fail(false);
     po::variables_map vm;
     try {
-        po::store(po::parse_command_line(argc, argv, visible,
-                                         po::command_line_style::unix_style ^ po::command_line_style::allow_short), vm);
+        po::parsed_options parsed(po::parse_command_line(argc, argv, visible,
+                                  po::command_line_style::unix_style ^ po::command_line_style::allow_short));
+        po::store(parsed,vm);
+
         po::notify(vm);
+
+        // any remaining options are an error:
+        if (! po::collect_unrecognized(parsed.options,po::include_positional).empty())
+        {
+            log_os << "\nERROR: Unexpected positional options.\n\n";
+            po_parse_fail=true;
+        }
     } catch (const boost::program_options::error& e) { // todo:: find out what is the more specific exception class thrown by program options
-        log_os << "\nERROR: Exception thrown by option parser: " << e.what() << "\n";
+        log_os << "\nERROR: Exception thrown by option parser: " << e.what() << "\n\n";
         po_parse_fail=true;
     }
 
@@ -538,7 +546,7 @@ try_main(int argc,char* argv[]) {
     if (input_files.empty()) is_show_help=true;
 
     if (is_show_help) {
-        log_os << "\n" << progname << " merge the variants from multiple gVCF files\n\n";
+        log_os << "\n" << progname << " merges the variants from multiple gVCF files\n\n";
         log_os << "version: " << gvcftools_version() << "\n\n";
         log_os << "usage: " << progname << " [options] > merged_variants\n\n";
         log_os << visible << "\n";
