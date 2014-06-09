@@ -78,7 +78,7 @@ private:
     std::ostream& _os;
     bool _is_header_output;
 
-    // not persisistent, just used to reduce allocation:
+    // not persistent, just used to reduce allocation:
     std::vector<std::string> words;
 };
 
@@ -538,7 +538,7 @@ try_main(int argc,char* argv[]) {
     if (input_files.empty()) is_show_help=true;
 
     if (is_show_help) {
-        log_os << "\n" << progname << " merge the variants from multiple gVCF files\n\n";
+        log_os << "\n" << progname << " merges the variants from multiple gVCF files\n\n";
         log_os << "version: " << gvcftools_version() << "\n\n";
         log_os << "usage: " << progname << " [options] > merged_variants\n\n";
         log_os << visible << "\n";
