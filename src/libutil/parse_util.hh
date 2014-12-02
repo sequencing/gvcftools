@@ -50,7 +50,9 @@ long
 parse_long(const char*& s);
 
 double
-parse_double(const char*& s);
+parse_double(
+    const char*& s,
+    const char* s_end = NULL);
 
 
 
@@ -67,7 +69,8 @@ long
 parse_long_str(const std::string& s);
 
 double
-parse_double_str(const std::string& s);
+parse_double_str(
+   const std::string& s);
 
 
 
