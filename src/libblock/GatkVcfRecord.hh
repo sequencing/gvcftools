@@ -46,9 +46,11 @@
 
 
 ///
-/// A value which might exist, and might be convertable to an integer
-/// if it does 'convertable to an integer' in this case are ints or
-/// floats which are rounded to the nearest int
+/// A value which might exist, and might be convertible to an integer
+/// if it does.
+///
+/// 'Convertible to an integer' in this case are ints or floats which
+/// are rounded to the nearest int
 ///
 struct MaybeInt {
 
