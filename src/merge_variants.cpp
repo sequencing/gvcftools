@@ -125,7 +125,7 @@ print_locus(
 
     if (! _is_header_output) {
         sa[0]->dump_header(_os);
-        _os << "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILT\tINFO\tFORMAT";
+        _os << "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT";
 
         const unsigned sample_size(sa.size());
         for (unsigned i(0); i<sample_size; ++i) {
