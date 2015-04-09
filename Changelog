@@ -1,3 +1,5 @@
+v0.16.1
+- merge: Fix vcf header from FILT to FILTER, doc method limitations
 v0.16
 - Add new remove_region tool (contributed by S. Ajay)
 - Add 'invert' option to extract_variants
