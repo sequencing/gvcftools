@@ -24,7 +24,6 @@
 //
 //
 
-/// \file
 ///
 /// \author Chris Saunders
 ///
@@ -542,6 +541,18 @@ try_main(int argc,char* argv[]) {
         log_os << "version: " << gvcftools_version() << "\n\n";
         log_os << "usage: " << progname << " [options] > merged_variants\n\n";
         log_os << visible << "\n";
+        log_os <<
+"\n"
+"Note this is a simple prototype merge implementation and comes with\n"
+"considerable restrictions:\n"
+"\n"
+"  - Most INFO fields are not recomputed/forwared to the merged record.\n"
+"  - Most sample fields are not forwarded to the merged record (this would\n"
+"      require knowing which fields depend on allele count.)\n"
+"  - Merged record FILTER field is a simple union of all merged samples,\n"
+"      thus a single filtered sample will filter the merged record.\n"
+"  - No handling of overlapping indel alleles\n"
+"\n";
         exit(2);
     }
 
