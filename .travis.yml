@@ -1,0 +1,33 @@
+language: cpp
+
+compiler:
+  - gcc
+  - clang
+
+os:
+  - linux
+
+before_install:
+  # setup cppcheck 1.67:
+  - if [ $TRAVIS_OS_NAME == linux ] && [ "$CXX" == "g++" ]; then sudo add-apt-repository -y ppa:j-rivero/cppcheck-latest; fi
+  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get update -qq; fi
+
+install:
+  # add cppcheck: static analysis should be independent of os/compiler, so only install this on one test case:
+  - if [ $TRAVIS_OS_NAME == linux ] && [ "$CXX" == "g++" ]; then sudo apt-get install -qq cppcheck; fi
+  # install clang 3.4
+  - if [ $TRAVIS_OS_NAME == linux ] && [ "$CXX" == "clang++" ]; then sudo apt-get install -qq llvm-3.4 llvm-3.4-dev; fi
+ 
+script:
+  - make -j4
+
+branches:
+  only:
+    - master
+
+notifications:
+  email:
+    recipients:
+      - csaunders@illumina.com
+
+
