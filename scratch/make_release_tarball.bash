@@ -49,7 +49,7 @@ git archive --prefix=$pname_root/ HEAD | tar -x -C $outdir
 rm -rf $pname/scratch
 
 # make version number substitutions:
-for f in README.txt; do
+for f in README.md; do
     sed "s/\${VERSION}/$gitversion/" < $f >| $pname/$f
 done
 
