@@ -1,4 +1,10 @@
-gvcftools - utilities for gVCF files
+# gvcftools - utilities for gVCF files
+
+[![Build Status] [tcistatus]] [tcihome]
+
+[tcistatus]:https://travis-ci.org/sequencing/gvcftools.svg?branch=master
+[tcihome]:https://travis-ci.org/sequencing/gvcftools
+
 
 Chris Saunders (csaunders@illumina.com)
 Version: ${VERSION}
