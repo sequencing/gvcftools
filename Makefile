@@ -13,7 +13,7 @@ export BOOST_ROOT := $(REDIST_DIR)/boost/stage
 .PHONY: all build clean install redist test
 
 
-all: install test
+all: install
 
 build: redist
 	$(MAKE) -C $(SRC_DIR)
@@ -21,7 +21,7 @@ build: redist
 redist:
 	$(MAKE) -C $(REDIST_DIR)
 
-install: build
+install: test
 	mkdir -p $(BIN_DIR) && $(MAKE) -C $(SRC_DIR) $@ 
 
 clean: srcclean
