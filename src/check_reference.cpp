@@ -40,6 +40,8 @@
 
 #include "boost/program_options.hpp"
 
+#include <unistd.h>
+
 #include <iostream>
 #include <string>
 
@@ -179,7 +181,9 @@ try_main(int argc,char* argv[]) {
         po_parse_fail=true;
     }
 
-    if ((argc<=1) || (vm.count("help")) || po_parse_fail) {
+    const bool isStdinTerminal(isatty(fileno(stdin)));
+
+    if ((argc<=1) || (vm.count("help")) || po_parse_fail || isStdinTerminal) {
         log_os << "\n" << progname << " check VCF reference fields.\n\n";
         log_os << "version: " << gvcftools_version() << "\n\n";
         log_os << "usage: " << progname << " [options] < (g)VCF\n\n";

@@ -39,10 +39,9 @@
 #include "VcfHeaderHandler.hh"
 #include "VcfRecord.hh"
 
-
 #include "boost/program_options.hpp"
 
-//#include <ctime>
+#include <unistd.h>
 
 #include <iostream>
 #include <string>
@@ -223,7 +222,9 @@ try_main(int argc,char* argv[]) {
         po_parse_fail=true;
     }
 
-    if ((argc<=1) || (vm.count("help")) || po_parse_fail) {
+    const bool isStdinTerminal(isatty(fileno(stdin)));
+
+    if ((argc<=1) || (vm.count("help")) || po_parse_fail || isStdinTerminal) {
         log_os << "\n" << progname << " converts regions of a gVCF or VCF from diploid to haploid\n\n";
         log_os << "version: " << gvcftools_version() << "\n\n";
         log_os << "usage: " << progname << " [options] < (g)VCF > haploid_region_(g)VCF\n\n";

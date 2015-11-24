@@ -33,10 +33,10 @@
 #include "VcfHeaderHandler.hh"
 #include "vcf_util.hh"
 
-
 #include "boost/program_options.hpp"
 
-//#include <ctime>
+#include <cstdio>
+#include <unistd.h>
 
 #include <iostream>
 #include <string>
@@ -219,7 +219,9 @@ try_main(int argc,char* argv[]) {
         po_parse_fail=true;
     }
 
-    if ((vm.count("help")) || po_parse_fail) {
+    const bool isStdinTerminal(isatty(fileno(stdin)));
+
+    if ((vm.count("help")) || po_parse_fail || isStdinTerminal) {
         log_os << "\n" << progname << " creates a bed file of called regions from a gVCF\n\n";
         log_os << "version: " << gvcftools_version() << "\n\n";
         log_os << "usage: " << progname << " [options] < gVCF > called.bed\n\n";
