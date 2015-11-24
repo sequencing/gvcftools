@@ -1,5 +1,6 @@
-v0.16.2
-- [#5] fix unit tests failing at new qi parser
+v0.17.0
+- add new check_reference tool
+- add tty detection for all tools requiring input on stdin
 v0.16.1
 - merge: Fix vcf header from FILT to FILTER, doc method limitations
 v0.16
