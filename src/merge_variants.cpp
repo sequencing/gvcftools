@@ -1,6 +1,6 @@
 // -*- mode: c++; indent-tabs-mode: nil; -*-
 //
-// Copyright (c) 2009-2012 Illumina, Inc.
+// Copyright (c) 2009-2015 Illumina, Inc.
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -24,8 +24,9 @@
 //
 //
 
+/// \file
 ///
-/// \author Chris Saunders
+/// \author Chris Saunders and Subramanian Shankar Ajay
 ///
 
 #include "gvcftools.hh"
@@ -75,9 +76,12 @@ struct merge_reporter {
 private:
 
     std::ostream& _os;
+    std::string _cur_merged_rec;
+    std::string _prev_merged_rec;
+    vcf_pos _last_merged_pos;
     bool _is_header_output;
 
-    // not persistent, just used to reduce allocation:
+    // not persisistent, just used to reduce allocation:
     std::vector<std::string> words;
 };
 
@@ -96,17 +100,18 @@ refAltWriter(
     const unsigned n_alleles(alleles.size());
     assert(0 != n_alleles);
 
-    os << '\t' << alleles.get_key(0);  // REF
+    os << '\t' ;
+    os << alleles.get_key(0);  // REF
 
     // ALT:
-    os << '\t';
+    os << "\t";
     if (n_alleles>1) {
         for (unsigned i(1); i<n_alleles; ++i) {
             if (i>1) os << ",";
             os << alleles.get_key(i);
         }
     } else {
-        os << '.';
+        os << ".";
     }
 }
 
@@ -124,6 +129,8 @@ print_locus(
 
     if (! _is_header_output) {
         sa[0]->dump_header(_os);
+        _os << "##FORMAT=<ID=FT,Number=.,Type=String,Description=\"Sample filter,P=PASS,F=Fails for one or more reasons listed in FILTER column\">";
+        _os << '\n';
         _os << "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT";
 
         const unsigned sample_size(sa.size());
@@ -143,7 +150,8 @@ print_locus(
     fkey_t merged_filters;
     for (unsigned st(0); st<n_samples; ++st) {
         const site_crawler& sample(*(sa[st]));
-        if (!(low_pos == sample.vpos())) continue;
+        //if (!(low_pos == sample.vpos())) continue;
+        if (!(low_pos.pos == sample.vpos().pos)) continue;
         const char* filter(sample.word(VCFID::FILT));
         if ((0 != strcmp(filter,".")) && (0 != strcmp(filter,"PASS"))) {
             split_string(filter,filter_delim,words);
@@ -161,7 +169,8 @@ print_locus(
     std::vector<fkey_t> sample_keys(n_samples);
     for (unsigned st(0); st<n_samples; ++st) {
         const site_crawler& sample(*(sa[st]));
-        if (!(low_pos == sample.vpos())) continue;
+        //if (!(low_pos == sample.vpos())) continue;
+        if (!(low_pos.pos == sample.vpos().pos)) continue;
         const char* format(sample.word(VCFID::FORMAT));
         if (0 != strcmp(format,".")) {
             split_string(format,format_delim,words);
@@ -170,13 +179,15 @@ print_locus(
                 merged_keys.insert_key(w);
                 sample_keys[st].insert_key(w);
             }
+            merged_keys.insert_key("FT");
+            sample_keys[st].insert_key("FT");
         }
     }
 
     _os << sa[0]->chrom()      // CHROM
         << '\t' << low_pos.pos // POS
         << '\t' << '.';        // ID
-
+    
 
     std::vector<std::string> genotypes;
 
@@ -184,7 +195,8 @@ print_locus(
     {
         // get ref, alt and gt for all samples:
         //
-        const char ref_base(ref_seg.get_base(sa[0]->pos()-1));
+        //const char ref_base(ref_seg.get_base(sa[0]->pos()-1));
+        const char ref_base(ref_seg.get_base(low_pos.pos-1));
 
         id_set<char> alleles;
         alleles.insert_key(ref_base);
@@ -228,7 +240,10 @@ print_locus(
         std::string ref_allele;
         for (unsigned st(0); st<n_samples; ++st) {
             const site_crawler& sample(*(sa[st]));
-            if (!(low_pos == sample.vpos())) continue;
+            //if (!(low_pos == sample.vpos())) continue;
+            if (!(low_pos.pos == sample.vpos().pos)) continue;
+            if (! sample.is_indel()) continue;
+
             if (sample.get_indel_ref().size() > ref_allele.size())
             {
                 ref_allele=sample.get_indel_ref();
@@ -238,11 +253,16 @@ print_locus(
         std::vector<std::string> alt_adjust(n_samples);
         for (unsigned st(0); st<n_samples; ++st) {
             const site_crawler& sample(*(sa[st]));
-            if (!(low_pos == sample.vpos())) continue;
-            if (sample.get_indel_ref().size() < ref_allele.size())
+            //if (!(low_pos == sample.vpos())) continue;
+            if (!(low_pos.pos == sample.vpos().pos)) continue;
+
+
+            if (sample.get_indel_ref().size() < ref_allele.size() || sample.is_reference())
             {
                 alt_adjust[st] = ref_allele.substr(sample.get_indel_ref().size());
             }
+            else
+                alt_adjust[st] = "";
         }
 
         id_set<std::string> alleles;
@@ -250,19 +270,38 @@ print_locus(
 
         for (unsigned st(0); st<n_samples; ++st) {
             const site_crawler& sample(*(sa[st]));
-            if (low_pos == sample.vpos()) {
-                const unsigned n_allele(sample.get_indel_allele_size());
+            //if (low_pos == sample.vpos()) {
+            if (low_pos.pos == sample.vpos().pos) {
+                //const unsigned n_allele(sample.get_indel_allele_size());
+                unsigned n_allele(0);
+                if (sample.is_indel())
+                    n_allele=sample.get_indel_allele_size();
+                else
+                    n_allele=sample.get_allele_size();
 
                 std::ostringstream oss;
                 for (unsigned ai(0); ai<n_allele; ai++) {
-                    const std::string allele(sample.get_indel_allele(ai));
-                    if (allele != "X") {
-                        const unsigned code(alleles.insert_key(allele+alt_adjust[st]));
+                    //const std::string allele(sample.get_indel_allele(ai));
+                    std::string allele;
+
+                    if (sample.is_indel())
+                        allele=sample.get_indel_allele(ai);
+                    else
+                        allele=sample.get_allele(ai);
+
+                    if (allele == "N"){
                         if (ai) oss << '/';
-                        oss << code;
-                    } else {
-                        if (ai) oss << '/';
-                        oss << 0;
+                        oss << '.';
+                    }
+                    else{
+                        if (allele != "X") {
+                            const unsigned code(alleles.insert_key(allele+alt_adjust[st]));
+                            if (ai) oss << '/';
+                            oss << code;
+                        } else {
+                            if (ai) oss << '/';
+                            oss << 0;
+                        }
                     }
                 }
                 genotypes.push_back(oss.str());
@@ -279,24 +318,24 @@ print_locus(
     assert(genotypes.size() == n_samples);
 
 
-    _os << '\t' << '.'; // QUAL
+    _os << "\t" << "."; // QUAL
 
     // FILT:
-    _os << '\t';
+    _os << "\t";
     const unsigned n_filters(merged_filters.size());
     if (n_filters) {
         for (unsigned filter_index(0); filter_index<n_filters; ++filter_index) {
             if (filter_index) _os << filter_delim;
-            _os << merged_filters.get_key(filter_index);
+            _os <<  merged_filters.get_key(filter_index);
         }
     } else {
-        _os << "PASS";
+        _os <<  "PASS";
     }
 
-    _os << '\t' << '.'; // INFO
+    _os << "\t" << "."; // INFO
 
     // FORMAT:
-    _os << '\t';
+    _os <<  '\t';
     const unsigned n_keys(merged_keys.size());
     if (n_keys) {
         for (unsigned i(0); i<n_keys; ++i) {
@@ -304,14 +343,15 @@ print_locus(
             _os << merged_keys.get_key(i);
         }
     } else {
-        _os << '.';
+        _os << ".";
     }
 
     for (unsigned st(0); st<n_samples; ++st) {
         const site_crawler& sample(*(sa[st]));
         const fkey_t& sample_key(sample_keys[st]);
 
-        if (low_pos == sample.vpos()) {
+        //if (low_pos == sample.vpos()) {
+        if (low_pos.pos == sample.vpos().pos) {
             const char* vcf_sample(sample.word(VCFID::SAMPLE));
 
             if (0 != strcmp(vcf_sample,".")) {
@@ -326,28 +366,55 @@ print_locus(
         }
 
         // print out values in merged order:
-        _os << '\t';
-        if (n_keys && (low_pos == sample.vpos())) {
+        _os << "\t";
+        //if (n_keys && (low_pos == sample.vpos())) {
+        if (n_keys && (low_pos.pos == sample.vpos().pos)) {
             for (unsigned key_index(0); key_index<n_keys; ++key_index) {
                 if (key_index) _os << format_delim;
                 const std::string& key(merged_keys.get_key(key_index));
                 if (sample_key.test_key(key)) {
                     if (key == "GT") {
                         _os << genotypes[st];
-                    } else {
-                        _os << words[sample_key.get_id(key)];
+                    }
+                    else {
+                        if (key == "FT"){
+                            const char* filter(sample.word(VCFID::FILT));
+                            if ((0 != strcmp(filter,".")) && (0 != strcmp(filter,"PASS")))
+                                _os << "F";
+                            else _os << "P" ;
+                        }
+                        else {
+                            _os <<  words[sample_key.get_id(key)];
+                        }
                     }
                 } else {
-                    _os << '.';
+                    _os << ".";
                 }
             }
         } else {
-            _os << '.';
+            _os << ".";
         }
     }
 
-    _os << '\n';
+    _os << "\n";
 
+    /*if (_last_merged_pos.pos != low_pos.pos){
+        if (! _prev_merged_rec.empty()){
+            _os << _prev_merged_rec;
+        }
+        _prev_merged_rec = _cur_merged_rec;
+    }
+    else{
+        _os << _cur_merged_rec;
+        _prev_merged_rec.clear();
+    }
+
+    _cur_merged_rec.clear();
+    _last_merged_pos.pos = low_pos.pos;
+    _last_merged_pos.is_indel = low_pos.is_indel;
+    */
+    
+    
 #if 0
     for (unsigned i(0); i<sample_size; ++i) {
         *pos_fs_ptr << _sample_label[i] << "\t";
@@ -356,6 +423,46 @@ print_locus(
         *pos_fs_ptr << "\n";
     }
 #endif
+}
+
+
+
+static
+void
+merge_indel_site(const std::vector<boost::shared_ptr<site_crawler> >& sa,
+           const vcf_pos low_pos,
+           const reference_contig_segment& ref_seg,
+           merge_reporter& mr) {
+
+
+    const unsigned n_samples(sa.size());
+
+    bool is_any_nonref_called(false);
+
+    const char ref_base(ref_seg.get_base(low_pos.pos-1));
+
+    if (ref_base=='N') return;
+
+    for (unsigned st(0); st<n_samples; ++st) {
+        const site_crawler& site(*(sa[st]));
+
+        std::string ref_allele = site.get_indel_ref();
+
+        if (site.is_pos_valid() && (site.vpos()==low_pos)) { // && site.is_site_call()){
+            const unsigned n_allele(site.get_allele_size());
+            for (unsigned allele_index(0); allele_index<n_allele; allele_index++) {
+                if (ref_allele != site.get_indel_allele(allele_index) && site.get_allele(allele_index) != 'N') {
+                    is_any_nonref_called=true;
+                    mr.print_locus(sa, low_pos, ref_seg, true);
+                    return;
+                }
+            }
+        }
+    }
+
+    if (! is_any_nonref_called) return;
+
+
 }
 
 
@@ -380,11 +487,11 @@ merge_site(const std::vector<boost::shared_ptr<site_crawler> >& sa,
     for (unsigned st(0); st<n_samples; ++st) {
         const site_crawler& site(*(sa[st]));
 
-        if (site.is_pos_valid() && (site.vpos()==low_pos) && site.is_site_call()) {
+        if (site.is_pos_valid() && (site.vpos()==low_pos)) { // && site.is_site_call()) {
             // position is called in sample st
             const unsigned n_allele(site.get_allele_size());
             for (unsigned allele_index(0); allele_index<n_allele; allele_index++) {
-                if (ref_base != site.get_allele(allele_index)) {
+                if (ref_base != site.get_allele(allele_index) && site.get_allele(allele_index) != 'N' ) {
                     is_any_nonref_called=true;
                 }
             }
@@ -454,7 +561,8 @@ merge_variants(const std::vector<std::string>& input_files,
         vcf_pos low_pos;
         for (unsigned st(0); st<n_samples; ++st) {
             if (! sa[st]->is_pos_valid()) continue;
-            if ((! is_low_pos_set) || (sa[st]->vpos() < low_pos)) {
+            //if ((! is_low_pos_set) || (sa[st]->vpos() < low_pos)) {
+            if ((! is_low_pos_set) || (sa[st]->vpos().pos < low_pos.pos) || (sa[st]->vpos().pos <= low_pos.pos && sa[st]->vpos().is_indel && !low_pos.is_indel)){
                 low_pos = sa[st]->vpos();
                 is_low_pos_set=true;
             }
@@ -466,15 +574,30 @@ merge_variants(const std::vector<std::string>& input_files,
         }
         else
         {
-            mr.print_locus(sa, low_pos, ref_seg,true);
+            for (unsigned idx(0); idx<n_samples; ++idx)
+                if (! (low_pos == sa[idx]->vpos()))
+                    if ( sa[idx]->vpos().pos - low_pos.pos == 1)
+                        sa[idx]->rewind_site(low_pos);
+            merge_indel_site(sa, low_pos, ref_seg, mr);
+
+            //mr.print_locus(sa, low_pos, ref_seg, true);
+
+            //for (unsigned idx(0); idx<n_samples; ++idx)
+                //if (sa[idx]->vpos().pos < low_pos.pos && sa[idx]->vpos().is_indel)
+                    //sa[idx]->update();
+
         }
 
         for (unsigned st(0); st<n_samples; ++st) {
-            if (sa[st]->is_pos_valid() && (low_pos == sa[st]->vpos())) {
+            if (sa[st]->is_pos_valid() && (low_pos.pos >= sa[st]->vpos().pos)) {
                 sa[st]->update();
             }
         }
     }
+    
+    vcf_pos end_pos;
+    merge_site(sa, end_pos, ref_seg, mr);
+    //mr.print_locus(sa, end_pos, ref_seg, true);
 }
 
 
@@ -537,22 +660,10 @@ try_main(int argc,char* argv[]) {
     if (input_files.empty()) is_show_help=true;
 
     if (is_show_help) {
-        log_os << "\n" << progname << " merges the variants from multiple gVCF files\n\n";
+        log_os << "\n" << progname << " merge the variants from multiple gVCF files\n\n";
         log_os << "version: " << gvcftools_version() << "\n\n";
         log_os << "usage: " << progname << " [options] > merged_variants\n\n";
         log_os << visible << "\n";
-        log_os <<
-"\n"
-"Note this is a simple prototype merge implementation and comes with\n"
-"considerable restrictions:\n"
-"\n"
-"  - Most INFO fields are not recomputed/forwared to the merged record.\n"
-"  - Most sample fields are not forwarded to the merged record (this would\n"
-"      require knowing which fields depend on allele count.)\n"
-"  - Merged record FILTER field is a simple union of all merged samples,\n"
-"      thus a single filtered sample will filter the merged record.\n"
-"  - No handling of overlapping indel alleles\n"
-"\n";
         exit(2);
     }
 

@@ -1,8 +1,9 @@
-v0.17.0
-- add new check_reference tool
-- add tty detection for all tools requiring input on stdin
-v0.16.1
-- merge: Fix vcf header from FILT to FILTER, doc method limitations
+v0.16.x
+- Fixed merge_variants bug associated with haploid chromosomes
+- Fixed merge_variants bug around indels (samples moving past locus would get
+"./." genotype). Implemented rewind function
+- Fixed merge_variants bug to merge snv and indel alleles at the same pos - write one
+record instead of multiple
 v0.16
 - Add new remove_region tool (contributed by S. Ajay)
 - Add 'invert' option to extract_variants
