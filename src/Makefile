@@ -35,7 +35,7 @@ export LDLIBS = -ltabix_and_faidx -lz -lm
 
 GVCFTOOLS_HH := gvcftools.hh
 TRIOPROGS := trio twins merge_variants
-BLOCKPROGS := break_blocks check_reference extract_variants gatk_to_gvcf get_called_regions set_haploid_region remove_region
+BLOCKPROGS := break_blocks extract_variants gatk_to_gvcf get_called_regions set_haploid_region remove_region
 PROGS = $(TRIOPROGS) $(BLOCKPROGS) 
 PROG_OBJS = $(PROGS:%=%.o)
 

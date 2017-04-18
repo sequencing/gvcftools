@@ -24,6 +24,7 @@
 //
 //
 
+/// \file
 ///
 /// \author Chris Saunders
 ///

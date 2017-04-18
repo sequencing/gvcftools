@@ -24,14 +24,13 @@
 //
 //
 
-///
+/// \file
+
 /// \author Chris Saunders
 ///
 
 #include "blt_exception.hh"
 #include "parse_util.hh"
-
-#include "boost/spirit/include/qi.hpp"
 
 #include <cerrno>
 #include <climits>
@@ -154,37 +153,28 @@ parse_long_str(const std::string& s) {
 
 
 double
-parse_double(
-        const char*& s,
-        const char* s_end)
-{
-    double val;
-    const char* s_start(s);
-    if (s_end == NULL) s_end = s + strlen(s);
-    bool isPass(boost::spirit::qi::parse(s, s_end, boost::spirit::double_, val));
-    if (isPass)
-    {
-        isPass = (s_start != s);
+parse_double(const char*& s) {
+
+    errno = 0;
+
+    char* endptr;
+    const double val(strtod(s, &endptr));
+    if ((errno == ERANGE) || (endptr == s)) {
+        parse_exception("double",s);
     }
-    if (!isPass)
-    {
-        parse_exception("double", s_start);
-    }
+
+    s = endptr;
     return val;
 }
 
 
 
 double
-parse_double_str(
-    const std::string& s)
-{
+parse_double_str(const std::string& s) {
     const char* s2(s.c_str());
-    const char* const s2_end(s2+s.size());
-    const double val(parse_double(s2,s2_end));
-    if (s2 != s2_end) {
+    const double val(parse_double(s2));
+    if ((s2-s.c_str())!=static_cast<int>(s.length())) {
         parse_exception("double",s.c_str());
     }
     return val;
 }
-

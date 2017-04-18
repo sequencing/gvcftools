@@ -34,10 +34,10 @@
 #include "VcfHeaderHandler.hh"
 #include "vcf_util.hh"
 
+
 #include "boost/program_options.hpp"
 
-#include <cstdio>
-#include <unistd.h>
+//#include <ctime>
 
 #include <iostream>
 #include <string>
@@ -159,9 +159,7 @@ try_main(int argc,char* argv[]) {
         po_parse_fail=true;
     }
 
-    const bool isStdinTerminal(isatty(fileno(stdin)));
-
-    if ((vm.count("help")) || po_parse_fail || isStdinTerminal) {
+    if ((vm.count("help")) || po_parse_fail) {
         log_os << "\n" << progname << " extracts variants from a VCF file\n\n";
         log_os << "version: " << gvcftools_version() << "\n\n";
         log_os << "usage: " << progname << " [options] < (g)VCF > variants_only_VCF\n\n";

@@ -1,6 +1,6 @@
 // -*- mode: c++; indent-tabs-mode: nil; -*-
 //
-// Copyright (c) 2009-2012 Illumina, Inc.
+// Copyright (c) 2009-2015 Illumina, Inc.
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -26,7 +26,7 @@
 
 /// \file
 ///
-/// \author Chris Saunders
+/// \author Chris Saunders and Subramanian Shankar Ajay
 ///
 
 
@@ -118,7 +118,8 @@ get_indel_allele(
         }
     }
 
-    return (is_standard_diploid && _gtcode.size()==2);
+    //return (is_standard_diploid && _gtcode.size()==2);
+    return ((is_standard_diploid && _gtcode.size() == 2) || (_gtcode.size() == 1 && _gtcode[0] >= 0));
 }
 
 
@@ -159,9 +160,23 @@ get_site_allele(
         }
     }
 
-    return (is_standard_diploid && _gtcode.size()==2);
+    //return (is_standard_diploid && _gtcode.size()==2);
+    return ((is_standard_diploid && _gtcode.size() == 2) || (_gtcode.size() == 1 && _gtcode[0] >= 0));
 }
 
+
+bool
+snp_type_info::is_ref() const{
+
+    BOOST_FOREACH(const int gt, _gtcode)
+    {
+        if(gt == 0)
+            continue;
+        else
+            return false;
+    }
+    return true;
+}                       
 
 
 // extract unsigned value for key from the vcf info field
@@ -256,6 +271,7 @@ site_crawler(const sample_info& si,
     , _tabs(NULL)
     , _is_sample_begin_state(true)
     , _is_sample_end_state(false)
+    , _is_reference(false)
     , _next_file(0)
     , _ref_seg(ref_seg)
     , _n_word(0)
@@ -266,6 +282,9 @@ site_crawler(const sample_info& si,
     , _is_site_allele_current(false)
     , _is_indel_allele_current(false)
 {
+    enum {MAX_WORD=50};
+    memset(_prev_word,0,sizeof(char *)*(MAX_WORD));
+    memset(_next_word,0,sizeof(char *)*(MAX_WORD));
     update(is_store_header);
 }
 
@@ -274,8 +293,12 @@ site_crawler(const sample_info& si,
 site_crawler::
 ~site_crawler() {
     if (NULL != _tabs) delete _tabs;
+    if (NULL != _prev_word[0]){
+        unsigned idx(0);
+        while (idx < _n_word)
+            free(_prev_word[idx++]);
+    }
 }
-
 
 
 
@@ -287,12 +310,18 @@ dump_state(std::ostream& os) const {
     os << "LOCUS_CRAWLER STATE:\n";
     os << "\tchrom: " << chrom();
     os << "\tposition: " << pos() << " offset: " << _locus_offset << "\n";
+    os << "\t_is_call: " << _is_call << "\n";
+    os << "\t_is_site_allele_current: " << _is_site_allele_current;
+    os << "\t_is_sample_begin_state: " << _is_sample_begin_state;
+    os << "\t_is_sample_end_state: " << _is_sample_end_state;
     os << "\tis_indel: " << is_indel() << "\n";
     os << "\tfile: '" << afile << "'\n";
     os << "\tline: '";
     dump_line(os);
     os << "'\n";
 }
+
+
 
 
 
@@ -437,7 +466,8 @@ process_record_line(char* line)
     //}
 
     if (! _is_sample_begin_state) {
-        if (! (last_vpos < vpos()) ) {
+        //if (! (last_vpos < vpos()) ) {
+        if (vpos() < last_vpos ) {
             if (_opt.is_murdock_mode) {
                 _vpos=last_vpos;
                 _locus_size=0;
@@ -474,6 +504,46 @@ dump_header(std::ostream& os) const {
 }
 
 
+bool
+site_crawler::
+rewind_site(const vcf_pos& lpos) {
+
+    if(_locus_offset > 0){
+        while(_vpos.pos > lpos.pos){
+            _locus_offset--;
+            _vpos.pos--;
+        }
+        _is_call = update_allele();
+        _is_reference = _opt.sti().is_ref();
+    }
+    else{
+        unsigned idx(0);
+        while(idx < _n_word){
+            _next_word[idx] = _word[idx];
+            _word[idx] = _prev_word[idx];
+            idx++;
+        }
+        _vpos.pos = _opt.sti().pos(_word);
+        _is_site_allele_current = false;
+        _is_indel_allele_current = false;
+        _vpos.is_indel = (_opt.sti().get_is_indel(_word));
+        _opt.sti().get_nonindel_ref_length(pos(),is_indel(),_word,_locus_size);
+
+        if(is_indel())
+            _locus_size = 1;
+            
+        _locus_offset = _locus_size - 1;
+        _vpos.pos += _locus_offset;
+        while(_vpos.pos > lpos.pos){
+            _locus_offset--;
+            _vpos.pos--;
+        }
+        _is_call = update_allele();
+        _is_reference = _opt.sti().is_ref();
+    }
+
+    return true;
+}
 
 
 void
@@ -502,6 +572,7 @@ update(bool is_store_header) {
             }
 
             _vpos.pos++;
+            _is_site_allele_current = false;
 
             if (_opt.is_region()) {
                 // check for pos preceding the start of region of interest in a multi-base record:
@@ -563,6 +634,38 @@ update(bool is_store_header) {
             }
             _next_file++;
         }
+
+        if (_next_word[0]){
+            unsigned idx(0);
+            while(idx < _n_word){
+                _word[idx] = _next_word[idx];
+                _next_word[idx] = NULL;
+                idx++;
+            }
+            _vpos.pos = _opt.sti().pos(_word);
+            _locus_offset = 0;
+            _is_site_allele_current = false;
+            _is_indel_allele_current = false;
+            _vpos.is_indel=(_opt.sti().get_is_indel(_word));
+            _opt.sti().get_nonindel_ref_length(pos(),is_indel(),_word,_locus_size);
+            _is_call=update_allele();
+
+            return;
+        }
+
+        unsigned idx(0);
+        if ( ! _is_sample_begin_state){
+            while (idx < _n_word){
+                size_t size = strlen(_word[idx]) + sizeof(char) ;
+
+                if (NULL != _prev_word[idx])
+                    free(_prev_word[idx]);
+                _prev_word[idx] = (char *)malloc(size);
+                strncpy(_prev_word[idx], _word[idx], size);
+                idx++;
+            }
+        }
+
 
         // read through file to get to a data line:
         bool is_eof(true);

@@ -42,7 +42,7 @@
 
 #include "boost/program_options.hpp"
 
-#include <unistd.h>
+//#include <ctime>
 
 #include <iostream>
 #include <string>
@@ -161,9 +161,7 @@ try_main(int argc,char* argv[]) {
         po_parse_fail=true;
     }
 
-    const bool isStdinTerminal(isatty(fileno(stdin)));
-
-    if ((argc<=1) || (vm.count("help")) || po_parse_fail || isStdinTerminal) {
+    if ((argc<=1) || (vm.count("help")) || po_parse_fail) {
         log_os << "\n" << progname << " converts non-reference blocks to individual positions in specified regions\n\n";
         log_os << "version: " << gvcftools_version() << "\n\n";
         log_os << "usage: " << progname << " [options] < (g)VCF > unblocked_(g)VCF\n\n";

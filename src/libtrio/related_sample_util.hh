@@ -1,6 +1,6 @@
 // -*- mode: c++; indent-tabs-mode: nil; -*-
 //
-// Copyright (c) 2009-2012 Illumina, Inc.
+// Copyright (c) 2009-2015 Illumina, Inc.
 //
 // Permission is hereby granted, free of charge, to any person
 // obtaining a copy of this software and associated documentation
@@ -26,7 +26,7 @@
 
 /// \file
 ///
-/// \author Chris Saunders
+/// \author Chris Saunders and Subramanian Shankar Ajay
 ///
 
 #pragma once
@@ -197,6 +197,8 @@ struct snp_type_info {
         std::string& indel_ref,
         std::vector<std::string>& allele,
         const char* const* word) const;
+
+    bool is_ref() const;
 
     unsigned
     total(const char* const* word) const {
@@ -422,6 +424,9 @@ struct site_crawler {
     update(const bool is_store_header = false);
 
     bool
+    rewind_site(const vcf_pos& lpos);
+
+    bool
     is_pos_valid() const { return (! _is_sample_end_state); }
 
     void
@@ -514,6 +519,11 @@ struct site_crawler {
         return _n_total;
     }
 
+    bool
+    is_reference() const {
+        return _is_reference;
+    }
+
 private:
 
     bool
@@ -547,11 +557,14 @@ private:
     tabix_streamer* _tabs;
     bool _is_sample_begin_state;
     bool _is_sample_end_state;
+    bool _is_reference;
     unsigned _next_file;
     const reference_contig_segment& _ref_seg;
 
     enum { MAX_WORD=50 };
     char* _word[MAX_WORD];
+    char* _prev_word[MAX_WORD];
+    char* _next_word[MAX_WORD];
     unsigned _n_word;
 
     unsigned _locus_size;
